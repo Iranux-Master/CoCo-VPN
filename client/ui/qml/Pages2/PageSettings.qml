@@ -175,7 +175,9 @@ PageType {
         id: about
 
         property string title: qsTr("About CoCo VPN")
-        readonly property string leftImagePath: "qrc:/images/cocoVpnIcon.png"
+        readonly property string leftImagePath: Qt.platform.os === "windows"
+                                                ? "qrc:/images/controls/app.svg"
+                                                : "qrc:/images/cocoVpnIcon.png"
         property bool isVisible: true
         readonly property var clickedHandler: function() {
             PageController.goToPage(PageEnum.PageSettingsAbout)

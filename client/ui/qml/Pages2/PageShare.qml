@@ -108,7 +108,80 @@ PageType {
     property var selectedBatchProtocols: []
     property var selectedAccountIds: []
     property string sharePreview: ""
+    property string accountSearchQuery: ""
+    property string accountServerFilter: ""
+    property string accountProtocolFilter: ""
+    property string accountStatusFilter: ""
     property var shareTemplateTags: ["{{NAME}}", "{{SERVER}}", "{{PROTOCOLS}}", "{{CONFIGS}}", "{{QR}}"]
+    property var accountServerOptions: {
+        var options = [{"value": "", "label": qsTr("All servers")}]
+        var known = {}
+        ExportController.accountGroups.forEach(function(group) {
+            var id = group.serverId || group.serverName
+            if (id && !known[id]) {
+                known[id] = true
+                options.push({"value": id, "label": group.serverName || id})
+            }
+        })
+        return options
+    }
+    property var accountProtocolOptions: {
+        var options = [{"value": "", "label": qsTr("All protocols")}]
+        var known = {}
+        ExportController.accountGroups.forEach(function(group) {
+            (group.methods || []).forEach(function(method) {
+                var name = method.name || ""
+                if (name && !known[name]) {
+                    known[name] = true
+                    options.push({"value": name, "label": name})
+                }
+            })
+        })
+        return options
+    }
+    property var accountStatusOptions: [
+        {"value": "", "label": qsTr("All statuses")},
+        {"value": "complete", "label": qsTr("Complete")},
+        {"value": "partial", "label": qsTr("Partially created")},
+        {"value": "inProgress", "label": qsTr("In progress")}
+    ]
+    property var filteredAccountGroups: {
+        var query = accountSearchQuery.trim().toLowerCase()
+        return ExportController.accountGroups.filter(function(group) {
+            var serverId = group.serverId || group.serverName
+            if (accountServerFilter && serverId !== accountServerFilter) return false
+            if (accountStatusFilter && group.status !== accountStatusFilter) return false
+            var methods = group.methods || []
+            if (accountProtocolFilter && !methods.some(function(method) { return method.name === accountProtocolFilter })) return false
+            if (!query) return true
+            var haystack = [group.name, group.serverName, group.status]
+            methods.forEach(function(method) { haystack.push(method.name) })
+            return haystack.join(" ").toLowerCase().indexOf(query) >= 0
+        })
+    }
+
+    function optionIndex(options, value) {
+        for (var i = 0; i < options.length; ++i) {
+            if (options[i].value === value) return i
+        }
+        return 0
+    }
+
+    function selectVisibleAccounts() {
+        root.selectedAccountIds = root.filteredAccountGroups.map(function(group) { return group.id })
+        root.sharePreview = ""
+    }
+
+    function clearAccountSelection() {
+        root.selectedAccountIds = []
+        root.sharePreview = ""
+    }
+
+    function updateSharePreview() {
+        root.sharePreview = shareFormatSelector.currentIndex === 0
+                ? ExportController.renderAccountsTemplate(root.selectedAccountIds, templateTextArea.textArea.text)
+                : ExportController.renderAccountsText(root.selectedAccountIds, templateTextArea.textArea.text)
+    }
     property list<QtObject> connectionTypesModel: [
         amneziaConnectionFormat
     ]
@@ -596,9 +669,10 @@ PageType {
                 }
                 Repeater {
                     model: proxyContainersModel
-                    delegate: CheckBox {
+                    delegate: CheckBoxType {
                         required property int index
                         required property string name
+                        Layout.fillWidth: true
                         visible: isVpnContainer
                         text: name
                         checked: root.selectedBatchProtocols.indexOf(proxyContainersModel.mapToSource(index)) >= 0
@@ -637,14 +711,73 @@ PageType {
                     Layout.fillWidth: true
                     Layout.topMargin: 12
                     headerText: qsTr("Created accounts")
-                    descriptionText: qsTr("Select one or more accounts to prepare a share message.")
+                    descriptionText: qsTr("Search, filter, select and share one or more accounts.")
+                }
+                TextFieldWithHeaderType {
+                    id: accountSearchField
+                    Layout.fillWidth: true
+                    headerText: qsTr("Search accounts")
+                    placeholderText: qsTr("Account, server or protocol")
+                }
+                Connections {
+                    target: accountSearchField.textField
+                    function onTextChanged() {
+                        root.accountSearchQuery = accountSearchField.textField.text
+                    }
+                }
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: 8
+
+                    ComboBox {
+                        width: Math.max(150, (parent.width - 16) / 3)
+                        model: root.accountServerOptions
+                        textRole: "label"
+                        currentIndex: root.optionIndex(root.accountServerOptions, root.accountServerFilter)
+                        onActivated: root.accountServerFilter = model[currentIndex].value
+                    }
+                    ComboBox {
+                        width: Math.max(150, (parent.width - 16) / 3)
+                        model: root.accountProtocolOptions
+                        textRole: "label"
+                        currentIndex: root.optionIndex(root.accountProtocolOptions, root.accountProtocolFilter)
+                        onActivated: root.accountProtocolFilter = model[currentIndex].value
+                    }
+                    ComboBox {
+                        width: Math.max(150, (parent.width - 16) / 3)
+                        model: root.accountStatusOptions
+                        textRole: "label"
+                        currentIndex: root.optionIndex(root.accountStatusOptions, root.accountStatusFilter)
+                        onActivated: root.accountStatusFilter = model[currentIndex].value
+                    }
+                }
+                RowLayout {
+                    Layout.fillWidth: true
+                    CaptionTextType {
+                        Layout.fillWidth: true
+                        text: qsTr("%1 accounts · %2 selected")
+                              .arg(root.filteredAccountGroups.length).arg(root.selectedAccountIds.length)
+                        color: AmneziaStyle.color.mutedGray
+                    }
+                    BasicButtonType {
+                        text: qsTr("Select filtered")
+                        enabled: root.filteredAccountGroups.length > 0
+                        clickedFunc: root.selectVisibleAccounts
+                    }
+                    BasicButtonType {
+                        text: qsTr("Clear selection")
+                        enabled: root.selectedAccountIds.length > 0
+                        clickedFunc: root.clearAccountSelection
+                    }
                 }
                 Repeater {
-                    model: ExportController.accountGroups
-                    delegate: CheckBox {
+                    model: root.filteredAccountGroups
+                    delegate: CheckBoxType {
                         required property var modelData
+                        Layout.fillWidth: true
                         text: modelData.name + " · " + modelData.serverName + " · " + modelData.methods.length + " " + qsTr("methods")
                               + (modelData.status === "partial" ? " · " + qsTr("Some methods failed") : "")
+                        descriptionText: modelData.createdAt || ""
                         checked: root.selectedAccountIds.indexOf(modelData.id) >= 0
                         onToggled: {
                             var ids = root.selectedAccountIds.slice()
@@ -655,6 +788,14 @@ PageType {
                         }
                     }
                 }
+                ParagraphTextType {
+                    Layout.fillWidth: true
+                    visible: root.filteredAccountGroups.length === 0
+                    text: ExportController.accountGroups.length === 0
+                          ? qsTr("No accounts have been created yet.")
+                          : qsTr("No accounts match the current search and filters.")
+                    color: AmneziaStyle.color.mutedGray
+                }
                 ComboBox {
                     id: savedTemplatesBox
                     Layout.fillWidth: true
@@ -662,7 +803,10 @@ PageType {
                     textRole: "name"
                     displayText: currentIndex >= 0 ? currentText : qsTr("Choose a saved template")
                     onActivated: {
-                        if (currentIndex >= 0) templateTextArea.textArea.text = model[currentIndex].body
+                        if (currentIndex >= 0) {
+                            templateTextArea.textArea.text = model[currentIndex].body
+                            root.sharePreview = ""
+                        }
                     }
                 }
                 Flow {
@@ -709,7 +853,7 @@ PageType {
                     id: templateTextArea
                     Layout.fillWidth: true
                     Layout.preferredHeight: 160
-                    text: "{{NAME}}\nسرور: {{SERVER}}\nروش‌های اتصال: {{PROTOCOLS}}\n{{CONFIGS}}\n{{QR}}"
+                    text: "سلام {{NAME}}،\nسرور: {{SERVER}}\nروش‌های اتصال: {{PROTOCOLS}}\n{{CONFIGS}}\n{{QR}}\nبرای اتصال، کانفیگ پروتکل مناسب را در برنامهٔ مربوط وارد کنید."
                     placeholderText: qsTr("Write a sharing message")
                     textArea.wrapMode: TextEdit.Wrap
                 }
@@ -742,16 +886,21 @@ PageType {
                     Layout.fillWidth: true
                     enabled: root.selectedAccountIds.length > 0 && templateTextArea.textArea.text.trim().length > 0
                     text: qsTr("Preview")
-                    clickedFunc: function() {
-                        root.sharePreview = ExportController.renderAccountsTemplate(root.selectedAccountIds, templateTextArea.textArea.text)
-                    }
+                    clickedFunc: root.updateSharePreview
+                }
+                ComboBox {
+                    id: shareFormatSelector
+                    Layout.fillWidth: true
+                    model: [qsTr("HTML file (includes QR codes)"), qsTr("Plain text file (TXT)")]
+                    currentIndex: 0
+                    onActivated: root.sharePreview = ""
                 }
                 TextArea {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 180
                     readOnly: true
                     wrapMode: TextEdit.Wrap
-                    textFormat: TextEdit.RichText
+                    textFormat: shareFormatSelector.currentIndex === 0 ? TextEdit.RichText : TextEdit.PlainText
                     text: root.sharePreview
                     visible: root.sharePreview.length > 0
                     color: AmneziaStyle.color.paleGray
@@ -771,19 +920,18 @@ PageType {
                 BasicButtonType {
                     Layout.fillWidth: true
                     enabled: root.sharePreview.length > 0
-                    text: qsTr("Share prepared message")
+                    text: shareFormatSelector.currentIndex === 0 ? qsTr("Save HTML share file") : qsTr("Save text share file")
                     leftImageSource: "qrc:/images/controls/share-2.svg"
                     clickedFunc: function() {
-                        var fileName = ""
-                        if (GC.isMobile()) {
-                            fileName = "cocovpn_accounts.html"
-                        } else {
-                            fileName = SystemController.getFileName(qsTr("Save sharing message"),
-                                                                    qsTr("HTML files (*.html)"),
-                                                                    StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/cocovpn_accounts.html",
+                        var isHtml = shareFormatSelector.currentIndex === 0
+                        var extension = isHtml ? "html" : "txt"
+                        var filter = isHtml ? qsTr("HTML files (*.html)") : qsTr("Text files (*.txt)")
+                        var fileName = SystemController.getFileName(qsTr("Save sharing message"),
+                                                                    filter,
+                                                                    StandardPaths.standardLocations(StandardPaths.DocumentsLocation)
+                                                                        + "/cocovpn_accounts." + extension,
                                                                     true,
-                                                                    "html")
-                        }
+                                                                    extension)
                         if (fileName !== "" && ExportController.setConfigFromString(root.sharePreview, fileName)) {
                             PageController.showNotificationMessage(qsTr("Sharing message saved"))
                         }
@@ -791,7 +939,7 @@ PageType {
                 }
                 ParagraphTextType {
                     Layout.fillWidth: true
-                    text: qsTr("The {{QR}} tag places QR codes in the preview. Connection settings grant access, so send them only to people you trust.")
+                    text: qsTr("The {{QR}} tag embeds QR codes in HTML. TXT includes a note to use HTML for QR codes. Share these private connection details only with their intended users.")
                     color: AmneziaStyle.color.mutedGray
                 }
             }

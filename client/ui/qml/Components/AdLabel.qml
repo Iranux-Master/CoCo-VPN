@@ -119,6 +119,7 @@ Rectangle {
             Image {
                 anchors.centerIn: parent
                 source: "qrc:/images/controls/chevron-right.svg"
+                rotation: Qt.platform.os === "windows" && AmneziaStyle.persianUi ? 180 : 0
                 sourceSize: Qt.size(24, 24)
             }
         }

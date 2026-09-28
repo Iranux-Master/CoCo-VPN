@@ -62,6 +62,7 @@ public slots:
     Q_INVOKABLE void deleteAccountGroup(const QString &id);
     Q_INVOKABLE QString renderAccountTemplate(const QString &groupId, const QString &templateBody);
     Q_INVOKABLE QString renderAccountsTemplate(const QVariantList &groupIds, const QString &templateBody);
+    Q_INVOKABLE QString renderAccountsText(const QVariantList &groupIds, const QString &templateBody);
     Q_INVOKABLE QVariantMap accountGroup(const QString &id) const;
 
 signals:
@@ -87,6 +88,8 @@ private:
     void saveShareTemplates();
     void persistBatchGroup();
     QString renderAccountTemplateFragment(const QVariantMap &group, const QString &templateBody) const;
+    QString renderAccountTextFragment(const QVariantMap &group, const QString &templateBody) const;
+    QString wrapAccountsHtml(const QString &sections) const;
 
     ExportController* m_exportController;
     SecureQSettings* m_settings;

@@ -5,6 +5,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDateTime>
+#include <QStringList>
 #include <QUuid>
 
 #include "../systemController.h"
@@ -186,8 +187,7 @@ QString ExportUiController::renderAccountTemplate(const QString &groupId, const 
 {
     const QVariantMap group = accountGroup(groupId);
     if (group.isEmpty()) return {};
-    return QString("<!doctype html><html><head><meta charset=\"utf-8\"><style>body{font-family:Shabnam,sans-serif;direction:rtl;text-align:right;color:#202124;background:#fff;margin:24px}pre{white-space:pre-wrap;overflow-wrap:anywhere}img{max-width:100%;height:auto}</style></head><body>%1</body></html>")
-            .arg(renderAccountTemplateFragment(group, templateBody));
+    return wrapAccountsHtml(renderAccountTemplateFragment(group, templateBody));
 }
 
 QString ExportUiController::renderAccountsTemplate(const QVariantList &groupIds, const QString &templateBody)
@@ -198,34 +198,92 @@ QString ExportUiController::renderAccountsTemplate(const QVariantList &groupIds,
         if (!group.isEmpty()) sections += renderAccountTemplateFragment(group, templateBody);
     }
     if (sections.isEmpty()) return {};
-    return QString("<!doctype html><html><head><meta charset=\"utf-8\"><style>body{font-family:Shabnam,sans-serif;direction:rtl;text-align:right;color:#202124;background:#fff;margin:24px}pre{white-space:pre-wrap;overflow-wrap:anywhere}img{max-width:100%;height:auto}article{margin-bottom:32px}</style></head><body>%1</body></html>")
-            .arg(sections);
+    return wrapAccountsHtml(sections);
+}
+
+QString ExportUiController::renderAccountsText(const QVariantList &groupIds, const QString &templateBody)
+{
+    QStringList sections;
+    for (const auto &value : groupIds) {
+        const QVariantMap group = accountGroup(value.toString());
+        if (!group.isEmpty()) sections.append(renderAccountTextFragment(group, templateBody));
+    }
+    return sections.join(QStringLiteral("\n\n----------------------------------------\n\n"));
+}
+
+QString ExportUiController::wrapAccountsHtml(const QString &sections) const
+{
+    return QStringLiteral(
+        "<!doctype html><html lang=\"fa\" dir=\"rtl\"><head><meta charset=\"utf-8\">"
+        "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>CoCo VPN · اطلاعات اتصال</title>"
+        "<style>"
+        ":root{color-scheme:light;--ink:#18221c;--muted:#64736a;--green:#176b36;--line:#dce8df;--paper:#fff;--wash:#f1f7f2}"
+        "*{box-sizing:border-box}body{margin:0;background:#edf3ee;color:var(--ink);font:16px/1.85 Tahoma,Arial,sans-serif}"
+        ".page{max-width:900px;margin:32px auto;padding:0 18px}.brand{display:flex;align-items:center;gap:12px;margin:0 0 20px;color:var(--green);font-size:14px;font-weight:700}"
+        ".brand-mark{width:12px;height:12px;border-radius:50%;background:var(--green);box-shadow:0 0 0 5px #d8ecdd}"
+        ".account{overflow:hidden;margin:0 0 24px;background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:0 8px 28px #173c2210}"
+        ".account-head{padding:24px 26px;background:linear-gradient(135deg,#f0f8f1,#fff);border-bottom:1px solid var(--line)}"
+        "h1{margin:0;color:var(--green);font-size:24px;line-height:1.4} .server{margin:6px 0 0;color:var(--muted)}"
+        ".account-body{padding:22px 26px}.message{margin-bottom:18px}h2,h3{color:var(--green)}h3{margin:18px 0 8px;font-size:17px}"
+        "pre{margin:0;padding:16px;overflow-wrap:anywhere;white-space:pre-wrap;direction:ltr;text-align:left;background:#f5f8f5;border:1px solid var(--line);border-radius:12px;font:13px/1.65 Consolas,\"Courier New\",monospace}"
+        ".protocols{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.protocol{padding:3px 11px;border-radius:999px;background:#e8f4ea;color:var(--green);font-size:13px;font-weight:700}"
+        ".qr-list{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px}.qr{margin:0;padding:12px;text-align:center;border:1px solid var(--line);border-radius:14px;background:#fff}.qr img{display:block;width:190px;max-width:100%;height:auto;margin:auto}.qr figcaption{margin-top:6px;color:var(--muted);font-size:13px}"
+        ".footer{padding:14px;color:var(--muted);text-align:center;font-size:12px}@media(max-width:600px){.page{margin:14px auto;padding:0 10px}.account-head,.account-body{padding:18px}.qr img{width:160px}}"
+        "@media print{body{background:#fff}.page{max-width:none;margin:0;padding:0}.account{break-inside:avoid;box-shadow:none}.footer{color:#555}}"
+        "</style></head><body><main class=\"page\"><div class=\"brand\"><span class=\"brand-mark\"></span><span>CoCo VPN · راهنمای اتصال</span></div>%1"
+        "<footer class=\"footer\">اطلاعات اتصال محرمانه است؛ این فایل را فقط با کاربر موردنظر به‌اشتراک بگذارید.</footer></main></body></html>")
+        .arg(sections);
 }
 
 QString ExportUiController::renderAccountTemplateFragment(const QVariantMap &group, const QString &templateBody) const
 {
-    QString protocols;
+    QStringList protocolBadges;
     QString configs;
     QString qrs;
     for (const auto &entry : group.value("methods").toList()) {
         const QVariantMap method = entry.toMap();
-        if (!protocols.isEmpty()) protocols += ", ";
         const QString methodName = method.value("name").toString();
-        protocols += methodName.toHtmlEscaped();
-        configs += QString("<h3>%1</h3><pre>%2</pre>").arg(methodName.toHtmlEscaped(), method.value("config").toString().toHtmlEscaped());
+        protocolBadges.append(QString("<span class=\"protocol\">%1</span>").arg(methodName.toHtmlEscaped()));
+        configs += QString("<section><h3>%1</h3><pre>%2</pre></section>")
+                       .arg(methodName.toHtmlEscaped(), method.value("config").toString().toHtmlEscaped());
         for (const auto &qrValue : method.value("qrCodes").toList()) {
-            const QString qr = qrValue.toString();
+            QString qr = qrValue.toString();
+            qr.replace(QStringLiteral("data:image/svg;base64,"), QStringLiteral("data:image/svg+xml;base64,"));
             if (qr.startsWith("data:image/"))
-                qrs += QString("<img alt=\"%1 QR\" src=\"%2\"/>").arg(methodName.toHtmlEscaped(), qr.toHtmlEscaped());
+                qrs += QString("<figure class=\"qr\"><img alt=\"%1 QR\" src=\"%2\"><figcaption>کد QR · %1</figcaption></figure>")
+                           .arg(methodName.toHtmlEscaped(), qr.toHtmlEscaped());
         }
     }
     QString output = templateBody.toHtmlEscaped().replace("\n", "<br/>");
     output.replace("{{NAME}}", group.value("name").toString().toHtmlEscaped());
     output.replace("{{SERVER}}", group.value("serverName").toString().toHtmlEscaped());
-    output.replace("{{PROTOCOLS}}", protocols);
+    output.replace("{{PROTOCOLS}}", QString("<div class=\"protocols\">%1</div>").arg(protocolBadges.join(QString())));
     output.replace("{{CONFIGS}}", configs);
-    output.replace("{{QR}}", qrs.isEmpty() ? "(برای این تنظیمات کد QR در دسترس نیست.)" : qrs);
-    return QString("<article>%1</article>").arg(output);
+    output.replace("{{QR}}", qrs.isEmpty() ? "(برای این تنظیمات کد QR در دسترس نیست.)" : QString("<div class=\"qr-list\">%1</div>").arg(qrs));
+    return QString("<article class=\"account\"><div class=\"account-body\"><div class=\"message\">%1</div></div></article>")
+        .arg(output);
+}
+
+QString ExportUiController::renderAccountTextFragment(const QVariantMap &group, const QString &templateBody) const
+{
+    QStringList protocols;
+    QStringList configs;
+    for (const auto &entry : group.value("methods").toList()) {
+        const QVariantMap method = entry.toMap();
+        const QString methodName = method.value("name").toString();
+        protocols.append(methodName);
+        configs.append(QString("[%1]\n%2").arg(methodName, method.value("config").toString()));
+    }
+
+    QString output = templateBody;
+    output.replace("{{NAME}}", group.value("name").toString());
+    output.replace("{{SERVER}}", group.value("serverName").toString());
+    output.replace("{{PROTOCOLS}}", protocols.join(QStringLiteral(", ")));
+    output.replace("{{CONFIGS}}", configs.join(QStringLiteral("\n\n")));
+    output.replace("{{QR}}", protocols.isEmpty()
+                                   ? QStringLiteral("کد QR برای این حساب موجود نیست.")
+                                   : QStringLiteral("برای مشاهدهٔ QR کدها، خروجی HTML را ذخیره کنید."));
+    return output;
 }
 
 void ExportUiController::generateFullAccessConfig(const QString &serverId)

@@ -83,7 +83,9 @@ DrawerType2 {
 
                 text: qsTr("CoCo VPN website")
                 descriptionText: qsTr("Download the update manually")
-                leftImageSource: "qrc:/images/cocoVpnIcon.png"
+                leftImageSource: Qt.platform.os === "windows"
+                                 ? "qrc:/images/controls/app.svg"
+                                 : "qrc:/images/cocoVpnIcon.png"
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {

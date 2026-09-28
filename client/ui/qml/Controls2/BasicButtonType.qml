@@ -178,6 +178,7 @@ Button {
                 Layout.preferredWidth: 20
 
                 source: root.rightImageSource
+                rotation: Qt.platform.os === "windows" && AmneziaStyle.persianUi && root.rightImageSource.endsWith("/chevron-right.svg") ? 180 : 0
                 visible: root.rightImageSource === "" ? false : true
 
                 layer {

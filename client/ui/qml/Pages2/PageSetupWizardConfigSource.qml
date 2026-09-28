@@ -283,7 +283,9 @@ PageType {
 
         property string title: qsTr("VPN by Amnezia")
         property string description: qsTr("The easiest way to connect to the VPN")
-        property string imageSource: "qrc:/images/cocoVpnIcon.png"
+        property string imageSource: Qt.platform.os === "windows"
+                                     ? "qrc:/images/controls/server.svg"
+                                     : "qrc:/images/cocoVpnIcon.png"
         property bool featuredAmneziaConnection: true
         property bool isVisible: true
         property var handler: function() {

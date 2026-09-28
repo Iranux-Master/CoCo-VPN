@@ -158,7 +158,9 @@ PageType {
                 bodyText: qsTr("Amnezia hosting. VPN servers without complicated settings and headaches")
 
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                leftImageSource: "qrc:/images/cocoVpnIcon.png"
+                leftImageSource: Qt.platform.os === "windows"
+                                 ? "qrc:/images/controls/globe-2.svg"
+                                 : "qrc:/images/cocoVpnIcon.png"
 
                 onClicked: {
                     Qt.openUrlExternally(LanguageUiController.getCurrentHostUrl())

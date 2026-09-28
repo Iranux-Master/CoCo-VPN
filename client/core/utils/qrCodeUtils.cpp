@@ -40,7 +40,7 @@ QString qrCodeUtils::generatePlainQrCodeImage(const QByteArray &data)
 
 QString qrCodeUtils::svgToBase64(const QString &image)
 {
-    return "data:image/svg;base64," + QString::fromLatin1(image.toUtf8().toBase64().data());
+    return "data:image/svg+xml;base64," + QString::fromLatin1(image.toUtf8().toBase64().data());
 }
 
 qrcodegen::QrCode qrCodeUtils::generateQrCode(const QByteArray &data)
