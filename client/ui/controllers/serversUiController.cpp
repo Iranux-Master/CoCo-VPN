@@ -362,22 +362,28 @@ void ServersUiController::setProcessedServerId(const QString &serverId)
 {
     const int newIndex = serverId.isEmpty() ? -1 : serverIndexForId(serverId);
     const QString normalizedServerId = newIndex >= 0 ? serverId : QString();
+    const bool serverChanged = m_processedServerId != normalizedServerId;
 
-    if (m_processedServerId != normalizedServerId) {
+    if (serverChanged) {
         m_processedServerId = normalizedServerId;
+    }
 
-        if (newIndex >= 0) {
-            if (isServerFromApi(m_processedServerId)) {
-                const auto &description = serverDescriptionById(m_processedServerId);
-                if (description.isApiV2 && description.isCountrySelectionAvailable
-                    && !description.apiAvailableCountries.isEmpty()) {
-                    emit updateApiCountryModel();
-                }
-            } else {
-                updateContainersModel();
+    if (newIndex >= 0) {
+        if (isServerFromApi(m_processedServerId)) {
+            const auto &description = serverDescriptionById(m_processedServerId);
+            if (serverChanged && description.isApiV2 && description.isCountrySelectionAvailable
+                && !description.apiAvailableCountries.isEmpty()) {
+                emit updateApiCountryModel();
             }
+        } else {
+            // Refresh even when the same server is selected again. Pages can be
+            // reopened with an empty/stale containers model while the processed
+            // server id is still unchanged.
+            updateContainersModel();
         }
+    }
 
+    if (serverChanged) {
         emit processedServerIdChanged(m_processedServerId);
     }
 }

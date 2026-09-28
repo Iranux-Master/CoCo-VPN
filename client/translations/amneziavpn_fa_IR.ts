@@ -3395,8 +3395,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="88"/>
-        <source>CoCo VPN is based on the open-source CoCo VPN project.</source>
-        <translation>⁦CoCo VPN⁩ بر پایهٔ پروژهٔ متن‌باز ⁦CoCo VPN⁩ ساخته شده است.</translation>
+        <source>CoCo VPN is based on the open-source AmneziaVPN project.</source>
+        <translation>⁦CoCo VPN⁩ بر پایهٔ پروژهٔ متن‌باز ⁦AmneziaVPN⁩ ساخته شده است.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="98"/>
@@ -3475,8 +3475,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="239"/>
-        <source>CoCo VPN open-source project</source>
-        <translation>پروژهٔ متن‌باز ⁦CoCo VPN⁩</translation>
+        <source>AmneziaVPN open-source project</source>
+        <translation>پروژهٔ متن‌باز ⁦AmneziaVPN⁩</translation>
     </message>
 </context>
 <context>
@@ -5568,6 +5568,54 @@ Create one from the current settings.</source>
 </context>
 <context>
     <name>PageShare</name>
+    <message><source>User management</source><translation>مدیریت کاربران</translation></message>
+    <message><source>Protocol users</source><translation>کاربران پروتکل</translation></message>
+    <message><source>Account management</source><translation>مدیریت حساب‌ها</translation></message>
+    <message><source>Manage accounts</source><translation>مدیریت حساب‌ها</translation></message>
+    <message><source>Create multiple accounts</source><translation>ساخت چند حساب</translation></message>
+    <message><source>Choose a server, select one or more installed protocols, then enter a name and account count.</source><translation>سرور را انتخاب کنید، یک یا چند پروتکل نصب‌شده را برگزینید و سپس نام و تعداد حساب‌ها را وارد کنید.</translation></message>
+    <message><source>Client</source><translation>کاربر</translation></message>
+    <message><source>Select installed VPN protocols</source><translation>پروتکل‌های نصب‌شدهٔ VPN را انتخاب کنید</translation></message>
+    <message><source>This server has no shareable VPN protocols installed.</source><translation>روی این سرور پروتکل VPN قابل اشتراکی نصب نشده است.</translation></message>
+    <message><source>Enter a whole number from 1 to 100.</source><translation>یک عدد صحیح از ۱ تا ۱۰۰ وارد کنید.</translation></message>
+    <message><source>Enter an account name.</source><translation>نام حساب را وارد کنید.</translation></message>
+    <message><source>Search, filter, select and share one or more accounts.</source><translation>یک یا چند حساب را جستجو، فیلتر، انتخاب و به اشتراک بگذارید.</translation></message>
+    <message><source>Search accounts</source><translation>جستجوی حساب‌ها</translation></message>
+    <message><source>Account, server or protocol</source><translation>حساب، سرور یا پروتکل</translation></message>
+    <message><source>All servers</source><translation>همهٔ سرورها</translation></message>
+    <message><source>Server filter</source><translation>فیلتر سرور</translation></message>
+    <message><source>All protocols</source><translation>همهٔ پروتکل‌ها</translation></message>
+    <message><source>Protocol filter</source><translation>فیلتر پروتکل</translation></message>
+    <message><source>All statuses</source><translation>همهٔ وضعیت‌ها</translation></message>
+    <message><source>Complete</source><translation>کامل</translation></message>
+    <message><source>Partially created</source><translation>ساخت ناقص</translation></message>
+    <message><source>In progress</source><translation>در حال انجام</translation></message>
+    <message><source>Status filter</source><translation>فیلتر وضعیت</translation></message>
+    <message><source>%1 accounts · %2 selected</source><translation>⁨%1⁩ حساب · ⁨%2⁩ انتخاب‌شده</translation></message>
+    <message><source>Select filtered</source><translation>انتخاب نتایج فیلترشده</translation></message>
+    <message><source>Clear selection</source><translation>پاک‌کردن انتخاب‌ها</translation></message>
+    <message><source>Share selected accounts</source><translation>اشتراک‌گذاری حساب‌های انتخاب‌شده</translation></message>
+    <message><source>No accounts have been created yet.</source><translation>هنوز حسابی ساخته نشده است.</translation></message>
+    <message><source>No accounts match the current search and filters.</source><translation>حسابی با جستجو و فیلترهای فعلی مطابقت ندارد.</translation></message>
+    <message><source>Share accounts</source><translation>اشتراک‌گذاری حساب‌ها</translation></message>
+    <message><source>Choose a message template and save the selected accounts as a file.</source><translation>قالب پیام را انتخاب کنید و حساب‌های انتخاب‌شده را در فایل ذخیره کنید.</translation></message>
+    <message><source>Message template</source><translation>قالب پیام</translation></message>
+    <message><source>Saved templates</source><translation>قالب‌های ذخیره‌شده</translation></message>
+    <message><source>Create or edit template</source><translation>ساخت یا ویرایش قالب</translation></message>
+    <message><source>Close template editor</source><translation>بستن ویرایشگر قالب</translation></message>
+    <message><source>Click a tag to insert it at the cursor in the template.</source><translation>برای درج برچسب در محل نشانگر، روی آن کلیک کنید.</translation></message>
+    <message><source>Enter a name for this template</source><translation>نامی برای این قالب وارد کنید</translation></message>
+    <message><source>Write a sharing message</source><translation>متن پیام اشتراک‌گذاری را بنویسید</translation></message>
+    <message><source>File format</source><translation>قالب فایل</translation></message>
+    <message><source>HTML file (includes QR codes)</source><translation>فایل HTML (شامل کدهای QR)</translation></message>
+    <message><source>Plain text file (TXT)</source><translation>فایل متنی ساده (TXT)</translation></message>
+    <message><source>Save HTML share file</source><translation>ذخیرهٔ فایل اشتراک‌گذاری HTML</translation></message>
+    <message><source>Save text share file</source><translation>ذخیرهٔ فایل اشتراک‌گذاری متنی</translation></message>
+    <message><source>Save sharing message</source><translation>ذخیرهٔ پیام اشتراک‌گذاری</translation></message>
+    <message><source>HTML files (*.html)</source><translation>فایل‌های HTML (*.html)</translation></message>
+    <message><source>Text files (*.txt)</source><translation>فایل‌های متنی (*.txt)</translation></message>
+    <message><source>Sharing message saved</source><translation>پیام اشتراک‌گذاری ذخیره شد.</translation></message>
+    <message><source>The {{QR}} tag embeds QR codes in HTML. TXT includes a note to use HTML for QR codes. Share these private connection details only with their intended users.</source><translation>برچسب {{QR}} کدهای QR را در فایل HTML قرار می‌دهد. فایل TXT برای کد QR استفاده از HTML را پیشنهاد می‌کند. این اطلاعات خصوصی اتصال را فقط برای کاربران مربوط ارسال کنید.</translation></message>
     <message><source>Accounts</source><translation>حساب‌ها</translation></message>
     <message><source>Account creation finished: %1 succeeded, %2 failed</source><translation>ساخت حساب‌ها تمام شد: ⁨%1⁩ موفق و ⁨%2⁩ ناموفق.</translation></message>
     <message><source>Create account groups</source><translation>ساخت گروهی حساب‌ها</translation></message>

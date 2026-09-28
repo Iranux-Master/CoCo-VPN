@@ -85,9 +85,7 @@ PageType {
 
                 font.pixelSize: 14
 
-                visible: false
-
-                text: qsTr("CoCo VPN")
+                text: qsTr("CoCo VPN is based on the open-source AmneziaVPN project.")
                 color: AmneziaStyle.color.paleGray
             }
 
@@ -196,7 +194,7 @@ PageType {
         }
     }
     
-    property list<QtObject> contacts: [ github ]
+    property list<QtObject> contacts: [ github, upstream ]
 
     QtObject {
         id: github
@@ -206,6 +204,17 @@ PageType {
         readonly property string imageSource: "qrc:/images/controls/github.svg"
         readonly property var handler: function() {
             Qt.openUrlExternally("https://github.com/Iranux-Master/CoCo-VPN")
+        }
+    }
+
+    QtObject {
+        id: upstream
+
+        readonly property string title: qsTr("Original project")
+        readonly property string description: qsTr("AmneziaVPN open-source project")
+        readonly property string imageSource: "qrc:/images/controls/github.svg"
+        readonly property var handler: function() {
+            Qt.openUrlExternally("https://github.com/amnezia-vpn/amnezia-client")
         }
     }
 
