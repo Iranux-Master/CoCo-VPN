@@ -5,11 +5,11 @@ IDI_ICON1               ICON                    "../../images/app.ico"
 
 #define VER_COMPANYNAME_STR         "CoCo VPN"
 #define VER_FILEDESCRIPTION_STR     VER_COMPANYNAME_STR
-#define VER_INTERNALNAME_STR        "AmneziaVPN"
-#define VER_LEGALCOPYRIGHT_STR      "AmneziaVPN."
+#define VER_INTERNALNAME_STR        "CoCoVPN"
+#define VER_LEGALCOPYRIGHT_STR      "CoCo VPN"
 #define VER_LEGALTRADEMARKS1_STR    "All Rights Reserved"
 #define VER_LEGALTRADEMARKS2_STR    VER_LEGALTRADEMARKS1_STR
-#define VER_ORIGINALFILENAME_STR    "amneziavpn.exe"
+#define VER_ORIGINALFILENAME_STR    "CoCoVPN.exe"
 #define VER_PRODUCTNAME_STR         "CoCo VPN"
 
 VS_VERSION_INFO VERSIONINFO

@@ -4,8 +4,8 @@
         <!-- Требует расширение WixToolset.Util.wixext и xmlns util -->
         <util:CloseApplication
                 Id="CloseAmneziaClient"
-                Target="AmneziaVPN.exe"
-                Description="Closing AmneziaVPN client"
+                Target="CoCoVPN.exe"
+                Description="Closing CoCo VPN"
                 TerminateProcess="1"
                 RebootPrompt="no" />
     </CPackWiXFragment>

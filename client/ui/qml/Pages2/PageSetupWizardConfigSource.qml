@@ -257,7 +257,7 @@ PageType {
                 disabledColor: AmneziaStyle.color.mutedGray
                 textColor: AmneziaStyle.color.goldenApricot
 
-                text: qsTr("Site Amnezia")
+                text: qsTr("Site CoCo VPN")
 
                 rightImageSource: "qrc:/images/controls/external-link.svg"
 
@@ -281,7 +281,7 @@ PageType {
     QtObject {
         id: amneziaVpn
 
-        property string title: qsTr("VPN by Amnezia")
+        property string title: qsTr("CoCo VPN")
         property string description: qsTr("The easiest way to connect to the VPN")
         property string imageSource: Qt.platform.os === "windows"
                                      ? "qrc:/images/controls/server.svg"

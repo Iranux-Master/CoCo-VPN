@@ -12,7 +12,7 @@ function appName()
 function appExecutableFileName()
 {
     if (runningOnWindows()) {
-        return appName() + ".exe";
+        return "CoCoVPN.exe";
     } else {
         return appName();
     }
@@ -21,8 +21,16 @@ function appExecutableFileName()
 function appInstalled()
 {
     if (runningOnWindows()) {
-        appInstalledUninstallerPath = installer.value("RootDir") + "Program Files/AmneziaVPN/maintenancetool.exe";
-        appInstalledUninstallerPath_x86 = installer.value("RootDir") + "Program Files (x86)/AmneziaVPN/maintenancetool.exe";
+        var programFiles = installer.value("RootDir") + "Program Files/";
+        var programFilesX86 = installer.value("RootDir") + "Program Files (x86)/";
+        appInstalledUninstallerPath = programFiles + "CoCo VPN/maintenancetool.exe";
+        appInstalledUninstallerPath_x86 = programFilesX86 + "CoCo VPN/maintenancetool.exe";
+        var legacyPath = programFiles + "AmneziaVPN/maintenancetool.exe";
+        var legacyPathX86 = programFilesX86 + "AmneziaVPN/maintenancetool.exe";
+        if (!installer.fileExists(appInstalledUninstallerPath) && installer.fileExists(legacyPath))
+            appInstalledUninstallerPath = legacyPath;
+        if (!installer.fileExists(appInstalledUninstallerPath_x86) && installer.fileExists(legacyPathX86))
+            appInstalledUninstallerPath_x86 = legacyPathX86;
     } else if (runningOnMacOS()){
         appInstalledUninstallerPath = "/Applications/" + appName() + ".app/maintenancetool.app/Contents/MacOS/maintenancetool";
     } else if (runningOnLinux()){

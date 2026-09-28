@@ -267,14 +267,14 @@ jobs:
     - name: 'Upload WIX installer artifact'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/AmneziaVPN_*_windows_x64.msi
+        path: deploy/build/CoCoVPN_*_windows_x64.msi
         archive: false
         retention-days: 7
       
     - name: 'Upload IFW installer artifact'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/AmneziaVPN_*_windows_x64.exe
+        path: deploy/build/CoCoVPN_*_windows_x64.exe
         archive: false
         retention-days: 7
 

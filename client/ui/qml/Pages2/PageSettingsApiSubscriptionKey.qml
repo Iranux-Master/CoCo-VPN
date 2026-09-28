@@ -190,7 +190,7 @@ PageType {
                 Layout.rightMargin: 16
                 visible: SubscriptionUiController.qrCodesCount > 0
                 horizontalAlignment: Text.AlignHCenter
-                text: qsTr("To read the QR code in the Amnezia app, tap + in the main menu → 'QR code'")
+                text: qsTr("To import this QR code, open a compatible VPN app and choose the QR code option.")
             }
         }
     }

@@ -28,12 +28,12 @@ PageType {
 
     property string configExtension: ".vpn"
     property string configCaption: qsTr("Save CoCo VPN config")
-    property string configFileName: "amnezia_config"
+    property string configFileName: "cocovpn_config"
 
     // onVisibleChanged: {
     //     configExtension = ".vpn"
     //     configCaption = qsTr("Save CoCo VPN config")
-    //     configFileName = "amnezia_config"
+    //     configFileName = "cocovpn_config"
 
     //     if (visible) {
     //         var serverName = ServersModel.getProcessedServerData("name") || ServersModel.getProcessedServerData("hostName") || "Server"
@@ -328,7 +328,7 @@ PageType {
                               && (ExportController.config.startsWith("tg://")
                                   || ExportController.config.startsWith("https://t.me")))
                 horizontalAlignment: Text.AlignHCenter
-                text: qsTr("To read the QR code in the Amnezia app, tap + in the main menu → 'QR code'")
+                text: qsTr("To import this QR code, open a compatible VPN app and choose the QR code option.")
             }
 
             WarningType {

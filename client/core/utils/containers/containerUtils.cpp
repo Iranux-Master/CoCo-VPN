@@ -67,14 +67,14 @@ QMap<DockerContainer, QString> ContainerUtils::containerHumanNames()
              { DockerContainer::ShadowSocks, "OpenVPN over SS" },
              { DockerContainer::Cloak, "OpenVPN over Cloak" },
              { DockerContainer::WireGuard, "WireGuard" },
-             { DockerContainer::Awg, "AmneziaWG" },
-             { DockerContainer::Awg2, "AmneziaWG" },
+             { DockerContainer::Awg, "AWG" },
+             { DockerContainer::Awg2, "AWG" },
              { DockerContainer::Xray, "XRay" },
              { DockerContainer::Ipsec, QObject::tr("IPsec") },
              { DockerContainer::SSXray, "Shadowsocks"},
 
              { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
-             { DockerContainer::Dns, QObject::tr("AmneziaDNS") },
+             { DockerContainer::Dns, QObject::tr("VPN DNS") },
              { DockerContainer::Sftp, QObject::tr("SFTP file sharing service") },
              { DockerContainer::Socks5Proxy, QObject::tr("SOCKS5 proxy server") },
              { DockerContainer::MtProxy, QObject::tr("MTProxy (Telegram)") },
@@ -96,10 +96,10 @@ QMap<DockerContainer, QString> ContainerUtils::containerDescriptions()
                QObject::tr("WireGuard - popular VPN protocol with high performance, high speed and low power "
                            "consumption.") },
              { DockerContainer::Awg,
-               QObject::tr("AmneziaWG is a special protocol from Amnezia based on WireGuard. "
+               QObject::tr("AWG is a WireGuard-based VPN protocol. "
                            "It provides high connection speed and ensures stable operation even in the most challenging network conditions.") },
              { DockerContainer::Awg2,
-               QObject::tr("AmneziaWG is a special protocol from Amnezia based on WireGuard. "
+               QObject::tr("AWG is a WireGuard-based VPN protocol. "
                            "It provides high connection speed and ensures stable operation even in the most challenging network conditions.") },
              { DockerContainer::Xray,
                QObject::tr("XRay with REALITY masks VPN traffic as web traffic and protects against active probing. "
@@ -148,11 +148,11 @@ QMap<DockerContainer, QString> ContainerUtils::containerDetailedDescriptions()
                       "* Easily detected by DPI systems (susceptible to blocking)\n"
                       "* Operates over UDP protocol") },
         { DockerContainer::Awg2,
-          QObject::tr("AmneziaWG is a modern VPN protocol based on WireGuard, "
+          QObject::tr("AWG is a modern VPN protocol based on WireGuard, "
                       "combining simplified architecture with high performance across all devices. "
                       "It addresses WireGuard's main vulnerability (easy detection by DPI systems) through advanced obfuscation techniques, "
                       "making VPN traffic indistinguishable from regular internet traffic.\n"
-                      "\nAmneziaWG is an excellent choice for those seeking a fast, stealthy VPN connection.\n"
+                      "\nAWG is an excellent choice for those seeking a fast, stealthy VPN connection.\n"
                       "\nFeatures:\n"
                       "* Available on all CoCo VPN platforms\n"
                       "* Low battery consumption on mobile devices\n"
@@ -186,7 +186,7 @@ QMap<DockerContainer, QString> ContainerUtils::containerDetailedDescriptions()
         { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
         { DockerContainer::Dns, QObject::tr("DNS Service") },
         { DockerContainer::Sftp,
-          QObject::tr("After installation, Amnezia will create a\n\n file storage on your server. "
+          QObject::tr("After installation, CoCo VPN will create a\n\n file storage on your server. "
                       "You will be able to access it using\n FileZilla or other SFTP clients, "
                       "as well as mount the disk on your device to access\n it directly from your device.\n\n"
                       "For more detailed information, you can\n find it in the support section under \"Create SFTP file storage.\" ") },
@@ -345,7 +345,7 @@ QString ContainerUtils::easySetupHeader(DockerContainer container)
 QString ContainerUtils::easySetupDescription(DockerContainer container)
 {
     switch (container) {
-    case DockerContainer::Awg2: return QObject::tr("AmneziaWG protocol will be installed. "
+    case DockerContainer::Awg2: return QObject::tr("AWG protocol will be installed. "
                                          "It provides high connection speed and ensures stable operation even in the most challenging network conditions.");
     default: return "";
     }

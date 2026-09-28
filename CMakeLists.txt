@@ -16,8 +16,8 @@ set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES
     CACHE STRING "" FORCE)
 
 project(${PROJECT} VERSION ${AMNEZIAVPN_VERSION}
-        DESCRIPTION "AmneziaVPN"
-        HOMEPAGE_URL "https://amnezia.org/"
+        DESCRIPTION "CoCo VPN"
+        HOMEPAGE_URL "https://iranux.site/cocovpn"
 )
 
 option(AMNEZIA_BUILD_TESTS "Build test executables" OFF)

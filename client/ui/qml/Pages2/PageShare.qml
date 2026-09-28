@@ -51,35 +51,35 @@ PageType {
                 ExportController.generateConnectionConfig(serverId, containerIndex, clientNameTextField.textField.text);
                 configCaption = qsTr("Save CoCo VPN config")
                 configExtension = ".vpn"
-                configFileName = "amnezia_config"
+                configFileName = "cocovpn_config"
                 break;
             }
             case PageShare.ConfigType.OpenVpn: {
                 ExportController.generateOpenVpnConfig(serverId, clientNameTextField.textField.text)
                 configCaption = qsTr("Save OpenVPN config")
                 configExtension = ".ovpn"
-                configFileName = "amnezia_for_openvpn"
+                configFileName = "cocovpn_for_openvpn"
                 break
             }
             case PageShare.ConfigType.WireGuard: {
                 ExportController.generateWireGuardConfig(serverId, clientNameTextField.textField.text)
                 configCaption = qsTr("Save WireGuard config")
                 configExtension = ".conf"
-                configFileName = "amnezia_for_wireguard"
+                configFileName = "cocovpn_for_wireguard"
                 break
             }
             case PageShare.ConfigType.Awg: {
                 ExportController.generateAwgConfig(serverId, containerIndex, clientNameTextField.textField.text)
-                configCaption = qsTr("Save AmneziaWG config")
+                configCaption = qsTr("Save AWG config")
                 configExtension = ".conf"
-                configFileName = "amnezia_for_awg"
+                configFileName = "cocovpn_for_awg"
                 break
             }
             case PageShare.ConfigType.Xray: {
                 ExportController.generateXrayConfig(serverId, clientNameTextField.textField.text)
                 configCaption = qsTr("Save XRay config")
                 configExtension = ".json"
-                configFileName = "amnezia_for_xray"
+                configFileName = "cocovpn_for_xray"
                 break
             }
             }
@@ -203,7 +203,7 @@ PageType {
     }
     QtObject {
         id: awgConnectionFormat
-        readonly property string name: qsTr("AmneziaWG native format")
+        readonly property string name: qsTr("AWG native format")
         readonly property int type: PageShare.ConfigType.Awg
     }
     QtObject {

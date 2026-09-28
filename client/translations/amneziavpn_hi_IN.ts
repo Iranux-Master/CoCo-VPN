@@ -513,8 +513,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="426"/>
-        <source>AmneziaWG 2.0 is outdated and no longer supported. Continued use requires a fresh installation of the AmneziaWG 3.1 container.</source>
-        <translation>AmneziaWG 2.0 पुराना है और अब समर्थित नहीं है। उपयोग जारी रखने के लिए AmneziaWG 3.1 कंटेनर की नई स्थापना आवश्यक है।</translation>
+        <source>AWG 2.0 is outdated and no longer supported. Continued use requires a fresh installation of the AWG 3.1 container.</source>
+        <translation>AWG 2.0 पुराना है और अब समर्थित नहीं है। उपयोग जारी रखने के लिए AWG 3.1 कंटेनर की नई स्थापना आवश्यक है।</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="472"/>
@@ -543,8 +543,8 @@ Already installed containers were found on the server. All installed containers 
     <name>PageProtocolAwgClientSettings</name>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="56"/>
-        <source>AmneziaWG settings</source>
-        <translation>AmneziaWG सेटिंग्स</translation>
+        <source>AWG settings</source>
+        <translation>AWG सेटिंग्स</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="80"/>
@@ -666,8 +666,8 @@ Already installed containers were found on the server. All installed containers 
     <name>PageProtocolAwgSettings</name>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="68"/>
-        <source>AmneziaWG settings</source>
-        <translation>AmneziaWG सेटिंग्स</translation>
+        <source>AWG settings</source>
+        <translation>AWG सेटिंग्स</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="81"/>
@@ -2032,8 +2032,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="79"/>
-        <source>Cannot remove AmneziaDNS from running server</source>
-        <translation>चल रहे सर्वर से Amnezia DNS को नहीं हटाया जा सकता</translation>
+        <source>Cannot remove VPN DNS from running server</source>
+        <translation>चल रहे सर्वर से CoCo VPN DNS को नहीं हटाया जा सकता</translation>
     </message>
 </context>
 <context>
@@ -3395,7 +3395,7 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="88"/>
-        <source>CoCo VPN is based on the open-source AmneziaVPN project.</source>
+        <source>CoCo VPN is based on the open-source CoCo VPN project.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3475,7 +3475,7 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="239"/>
-        <source>AmneziaVPN open-source project</source>
+        <source>CoCo VPN open-source project</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3649,8 +3649,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="102"/>
-        <source>Setup guides on the Amnezia website</source>
-        <translation>Amnezia वेबसाइट पर सेटअप गाइड</translation>
+        <source>Setup guides on the CoCo VPN website</source>
+        <translation>CoCo VPN वेबसाइट पर सेटअप गाइड</translation>
     </message>
 </context>
 <context>
@@ -3667,8 +3667,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="61"/>
-        <source>For router setup or the AmneziaWG app</source>
-        <translation>राउटर सेटअप या AmneziaWG ऐप के लिए</translation>
+        <source>For router setup or the AWG app</source>
+        <translation>राउटर सेटअप या AWG ऐप के लिए</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="73"/>
@@ -3913,8 +3913,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="191"/>
-        <source>To read the QR code in the Amnezia app, tap + in the main menu → &apos;QR code&apos;</source>
-        <translation>Amnezia ऐप में QR कोड पढ़ने के लिए, मुख्य मेनू में + दबाएँ → &apos;QR कोड&apos;</translation>
+        <source>To read the QR code in the CoCo VPN app, tap + in the main menu → &apos;QR code&apos;</source>
+        <translation>CoCo VPN ऐप में QR कोड पढ़ने के लिए, मुख्य मेनू में + दबाएँ → &apos;QR कोड&apos;</translation>
     </message>
 </context>
 <context>
@@ -4127,8 +4127,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="264"/>
-        <source>All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.</source>
-        <translation>सभी सेटिंग्स डिफ़ॉल्ट पर रीसेट हो जाएंगी. सभी स्थापित AmneziaVPN सेवाएँ अभी भी सर्वर पर रहेंगी।.</translation>
+        <source>All settings will be reset to default. All installed CoCo VPN services will still remain on the server.</source>
+        <translation>सभी सेटिंग्स डिफ़ॉल्ट पर रीसेट हो जाएंगी. सभी स्थापित CoCo VPN सेवाएँ अभी भी सर्वर पर रहेंगी।.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="265"/>
@@ -4234,13 +4234,13 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="65"/>
-        <source>Use AmneziaDNS</source>
-        <translation>AmneziaDNS का प्रयोग करें</translation>
+        <source>Use VPN DNS</source>
+        <translation>VPN DNS का प्रयोग करें</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="66"/>
-        <source>If AmneziaDNS is installed on the server</source>
-        <translation>यदि AmneziaDNS सर्वर पर स्थापित है</translation>
+        <source>If VPN DNS is installed on the server</source>
+        <translation>यदि VPN DNS सर्वर पर स्थापित है</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="83"/>
@@ -4249,8 +4249,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="84"/>
-        <source>When AmneziaDNS is not used or installed</source>
-        <translation>जब AmneziaDNS का उपयोग या स्थापित नहीं किया जाता है</translation>
+        <source>When VPN DNS is not used or installed</source>
+        <translation>जब VPN DNS का उपयोग या स्थापित नहीं किया जाता है</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="99"/>
@@ -4297,8 +4297,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="67"/>
-        <source>If AmneziaDNS is not used or installed</source>
-        <translation>यदि AmneziaDNS का उपयोग या स्थापित नहीं किया गया है</translation>
+        <source>If VPN DNS is not used or installed</source>
+        <translation>यदि VPN DNS का उपयोग या स्थापित नहीं किया गया है</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="84"/>
@@ -4559,8 +4559,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="182"/>
-        <source>AmneziaVPN logs</source>
-        <translation>AmneziaVPN लॉग</translation>
+        <source>CoCo VPN logs</source>
+        <translation>CoCo VPN लॉग</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="192"/>
@@ -4587,8 +4587,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="211"/>
-        <source>AmneziaVPN-service logs</source>
-        <translation>AmneziaVPN-सेवा लॉग</translation>
+        <source>CoCo VPN-service logs</source>
+        <translation>CoCo VPN-सेवा लॉग</translation>
     </message>
 </context>
 <context>
@@ -4613,8 +4613,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="98"/>
-        <source>Check the server for previously installed Amnezia services</source>
-        <translation>पहले से स्थापित Amnezia सेवाओं के लिए सर्वर की जाँच करें</translation>
+        <source>Check the server for previously installed CoCo VPN services</source>
+        <translation>पहले से स्थापित CoCo VPN सेवाओं के लिए सर्वर की जाँच करें</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="99"/>
@@ -4669,8 +4669,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="147"/>
-        <source>All installed AmneziaVPN services will still remain on the server.</source>
-        <translation>सभी स्थापित AmneziaVPN सेवाएँ अभी भी सर्वर पर रहेंगी.</translation>
+        <source>All installed CoCo VPN services will still remain on the server.</source>
+        <translation>सभी स्थापित CoCo VPN सेवाएँ अभी भी सर्वर पर रहेंगी.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="153"/>
@@ -4679,13 +4679,13 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="172"/>
-        <source>Clear server from Amnezia software</source>
-        <translation>Amnezia सॉफ़्टवेयर से सर्वर साफ़ करें</translation>
+        <source>Clear server from CoCo VPN software</source>
+        <translation>CoCo VPN सॉफ़्टवेयर से सर्वर साफ़ करें</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="176"/>
-        <source>Do you want to clear server from Amnezia software?</source>
-        <translation>क्या आप Amnezia सॉफ़्टवेयर से सर्वर साफ़ करना चाहते हैं?</translation>
+        <source>Do you want to clear server from CoCo VPN software?</source>
+        <translation>क्या आप CoCo VPN सॉफ़्टवेयर से सर्वर साफ़ करना चाहते हैं?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="177"/>
@@ -4694,8 +4694,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="183"/>
-        <source>Cannot clear server from Amnezia software during active connection</source>
-        <translation>सक्रिय कनेक्शन के दौरान Amnezia सॉफ़्टवेयर से सर्वर साफ़ नहीं किया जा सकता</translation>
+        <source>Cannot clear server from CoCo VPN software during active connection</source>
+        <translation>सक्रिय कनेक्शन के दौरान CoCo VPN सॉफ़्टवेयर से सर्वर साफ़ नहीं किया जा सकता</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="201"/>
@@ -4745,8 +4745,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="71"/>
-        <source>AmneziaWG 2.0 is outdated and does not include the latest security improvements, but it will continue to work. Moving to AmneziaWG 3.1 by deploying a new container on the server is recommended for stronger protocol security</source>
-        <translation>AmneziaWG 2.0 पुराना है और इसमें नवीनतम सुरक्षा सुधार शामिल नहीं हैं, लेकिन यह काम करता रहेगा। मज़बूत प्रोटोकॉल सुरक्षा के लिए सर्वर पर नया कंटेनर तैनात कर AmneziaWG 3.1 पर जाने की सलाह दी जाती है</translation>
+        <source>AWG 2.0 is outdated and does not include the latest security improvements, but it will continue to work. Moving to AWG 3.1 by deploying a new container on the server is recommended for stronger protocol security</source>
+        <translation>AWG 2.0 पुराना है और इसमें नवीनतम सुरक्षा सुधार शामिल नहीं हैं, लेकिन यह काम करता रहेगा। मज़बूत प्रोटोकॉल सुरक्षा के लिए सर्वर पर नया कंटेनर तैनात कर AWG 3.1 पर जाने की सलाह दी जाती है</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="90"/>
@@ -5057,8 +5057,8 @@ Create one from the current settings.</source>
     <name>PageSetupWizardApiServicesList</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiServicesList.qml" line="52"/>
-        <source>VPN by Amnezia</source>
-        <translation>Amnezia का VPN</translation>
+        <source>VPN by CoCo VPN</source>
+        <translation>CoCo VPN का VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiServicesList.qml" line="53"/>
@@ -5184,13 +5184,13 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="260"/>
-        <source>Site Amnezia</source>
-        <translation>Amnezia वेबसाइट</translation>
+        <source>Site CoCo VPN</source>
+        <translation>CoCo VPN वेबसाइट</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="284"/>
-        <source>VPN by Amnezia</source>
-        <translation>Amnezia का VPN</translation>
+        <source>VPN by CoCo VPN</source>
+        <translation>CoCo VPN का VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="285"/>
@@ -5274,8 +5274,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="144"/>
-        <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties</source>
-        <translation>आपके द्वारा दर्ज किया गया सभी डेटा पूरी तरह से गोपनीय रहेगा और Amnezia या किसी तीसरे पक्ष को साझा या प्रकट नहीं किया जाएगा</translation>
+        <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the CoCo VPN or any third parties</source>
+        <translation>आपके द्वारा दर्ज किया गया सभी डेटा पूरी तरह से गोपनीय रहेगा और CoCo VPN या किसी तीसरे पक्ष को साझा या प्रकट नहीं किया जाएगा</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="157"/>
@@ -5284,8 +5284,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="158"/>
-        <source>Amnezia hosting. VPN servers without complicated settings and headaches</source>
-        <translation>Amnezia होस्टिंग। जटिल सेटिंग्स और झंझट के बिना VPN सर्वर</translation>
+        <source>CoCo VPN hosting. VPN servers without complicated settings and headaches</source>
+        <translation>CoCo VPN होस्टिंग। जटिल सेटिंग्स और झंझट के बिना VPN सर्वर</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="179"/>
@@ -5376,13 +5376,13 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="63"/>
-        <source>Amnezia has detected that your server is currently </source>
-        <translation>Amnezia ने पता लगाया है कि आपका सर्वर वर्तमान में है </translation>
+        <source>CoCo VPN has detected that your server is currently </source>
+        <translation>CoCo VPN ने पता लगाया है कि आपका सर्वर वर्तमान में है </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="64"/>
-        <source>busy installing other software. Amnezia installation </source>
-        <translation>अन्य सॉफ़्टवेयर स्थापित करने में व्यस्त। Amnezia की स्थापना </translation>
+        <source>busy installing other software. CoCo VPN installation </source>
+        <translation>अन्य सॉफ़्टवेयर स्थापित करने में व्यस्त। CoCo VPN की स्थापना </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="65"/>
@@ -5593,8 +5593,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="72"/>
-        <source>Save AmneziaWG config</source>
-        <translation>AmneziaWG कॉन्फ़िगरेशन सहेजें</translation>
+        <source>Save AWG config</source>
+        <translation>AWG कॉन्फ़िगरेशन सहेजें</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="79"/>
@@ -5628,8 +5628,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="123"/>
-        <source>AmneziaWG native format</source>
-        <translation>AmneziaWG मूल प्रारूप</translation>
+        <source>AWG native format</source>
+        <translation>AWG मूल प्रारूप</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="128"/>
@@ -5802,8 +5802,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareConnection.qml" line="326"/>
-        <source>To read the QR code in the Amnezia app, tap + in the main menu → &apos;QR code&apos;</source>
-        <translation>Amnezia ऐप में QR कोड पढ़ने के लिए, मुख्य मेनू में + दबाएँ → &apos;QR कोड&apos;</translation>
+        <source>To read the QR code in the CoCo VPN app, tap + in the main menu → &apos;QR code&apos;</source>
+        <translation>CoCo VPN ऐप में QR कोड पढ़ने के लिए, मुख्य मेनू में + दबाएँ → &apos;QR कोड&apos;</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareConnection.qml" line="342"/>
@@ -6128,8 +6128,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="73"/>
-        <source>This legacy Amnezia subscription format is no longer supported</source>
-        <translation>यह पुराना Amnezia सदस्यता प्रारूप अब समर्थित नहीं है</translation>
+        <source>This legacy CoCo VPN subscription format is no longer supported</source>
+        <translation>यह पुराना CoCo VPN सदस्यता प्रारूप अब समर्थित नहीं है</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="74"/>
@@ -6216,10 +6216,10 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="95"/>
-        <source>Your Amnezia Premium subscription has expired.
+        <source>Your CoCo VPN Premium subscription has expired.
  Please check your email for renewal instructions.
  If you haven&apos;t received an email, please contact our support.</source>
-        <translation>आपकी Amnezia Premium सदस्यता समाप्त हो गई है।
+        <translation>आपकी CoCo VPN Premium सदस्यता समाप्त हो गई है।
  नवीनीकरण निर्देशों के लिए कृपया अपना ईमेल देखें।
  यदि आपको ईमेल नहीं मिला है, तो कृपया हमारी सहायता टीम से संपर्क करें।</translation>
     </message>
@@ -6290,8 +6290,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="62"/>
-        <source>Amnezia helper service error</source>
-        <translation>Amnezia Amnezia सहायक सेवा त्रुटि</translation>
+        <source>CoCo VPN helper service error</source>
+        <translation>CoCo VPN CoCo VPN सहायक सेवा त्रुटि</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="63"/>
@@ -6431,8 +6431,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="77"/>
-        <source>AmneziaDNS</source>
-        <translation>AmneziaDNS</translation>
+        <source>VPN DNS</source>
+        <translation>VPN DNS</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="78"/>
@@ -6515,9 +6515,9 @@ Features:
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="151"/>
-        <source>AmneziaWG is a modern VPN protocol based on WireGuard, combining simplified architecture with high performance across all devices. It addresses WireGuard&apos;s main vulnerability (easy detection by DPI systems) through advanced obfuscation techniques, making VPN traffic indistinguishable from regular internet traffic.
+        <source>AWG is a modern VPN protocol based on WireGuard, combining simplified architecture with high performance across all devices. It addresses WireGuard&apos;s main vulnerability (easy detection by DPI systems) through advanced obfuscation techniques, making VPN traffic indistinguishable from regular internet traffic.
 
-AmneziaWG is an excellent choice for those seeking a fast, stealthy VPN connection.
+AWG is an excellent choice for those seeking a fast, stealthy VPN connection.
 
 Features:
 * Available on all CoCo VPN platforms
@@ -6525,9 +6525,9 @@ Features:
 * Minimal settings required
 * Undetectable by traffic analysis systems (DPI)
 * Operates over UDP protocol</source>
-        <translation>AmneziaWG, WireGuard पर आधारित एक आधुनिक VPN प्रोटोकॉल है, जो सरल आर्किटेक्चर को सभी उपकरणों पर उच्च प्रदर्शन के साथ जोड़ता है। यह उन्नत ऑब्फ़सकेशन तकनीकों के माध्यम से WireGuard की मुख्य कमज़ोरी (DPI सिस्टम द्वारा आसान पहचान) को दूर करता है, जिससे VPN ट्रैफ़िक सामान्य इंटरनेट ट्रैफ़िक से अलग नहीं दिखता।
+        <translation>AWG, WireGuard पर आधारित एक आधुनिक VPN प्रोटोकॉल है, जो सरल आर्किटेक्चर को सभी उपकरणों पर उच्च प्रदर्शन के साथ जोड़ता है। यह उन्नत ऑब्फ़सकेशन तकनीकों के माध्यम से WireGuard की मुख्य कमज़ोरी (DPI सिस्टम द्वारा आसान पहचान) को दूर करता है, जिससे VPN ट्रैफ़िक सामान्य इंटरनेट ट्रैफ़िक से अलग नहीं दिखता।
 
-जो लोग तेज़ और अदृश्य VPN कनेक्शन चाहते हैं, उनके लिए AmneziaWG एक उत्कृष्ट विकल्प है।
+जो लोग तेज़ और अदृश्य VPN कनेक्शन चाहते हैं, उनके लिए AWG एक उत्कृष्ट विकल्प है।
 
 विशेषताएँ:
 * सभी CoCo VPN प्लेटफ़ॉर्म पर उपलब्ध
@@ -6598,8 +6598,8 @@ Features:
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="348"/>
-        <source>AmneziaWG protocol will be installed. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
-        <translation>AmneziaWG प्रोटोकॉल स्थापित किया जाएगा। यह उच्च कनेक्शन गति प्रदान करता है और सबसे कठिन नेटवर्क परिस्थितियों में भी स्थिर संचालन सुनिश्चित करता है।</translation>
+        <source>AWG protocol will be installed. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
+        <translation>AWG प्रोटोकॉल स्थापित किया जाएगा। यह उच्च कनेक्शन गति प्रदान करता है और सबसे कठिन नेटवर्क परिस्थितियों में भी स्थिर संचालन सुनिश्चित करता है।</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="96"/>
@@ -6610,8 +6610,8 @@ Features:
         <location filename="../core/utils/containers/containerUtils.cpp" line="99"/>
         <location filename="../core/utils/containers/containerUtils.cpp" line="102"/>
         <location filename="../ui/models/containersModel.cpp" line="41"/>
-        <source>AmneziaWG is a special protocol from Amnezia based on WireGuard. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
-        <translation>AmneziaWG, WireGuard पर आधारित Amnezia का एक विशेष प्रोटोकॉल है। यह उच्च कनेक्शन गति प्रदान करता है और सबसे कठिन नेटवर्क परिस्थितियों में भी स्थिर संचालन सुनिश्चित करता है।</translation>
+        <source>AWG is a special protocol from CoCo VPN based on WireGuard. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
+        <translation>AWG, WireGuard पर आधारित CoCo VPN का एक विशेष प्रोटोकॉल है। यह उच्च कनेक्शन गति प्रदान करता है और सबसे कठिन नेटवर्क परिस्थितियों में भी स्थिर संचालन सुनिश्चित करता है।</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="105"/>
@@ -6630,7 +6630,7 @@ Features:
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="189"/>
-        <source>After installation, Amnezia will create a
+        <source>After installation, CoCo VPN will create a
 
  file storage on your server. You will be able to access it using
  FileZilla or other SFTP clients, as well as mount the disk on your device to access
@@ -6638,7 +6638,7 @@ Features:
 
 For more detailed information, you can
  find it in the support section under &quot;Create SFTP file storage.&quot; </source>
-        <translation>इंस्टालेशन के बाद, Amnezia एक बनाएगा
+        <translation>इंस्टालेशन के बाद, CoCo VPN एक बनाएगा
 
  आपके सर्वर पर फ़ाइल भंडारण। आप इसका उपयोग करके इसे एक्सेस कर पाएंगे
  FileZilla या अन्य SFTP क्लाइंट, साथ ही एक्सेस करने के लिए अपने डिवाइस पर डिस्क को माउंट करें
@@ -7191,9 +7191,9 @@ For more detailed information, you can
     </message>
     <message>
         <location filename="../ui/qml/main2.qml" line="401"/>
-        <source>This legacy Amnezia subscription type can no longer be used to connect in this application version.
+        <source>This legacy CoCo VPN subscription type can no longer be used to connect in this application version.
 Remove the server from the app to continue.</source>
-        <translation>इस पुराने Amnezia सदस्यता प्रकार का उपयोग इस एप्लिकेशन संस्करण में कनेक्ट करने के लिए नहीं किया जा सकता।
+        <translation>इस पुराने CoCo VPN सदस्यता प्रकार का उपयोग इस एप्लिकेशन संस्करण में कनेक्ट करने के लिए नहीं किया जा सकता।
 जारी रखने के लिए सर्वर को ऐप से हटाएँ।</translation>
     </message>
     <message>

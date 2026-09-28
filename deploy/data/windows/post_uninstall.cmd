@@ -10,12 +10,16 @@ set "SYS_LOG_DIR=%SYS_APP_DIR%\log"
 set "SYS_LOG_FILE=%SYS_LOG_DIR%\AmneziaVPN-service.log"
 
 timeout /t 1
+sc stop CoCoVPN-service
+sc delete CoCoVPN-service
 sc stop AmneziaVPN-service
 sc delete AmneziaVPN-service
 sc stop AmneziaWGTunnel$AmneziaVPN
 sc delete AmneziaWGTunnel$AmneziaVPN
 taskkill /IM "AmneziaVPN-service.exe" /F
+taskkill /IM "CoCoVPN-service.exe" /F
 taskkill /IM "AmneziaVPN.exe" /F
+taskkill /IM "CoCoVPN.exe" /F
 
 rem Delete the service log file under ProgramData
 if exist "%SYS_LOG_FILE%" del /F /Q "%SYS_LOG_FILE%"
