@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
+import QtCore
 
 import SortFilterProxyModel 0.2
 
@@ -107,6 +108,7 @@ PageType {
     property var selectedBatchProtocols: []
     property var selectedAccountIds: []
     property string sharePreview: ""
+    property var shareTemplateTags: ["{{NAME}}", "{{SERVER}}", "{{PROTOCOLS}}", "{{CONFIGS}}", "{{QR}}"]
     property list<QtObject> connectionTypesModel: [
         amneziaConnectionFormat
     ]
@@ -219,6 +221,7 @@ PageType {
                 id: accessTypeSelector
 
                 property int currentIndex
+                property int tabCount: Qt.platform.os === "windows" ? 3 : 2
 
                 Layout.topMargin: 32
 
@@ -237,7 +240,7 @@ PageType {
                         id: connectionRadioButton
                         checked: accessTypeSelector.currentIndex === 0
 
-                        implicitWidth: (root.width - 32) / 3
+                        implicitWidth: (root.width - 32) / accessTypeSelector.tabCount
                         text: qsTr("Connection")
 
                         onClicked: {
@@ -252,7 +255,7 @@ PageType {
                         id: usersRadioButton
                         checked: accessTypeSelector.currentIndex === 1
 
-                        implicitWidth: (root.width - 32) / 3
+                        implicitWidth: (root.width - 32) / accessTypeSelector.tabCount
                         text: qsTr("Users")
 
                         onClicked: {
@@ -267,8 +270,9 @@ PageType {
                         Keys.onReturnPressed: this.clicked()
                     }
                     HorizontalRadioButton {
+                        visible: Qt.platform.os === "windows"
                         checked: accessTypeSelector.currentIndex === 2
-                        implicitWidth: (root.width - 32) / 3
+                        implicitWidth: (root.width - 32) / accessTypeSelector.tabCount
                         text: qsTr("Accounts")
                         onClicked: accessTypeSelector.currentIndex = 2
                     }
@@ -373,6 +377,7 @@ PageType {
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
+                visible: accessTypeSelector.currentIndex !== 2
 
                 drawerHeight: 0.5
                 drawerParent: root
@@ -392,6 +397,10 @@ PageType {
                         filters: [
                             ValueFilter {
                                 roleName: "isInstalled"
+                                value: true
+                            },
+                            ValueFilter {
+                                roleName: "isVpnContainer"
                                 value: true
                             },
                             ValueFilter {
@@ -456,7 +465,7 @@ PageType {
                         containerSelector.containerSelectorTextChanged()
                     }
 
-                    function fillConnectionTypeModel() {
+                function fillConnectionTypeModel() {
                         root.connectionTypesModel = [amneziaConnectionFormat]
 
                         var index = proxyContainersModel.mapToSource(selectedIndex)
@@ -473,6 +482,15 @@ PageType {
                             root.connectionTypesModel.push(xrayConnectionFormat)
                         }
                     }
+                }
+            }
+
+            Connections {
+                target: serverSelector
+
+                function onServerSelectorIndexChanged() {
+                    // Protocol indices belong to the selected server's container model.
+                    root.selectedBatchProtocols = []
                 }
             }
 
@@ -544,7 +562,7 @@ PageType {
 
             ColumnLayout {
                 id: accountsPane
-                visible: accessTypeSelector.currentIndex === 2
+                visible: Qt.platform.os === "windows" && accessTypeSelector.currentIndex === 2
                 Layout.fillWidth: true
                 Layout.topMargin: 24
                 spacing: 12
@@ -571,7 +589,9 @@ PageType {
                 }
                 ParagraphTextType {
                     Layout.fillWidth: true
-                    text: qsTr("Select installed VPN methods")
+                    text: proxyContainersModel.count > 0
+                          ? qsTr("Select installed VPN protocols")
+                          : qsTr("This server has no shareable VPN protocols installed.")
                     color: AmneziaStyle.color.paleGray
                 }
                 Repeater {
@@ -598,8 +618,16 @@ PageType {
                           ? qsTr("Creating accounts: %1 of %2").arg(ExportController.batchProgress).arg(ExportController.batchTotal)
                           : qsTr("Create accounts")
                     clickedFunc: function() {
-                        var count = parseInt(batchCountField.textField.text)
-                        if (!count || count < 1 || count > 100 || batchNameField.textField.text.trim() === "") return
+                        var countText = batchCountField.textField.text.trim()
+                        var count = Number(countText)
+                        if (!/^\d+$/.test(countText) || count < 1 || count > 100) {
+                            batchCountField.errorText = qsTr("Enter a whole number from 1 to 100.")
+                            return
+                        }
+                        if (batchNameField.textField.text.trim() === "") {
+                            batchNameField.errorText = qsTr("Enter an account name.")
+                            return
+                        }
                         PageController.showBusyIndicator(true)
                         ExportController.startAccountBatch(ServersUiController.processedServerId, serverSelector.text,
                                                            batchNameField.textField.text, count, root.selectedBatchProtocols)
@@ -623,6 +651,7 @@ PageType {
                             if (checked && ids.indexOf(modelData.id) < 0) ids.push(modelData.id)
                             if (!checked) ids = ids.filter(function(value) { return value !== modelData.id })
                             root.selectedAccountIds = ids
+                            root.sharePreview = ""
                         }
                     }
                 }
@@ -633,34 +662,88 @@ PageType {
                     textRole: "name"
                     displayText: currentIndex >= 0 ? currentText : qsTr("Choose a saved template")
                     onActivated: {
-                        if (currentIndex >= 0) templateTextArea.text = model[currentIndex].body
+                        if (currentIndex >= 0) templateTextArea.textArea.text = model[currentIndex].body
                     }
                 }
-                TextArea {
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: 8
+
+                    Repeater {
+                        model: root.shareTemplateTags
+
+                        BasicButtonType {
+                            required property string modelData
+
+                            implicitHeight: 44
+                            width: Math.max(buttonTextLabel.implicitWidth + 32, 84)
+                            defaultColor: AmneziaStyle.color.transparent
+                            hoveredColor: AmneziaStyle.color.translucentWhite
+                            pressedColor: AmneziaStyle.color.sheerWhite
+                            textColor: AmneziaStyle.color.paleGray
+                            borderColor: AmneziaStyle.color.slateGray
+                            borderWidth: 1
+                            text: modelData
+                            Accessible.name: qsTr("Insert tag %1").arg(modelData)
+
+                            clickedFunc: function() {
+                                var start = templateTextArea.textArea.selectionStart
+                                var end = templateTextArea.textArea.selectionEnd
+                                var insertionPosition = templateTextArea.textArea.cursorPosition
+                                if (start !== end) {
+                                    insertionPosition = Math.min(start, end)
+                                    templateTextArea.textArea.remove(Math.min(start, end), Math.max(start, end))
+                                }
+                                templateTextArea.textArea.insert(insertionPosition, modelData)
+                                templateTextArea.textArea.forceActiveFocus()
+                            }
+                        }
+                    }
+                }
+                ParagraphTextType {
+                    Layout.fillWidth: true
+                    text: qsTr("Click a tag to insert it at the cursor in the template.")
+                    color: AmneziaStyle.color.mutedGray
+                }
+                TextAreaType {
                     id: templateTextArea
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 140
-                    wrapMode: TextEdit.Wrap
+                    Layout.preferredHeight: 160
                     text: "{{NAME}}\nسرور: {{SERVER}}\nروش‌های اتصال: {{PROTOCOLS}}\n{{CONFIGS}}\n{{QR}}"
-                    placeholderText: qsTr("Tags: {{NAME}}, {{SERVER}}, {{PROTOCOLS}}, {{CONFIGS}}, {{QR}}")
+                    placeholderText: qsTr("Write a sharing message")
+                    textArea.wrapMode: TextEdit.Wrap
+                }
+                Connections {
+                    target: templateTextArea.textArea
+
+                    function onTextChanged() {
+                        root.sharePreview = ""
+                    }
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    TextField { id: templateNameField; Layout.fillWidth: true; placeholderText: qsTr("Template name") }
+                    TextFieldWithHeaderType {
+                        id: templateNameField
+                        Layout.fillWidth: true
+                        headerText: qsTr("Template name")
+                        placeholderText: qsTr("Enter a name for this template")
+                    }
                     BasicButtonType {
+                        enabled: templateNameField.textField.text.trim().length > 0
+                                 && templateTextArea.textArea.text.trim().length > 0
                         text: qsTr("Save template")
                         clickedFunc: function() {
-                            ExportController.saveShareTemplate(templateNameField.text, templateTextArea.text)
-                            templateNameField.text = ""
+                            ExportController.saveShareTemplate(templateNameField.textField.text, templateTextArea.textArea.text)
+                            templateNameField.textField.text = ""
                         }
                     }
                 }
                 BasicButtonType {
                     Layout.fillWidth: true
-                    enabled: root.selectedAccountIds.length > 0
+                    enabled: root.selectedAccountIds.length > 0 && templateTextArea.textArea.text.trim().length > 0
                     text: qsTr("Preview")
                     clickedFunc: function() {
-                        root.sharePreview = ExportController.renderAccountsTemplate(root.selectedAccountIds, templateTextArea.text)
+                        root.sharePreview = ExportController.renderAccountsTemplate(root.selectedAccountIds, templateTextArea.textArea.text)
                     }
                 }
                 TextArea {
@@ -671,6 +754,19 @@ PageType {
                     textFormat: TextEdit.RichText
                     text: root.sharePreview
                     visible: root.sharePreview.length > 0
+                    color: AmneziaStyle.color.paleGray
+                    selectionColor: AmneziaStyle.color.richBrown
+                    selectedTextColor: AmneziaStyle.color.paleGray
+                    placeholderTextColor: AmneziaStyle.color.mutedGray
+                    font.pixelSize: 16
+                    font.weight: Font.Medium
+                    font.family: "PT Root UI VF"
+                    background: Rectangle {
+                        color: AmneziaStyle.color.onyxBlack
+                        radius: 16
+                        border.color: AmneziaStyle.color.slateGray
+                        border.width: 1
+                    }
                 }
                 BasicButtonType {
                     Layout.fillWidth: true
@@ -678,7 +774,19 @@ PageType {
                     text: qsTr("Share prepared message")
                     leftImageSource: "qrc:/images/controls/share-2.svg"
                     clickedFunc: function() {
-                        ExportController.setConfigFromString(root.sharePreview, "cocovpn_accounts.html")
+                        var fileName = ""
+                        if (GC.isMobile()) {
+                            fileName = "cocovpn_accounts.html"
+                        } else {
+                            fileName = SystemController.getFileName(qsTr("Save sharing message"),
+                                                                    qsTr("HTML files (*.html)"),
+                                                                    StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/cocovpn_accounts.html",
+                                                                    true,
+                                                                    "html")
+                        }
+                        if (fileName !== "" && ExportController.setConfigFromString(root.sharePreview, fileName)) {
+                            PageController.showNotificationMessage(qsTr("Sharing message saved"))
+                        }
                     }
                 }
                 ParagraphTextType {

@@ -81,7 +81,9 @@ void ExportUiController::createNextBatchAccount()
         return;
     }
 
-    const QString name = m_batchCount == 1 ? m_batchBaseName : QString("%1 %2").arg(m_batchBaseName).arg(m_batchIndex + 1);
+    const QString suffix = m_batchCount == 1 ? QString() : QString(" %1").arg(m_batchIndex + 1);
+    const int baseNameLength = qMax(0, 20 - suffix.size());
+    const QString name = m_batchBaseName.left(baseNameLength).trimmed() + suffix;
     if (m_batchProtocolIndex == 0) {
         m_batchGroup = {{"id", QUuid::createUuid().toString(QUuid::WithoutBraces)}, {"name", name},
                         {"serverId", m_batchServerId}, {"serverName", m_batchServerName},
@@ -350,12 +352,17 @@ void ExportUiController::applyExportResult(const ExportController::ExportResult 
     emit exportConfigChanged();
 }
 
-void ExportUiController::setConfigFromString(const QString &config, const QString &fileName)
+bool ExportUiController::setConfigFromString(const QString &config, const QString &fileName)
 {
     clearPreviousConfig();
     m_config = config;
     emit exportConfigChanged();
-    if (!fileName.isEmpty()) {
-        SystemController::saveFile(fileName, m_config);
+    if (fileName.isEmpty()) {
+        return false;
     }
+    if (!SystemController::saveFile(fileName, m_config)) {
+        emit exportErrorOccurred(ErrorCode::InternalError);
+        return false;
+    }
+    return true;
 }
