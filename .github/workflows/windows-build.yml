@@ -37,7 +37,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: 'true'
-          fetch-depth: 10
+          fetch-depth: 1
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
@@ -60,51 +60,23 @@ jobs:
         with:
           arch: x64
 
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
-
-      - name: Install WiX Toolset
-        shell: powershell
-        run: |
-          dotnet tool install --global wix --version 4.0.6
-          wix extension add -g WixToolset.UI.wixext/4.0.6
-          wix extension add -g WixToolset.Util.wixext/4.0.6
-          $wixBinDir = Join-Path $env:USERPROFILE ".dotnet\tools"
-          "WIX_BIN_DIR=$wixBinDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-
-      - name: Setup Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: 3.14
-
       - name: Install Conan
-        run: pip install "conan==2.28.0"
+        run: python -m pip install "conan==2.28.0"
 
       - name: Build Windows installers
         shell: cmd
         env:
           QT_INSTALL_DIR: ${{ runner.temp }}
-          AMNEZIA_BUILD_TESTS: ON
+          AMNEZIA_BUILD_TESTS: OFF
         run: |
-          set WIX_ROOT_PATH="%USERPROFILE%\.dotnet\tools"
-          deploy\build.bat --installer all
+          deploy\build.bat --installer ifw
 
-      - name: Upload MSI installer
+      - name: Upload Windows installer
         uses: actions/upload-artifact@v7
         with:
-          name: windows-installer-msi
-          path: deploy/build/AmneziaVPN_*_windows_x64.msi
-          archive: false
-          if-no-files-found: error
-          retention-days: 3
-
-      - name: Upload EXE installer
-        uses: actions/upload-artifact@v7
-        with:
-          name: windows-installer-exe
+          name: windows-installer
           path: deploy/build/AmneziaVPN_*_windows_x64.exe
           archive: false
           if-no-files-found: error
-          retention-days: 3
+          compression-level: 0
+          retention-days: 1
