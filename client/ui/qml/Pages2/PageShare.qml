@@ -757,6 +757,27 @@ PageType {
                                 }
 
                                 BasicButtonType {
+                                    Layout.fillWidth: true
+                                    Layout.topMargin: 24
+                                    text: qsTr("Create and share new access")
+                                    leftImageSource: "qrc:/images/controls/share-2.svg"
+                                    clickedFunc: function() {
+                                        // Client private credentials are not retained in the users list;
+                                        // create a fresh credential with a clear, distinct name.
+                                        var suffix = " (new)"
+                                        clientNameTextField.textField.text = clientName.substring(0, 20 - suffix.length) + suffix
+                                        clientInfoDrawer.closeTriggered()
+                                        accessTypeSelector.currentIndex = 0
+                                        Qt.callLater(function() {
+                                            a.contentY = 0
+                                            if (root.connectionTypesModel.length > 0) {
+                                                ExportController.generateConfig(root.connectionTypesModel[exportTypeSelector.currentIndex].type)
+                                            }
+                                        })
+                                    }
+                                }
+
+                                BasicButtonType {
                                     id: renameButton
                                     Layout.fillWidth: true
                                     Layout.topMargin: 24

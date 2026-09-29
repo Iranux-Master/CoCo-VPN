@@ -160,6 +160,9 @@ PageType {
                     }
 
                     PageController.showBusyIndicator(false)
+                    if (ExportController.config === "") {
+                        return
+                    }
                     
                     PageController.goToShareConnectionPage(listView.headerText, listView.configContentHeaderText, "", ".vpn", "cocovpn_config")
                 }

@@ -5792,6 +5792,10 @@ Create one from the current settings.</source>
         <translation>آدرس‌های ⁦IP⁩ مجاز: ⁨%1⁩</translation>
     </message>
     <message>
+        <source>Create and share new access</source>
+        <translation>ساخت و اشتراک‌گذاری دسترسی جدید</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="765"/>
         <source>Rename</source>
         <translation>تغییر نام</translation>

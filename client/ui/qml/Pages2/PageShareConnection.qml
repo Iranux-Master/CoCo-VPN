@@ -365,7 +365,8 @@ PageType {
                 Layout.rightMargin: 16
 
                 visible: pageShareConnection.isSelfHostedConfig
-                         && pageShareConnection.configExtension === ".conf"
+                         && (pageShareConnection.configExtension === ".conf"
+                             || pageShareConnection.configExtension === ".vpn")
                          && !isQrCodeVisible
                          && ExportController.config !== ""
 

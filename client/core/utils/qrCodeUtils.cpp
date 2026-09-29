@@ -8,14 +8,21 @@
 
 QList<QString> qrCodeUtils::generateQrCodeImageSeries(const QByteArray &data)
 {
-    double k = 850;
+    constexpr int chunkSize = 850;
+    constexpr int maxQrChunks = 64;
 
-    quint8 chunksCount = std::ceil(data.size() / k);
+    const int chunksCount = static_cast<int>(std::ceil(data.size() / static_cast<double>(chunkSize)));
+    // Very large admin configurations can otherwise generate hundreds of SVG QR images
+    // synchronously on the UI thread. Let the user share the config file instead.
+    if (chunksCount > maxQrChunks) {
+        return {};
+    }
     QList<QString> chunks;
-    for (int i = 0; i < data.size(); i = i + k) {
+    for (int i = 0; i < data.size(); i += chunkSize) {
         QByteArray chunk;
         QDataStream s(&chunk, QIODevice::WriteOnly);
-        s << qrCodeUtils::qrMagicCode << chunksCount << (quint8)std::round(i / k) << data.mid(i, k);
+        s << qrCodeUtils::qrMagicCode << static_cast<quint8>(chunksCount)
+          << static_cast<quint8>(i / chunkSize) << data.mid(i, chunkSize);
 
         QByteArray ba = chunk.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
 

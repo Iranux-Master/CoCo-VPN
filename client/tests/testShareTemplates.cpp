@@ -1,6 +1,7 @@
 #include <QtTest>
 
 #include "secureQSettings.h"
+#include "core/utils/qrCodeUtils.h"
 #include "core/controllers/selfhosted/exportController.h"
 #include "ui/controllers/selfhosted/exportUiController.h"
 
@@ -13,6 +14,7 @@ private slots:
     void builtInGuidesExistInBothLanguages();
     void languageAndTemplateOverridesPersist();
     void shareDocumentContainsEscapedConfigAndQr();
+    void oversizedAccessQrIsSkipped();
 };
 
 void ShareTemplatesTest::catalogCoversAccessProtocolsAndServices()
@@ -94,6 +96,12 @@ void ShareTemplatesTest::shareDocumentContainsEscapedConfigAndQr()
         QStringLiteral("Test server"), QStringLiteral("Test user"), QStringLiteral("2026-09-29"), config, {}, false, false);
     QVERIFY(text.contains(config));
     QVERIFY(text.contains(QStringLiteral("QR code is included in the HTML version.")));
+}
+
+void ShareTemplatesTest::oversizedAccessQrIsSkipped()
+{
+    const QByteArray oversizedConfig(850 * 65, 'x');
+    QVERIFY(qrCodeUtils::generateQrCodeImageSeries(oversizedConfig).isEmpty());
 }
 
 QTEST_MAIN(ShareTemplatesTest)
