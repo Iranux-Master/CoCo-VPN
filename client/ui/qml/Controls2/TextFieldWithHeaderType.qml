@@ -27,6 +27,7 @@ Item {
     property alias placeholderText: textField.placeholderText
     property string textFieldTextColor: AmneziaStyle.color.paleGray
     property string textFieldTextDisabledColor: AmneziaStyle.color.mutedGray
+    property string placeholderTextColor: AmneziaStyle.color.charcoalGray
 
     property bool textFieldEditable: true
 
@@ -116,7 +117,7 @@ Item {
 
                         inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText | Qt.ImhPreferLatin
 
-                        placeholderTextColor: AmneziaStyle.color.charcoalGray
+                        placeholderTextColor: root.placeholderTextColor
 
                         selectionColor:  AmneziaStyle.color.richBrown
                         selectedTextColor: AmneziaStyle.color.paleGray
@@ -305,3 +306,4 @@ Item {
         // }
     }
 }
+

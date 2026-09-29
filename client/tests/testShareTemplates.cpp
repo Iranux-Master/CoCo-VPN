@@ -1,4 +1,6 @@
 #include <QtTest>
+#include <QFile>
+#include <QTemporaryDir>
 
 #include "secureQSettings.h"
 #include "core/utils/qrCodeUtils.h"
@@ -16,6 +18,8 @@ private slots:
     void shareDocumentContainsEscapedConfigAndQr();
     void templatePreviewUsesDraftAndMarksSampleData();
     void oversizedAccessQrIsSkipped();
+    void savingGuideDoesNotReplaceConnectionConfig();
+    void savedClientCredentialsAreExcludedFromBackups();
 };
 
 void ShareTemplatesTest::catalogCoversAccessProtocolsAndServices()
@@ -131,5 +135,39 @@ void ShareTemplatesTest::oversizedAccessQrIsSkipped()
     QVERIFY(qrCodeUtils::generateQrCodeImageSeries(oversizedConfig).isEmpty());
 }
 
+void ShareTemplatesTest::savingGuideDoesNotReplaceConnectionConfig()
+{
+    SecureQSettings settings(QStringLiteral("CoCoVpnTests"), QStringLiteral("ShareTemplates"), nullptr, false);
+    settings.clearSettings();
+    ExportController exporter(nullptr, nullptr);
+    ExportUiController controller(&exporter, &settings);
+
+    const QString config = QStringLiteral("vpn://same-existing-access");
+    QVERIFY(!controller.setConfigFromString(config, QString())); // Load the active config without writing it.
+
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString guide = QStringLiteral("<html>sharing guide</html>");
+    const QString path = directory.filePath(QStringLiteral("guide.html"));
+    QVERIFY(controller.saveRenderedShareDocument(path, guide));
+    QCOMPARE(controller.getConfig(), config);
+
+    QFile savedGuide(path);
+    QVERIFY(savedGuide.open(QIODevice::ReadOnly));
+    QCOMPARE(QString::fromUtf8(savedGuide.readAll()), guide);
+}
+
+void ShareTemplatesTest::savedClientCredentialsAreExcludedFromBackups()
+{
+    SecureQSettings settings(QStringLiteral("CoCoVpnTests"), QStringLiteral("ShareTemplates"), nullptr, false);
+    settings.clearSettings();
+    settings.setValue(QStringLiteral("Sharing/clientConfigs/test"),
+                      QVariantMap{{QStringLiteral("config"), QStringLiteral("PRIVATE-CONFIG-MARKER")}});
+
+    const QByteArray backup = settings.backupAppConfig();
+    QVERIFY(!backup.contains("PRIVATE-CONFIG-MARKER"));
+}
+
 QTEST_MAIN(ShareTemplatesTest)
 #include "testShareTemplates.moc"
+

@@ -11,6 +11,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QUuid>
+#include <QCryptographicHash>
 
 #include "../systemController.h"
 #include "core/utils/qrCodeUtils.h"
@@ -40,6 +41,63 @@ QString ExportUiController::shareServer() const { return m_shareServer; }
 QString ExportUiController::shareAccount() const { return m_shareAccount; }
 QString ExportUiController::shareCreatedAt() const { return m_shareCreatedAt; }
 bool ExportUiController::shareNativeFormat() const { return m_shareNativeFormat; }
+QString ExportUiController::lastClientId() const { return m_lastClientId; }
+QString ExportUiController::shareConfigExtension() const { return m_shareConfigExtension; }
+
+namespace {
+QString clientShareConfigKey(const QString &serverId, int containerIndex, const QString &clientId)
+{
+    const QByteArray identity = serverId.toUtf8() + '\n' + QByteArray::number(containerIndex) + '\n' + clientId.toUtf8();
+    const QByteArray digest = QCryptographicHash::hash(identity, QCryptographicHash::Sha256).toHex();
+    return QStringLiteral("Sharing/clientConfigs/%1").arg(QString::fromLatin1(digest));
+}
+}
+
+void ExportUiController::rememberCurrentClientShareConfig(const QString &serverId, int containerIndex,
+                                                           const QString &createdAt, bool nativeFormat,
+                                                           const QString &configExtension)
+{
+    if (!m_settings || serverId.isEmpty() || m_lastClientId.isEmpty() || m_config.isEmpty()) return;
+
+    const QVariantMap record {
+        {QStringLiteral("config"), m_config},
+        {QStringLiteral("nativeConfig"), m_nativeConfigString},
+        {QStringLiteral("qrCodes"), QVariant::fromValue(m_qrCodes)},
+        {QStringLiteral("kind"), m_shareKind},
+        {QStringLiteral("createdAt"), createdAt},
+        {QStringLiteral("nativeFormat"), nativeFormat},
+        {QStringLiteral("extension"), configExtension}
+    };
+    m_settings->setValue(clientShareConfigKey(serverId, containerIndex, m_lastClientId), record);
+}
+
+bool ExportUiController::loadClientShareConfig(const QString &serverId, int containerIndex,
+                                                const QString &clientId)
+{
+    if (!m_settings || serverId.isEmpty() || clientId.isEmpty()) return false;
+    const QVariantMap record = m_settings->value(clientShareConfigKey(serverId, containerIndex, clientId)).toMap();
+    const QString config = record.value(QStringLiteral("config")).toString();
+    if (config.isEmpty()) return false;
+
+    m_config = config;
+    m_nativeConfigString = record.value(QStringLiteral("nativeConfig")).toString();
+    m_qrCodes = record.value(QStringLiteral("qrCodes")).value<QList<QString>>();
+    m_shareKind = record.value(QStringLiteral("kind")).toString();
+    m_shareConfigExtension = record.value(QStringLiteral("extension")).toString();
+    m_shareCreatedAt = record.value(QStringLiteral("createdAt")).toString();
+    m_shareNativeFormat = record.value(QStringLiteral("nativeFormat")).toBool();
+    m_lastClientId = clientId;
+    emit sharingContextChanged();
+    emit exportConfigChanged();
+    return true;
+}
+
+void ExportUiController::forgetClientShareConfig(const QString &serverId, int containerIndex,
+                                                  const QString &clientId)
+{
+    if (!m_settings || serverId.isEmpty() || clientId.isEmpty()) return;
+    m_settings->remove(clientShareConfigKey(serverId, containerIndex, clientId));
+}
 
 QVariantList ExportUiController::shareTemplateKinds() const
 {
@@ -426,6 +484,8 @@ void ExportUiController::clearPreviousConfig()
     m_config.clear();
     m_nativeConfigString.clear();
     m_qrCodes.clear();
+    m_lastClientId.clear();
+    m_shareConfigExtension.clear();
 
     emit exportConfigChanged();
 }
@@ -440,6 +500,7 @@ void ExportUiController::applyExportResult(const ExportController::ExportResult 
     m_config = result.config;
     m_nativeConfigString = result.nativeConfigString;
     m_qrCodes = result.qrCodes;
+    m_lastClientId = result.clientId;
 
     emit exportConfigChanged();
 }
@@ -458,3 +519,9 @@ bool ExportUiController::setConfigFromString(const QString &config, const QStrin
     }
     return true;
 }
+
+bool ExportUiController::saveRenderedShareDocument(const QString &fileName, const QString &document) const
+{
+    return SystemController::saveFile(fileName, document);
+}
+

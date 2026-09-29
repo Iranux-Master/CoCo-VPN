@@ -42,7 +42,7 @@ private:
 
     mutable QHash<QString, QVariant> m_cache;
 
-    QStringList encryptedKeys; // encode only key listed here
+    QStringList encryptedKeys; // Encrypt values stored at these keys or below these prefixes.
     // only this fields need for backup
     QStringList m_fieldsToBackup = {
         "Conf/", "Servers/", "Sharing/",
@@ -59,3 +59,4 @@ private:
 };
 
 #endif // SECUREQSETTINGS_H
+

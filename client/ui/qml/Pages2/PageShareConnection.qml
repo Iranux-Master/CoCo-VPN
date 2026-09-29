@@ -33,7 +33,7 @@ PageType {
 
     property string headerText
     property string configContentHeaderText
-    property string shareButtonText: qsTr("Share")
+    property string shareButtonText: GC.isMobile() ? qsTr("Share") : qsTr("Save config file")
     property string copyButtonText: qsTr("Copy")
     property bool isSelfHostedConfig: true
 
@@ -399,7 +399,8 @@ PageType {
                     ExportController.shareLanguage, ExportController.shareServer,
                     ExportController.shareAccount, ExportController.shareCreatedAt,
                     ExportController.config, ExportController.qrCodes, ExportController.shareNativeFormat, asHtml)
-        if (ExportController.setConfigFromString(document, fileName))
+        if (ExportController.saveRenderedShareDocument(fileName, document))
             PageController.showNotificationMessage(qsTr("Sharing guide saved"))
     }
 }
+

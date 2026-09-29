@@ -11,6 +11,7 @@
 #include <QRandomGenerator>
 #include <QSharedPointer>
 #include <QTimer>
+#include <algorithm>
 
 using namespace QKeychain;
 
@@ -24,14 +25,16 @@ namespace {
 }
 
 SecureQSettings::SecureQSettings(const QString &organization, const QString &application, QObject *parent, bool enableEncryption)
-    : QObject { parent }, m_settings(organization, application, parent), encryptedKeys({ "Servers/serversList" }), m_encryptionEnabled(enableEncryption)
+    : QObject { parent }, m_settings(organization, application, parent), encryptedKeys({ "Servers/serversList", "Sharing/clientConfigs/" }), m_encryptionEnabled(enableEncryption)
 {
     bool encrypted = m_settings.value("Conf/encrypted").toBool();
 
     // convert settings to encrypted for if updated to >= 2.1.0
     if (encryptionRequired() && !encrypted) {
         for (const QString &key : m_settings.allKeys()) {
-            if (encryptedKeys.contains(key)) {
+            if (std::any_of(encryptedKeys.cbegin(), encryptedKeys.cend(), [&key](const QString &prefix) {
+                    return key == prefix || key.startsWith(prefix);
+                })) {
                 const QVariant &val = value(key);
                 setValue(key, val);
             }
@@ -88,7 +91,10 @@ void SecureQSettings::setValue(const QString &key, const QVariant &value)
 {
     QMutexLocker locker(&m_mutex);
 
-    if (encryptionRequired() && encryptedKeys.contains(key)) {
+    const bool shouldEncrypt = std::any_of(encryptedKeys.cbegin(), encryptedKeys.cend(), [&key](const QString &prefix) {
+        return key == prefix || key.startsWith(prefix);
+    });
+    if (encryptionRequired() && shouldEncrypt) {
         if (!getEncKey().isEmpty() && !getEncIv().isEmpty()) {
             QByteArray decryptedValue;
             {
@@ -125,6 +131,13 @@ QByteArray SecureQSettings::backupAppConfig() const
     QJsonObject cfg;
 
     const auto needToBackup = [this](const auto &key) {
+      // Per-client connection configs contain private credentials. Keep them encrypted in the
+      // local key store and out of portable backups that can be shared or stored elsewhere.
+      if (key.startsWith("Sharing/clientConfigs/"))
+      {
+        return false;
+      }
+
       for (const auto &item : m_fieldsToBackup)
       {
         if (key == "Conf/installationUuid")
@@ -299,3 +312,4 @@ void SecureQSettings::setSecTag(const QString &tag, const QByteArray &data)
         qCritical() << "SecureQSettings::setSecTag Error:" << job->errorString();
     }
 }
+

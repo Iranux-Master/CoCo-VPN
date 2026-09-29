@@ -26,6 +26,8 @@ public:
     Q_PROPERTY(QString shareAccount READ shareAccount NOTIFY sharingContextChanged)
     Q_PROPERTY(QString shareCreatedAt READ shareCreatedAt NOTIFY sharingContextChanged)
     Q_PROPERTY(bool shareNativeFormat READ shareNativeFormat NOTIFY sharingContextChanged)
+    Q_PROPERTY(QString lastClientId READ lastClientId NOTIFY exportConfigChanged)
+    Q_PROPERTY(QString shareConfigExtension READ shareConfigExtension NOTIFY exportConfigChanged)
     Q_PROPERTY(QVariantList shareTemplateKinds READ shareTemplateKinds CONSTANT)
 
 public slots:
@@ -45,6 +47,7 @@ public slots:
 
     void exportConfig(const QString &fileName);
     bool setConfigFromString(const QString &config, const QString &fileName);
+    Q_INVOKABLE bool saveRenderedShareDocument(const QString &fileName, const QString &document) const;
 
     void updateClientManagementModel(const QString &serverId, int containerIndex);
 
@@ -58,6 +61,8 @@ public slots:
     QString shareAccount() const;
     QString shareCreatedAt() const;
     bool shareNativeFormat() const;
+    QString lastClientId() const;
+    QString shareConfigExtension() const;
     QVariantList shareTemplateKinds() const;
     Q_INVOKABLE void setShareLanguage(const QString &language);
     Q_INVOKABLE QString shareTemplate(const QString &kind, const QString &language) const;
@@ -81,6 +86,13 @@ public slots:
     Q_INVOKABLE void setSharingContext(const QString &kind, const QString &serverName,
                                        const QString &accountName, const QString &createdAt,
                                        bool nativeFormat = false);
+    Q_INVOKABLE void rememberCurrentClientShareConfig(const QString &serverId, int containerIndex,
+                                                       const QString &createdAt, bool nativeFormat,
+                                                       const QString &configExtension);
+    Q_INVOKABLE bool loadClientShareConfig(const QString &serverId, int containerIndex,
+                                            const QString &clientId);
+    Q_INVOKABLE void forgetClientShareConfig(const QString &serverId, int containerIndex,
+                                              const QString &clientId);
 
 signals:
     void generateConfig(int type);
@@ -115,6 +127,8 @@ private:
     QString m_shareAccount;
     QString m_shareCreatedAt;
     bool m_shareNativeFormat = false;
+    QString m_lastClientId;
+    QString m_shareConfigExtension;
 
     QString m_config;
     QString m_nativeConfigString;
@@ -122,3 +136,4 @@ private:
 };
 
 #endif // EXPORTUICONTROLLER_H
+

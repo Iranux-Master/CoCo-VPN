@@ -31,3 +31,4 @@ These services do not use the VPN protocol client manager. Their guide action re
 `Cloak` and `ShadowSocks` are legacy container entries marked unsupported by `ContainerUtils::isUnsupportedContainer`; they are not active connection template kinds. `TorWebSite`, `Dns`, `Sftp`, `Socks5Proxy`, `MtProxy`, `Telemt`, and `TProxy` are marked non-shareable in the VPN client selector because they are service guides rather than VPN client accounts.
 
 The old server/protocol client manager remains the source of truth for creating, renaming, listing, and revoking VPN clients. The removed `Sharing/accountGroups` storage was only used by the added multi-protocol account bundle and batch UI.
+

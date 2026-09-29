@@ -32,6 +32,12 @@ PageType {
         target: ExportController
 
         function onRevokeConfigFinished() {
+            if (root.pendingRevokeClientId !== "") {
+                ExportController.forgetClientShareConfig(root.pendingRevokeServerId,
+                                                          root.pendingRevokeContainerIndex,
+                                                          root.pendingRevokeClientId)
+                root.pendingRevokeClientId = ""
+            }
             PageController.showBusyIndicator(false)
             PageController.showNotificationMessage(qsTr("Config revoked"))
         }
@@ -93,6 +99,11 @@ PageType {
             }
             }
 
+            ExportController.rememberCurrentClientShareConfig(serverId, containerIndex,
+                                                               ExportController.shareCreatedAt,
+                                                               type !== PageShare.ConfigType.AmneziaConnection,
+                                                               configExtension)
+
             PageController.showBusyIndicator(false)
 
             var headerText = qsTr("Connection to ") + serverSelector.text
@@ -101,6 +112,7 @@ PageType {
         }
 
         function onExportErrorOccurred(error) {
+            root.pendingRevokeClientId = ""
             PageController.showBusyIndicator(false)
             PageController.showErrorMessage(error)
         }
@@ -110,6 +122,20 @@ PageType {
     property bool isSearchBarVisible: false
     property bool showContent: false
     property bool shareButtonEnabled: true
+    property string pendingRevokeClientId: ""
+    property string pendingRevokeServerId: ""
+    property int pendingRevokeContainerIndex: -1
+
+    function shareKindForContainer(containerIndex) {
+        if (containerIndex === ContainerProps.containerFromString("amnezia-openvpn")) return "openvpn"
+        if (containerIndex === ContainerProps.containerFromString("amnezia-awg")
+                || containerIndex === ContainerProps.containerFromString("amnezia-awg2")) return "awg"
+        if (containerIndex === ContainerProps.containerFromString("amnezia-ipsec")) return "ikev2"
+        if (containerIndex === ContainerProps.containerFromString("amnezia-xray")) return "xray"
+        if (containerIndex === ContainerProps.containerFromString("amnezia-ssxray")) return "shadowsocks"
+        return "wireguard"
+    }
+
     // Shared by protocol selection and the legacy per-protocol client manager.
     SortFilterProxyModel {
         id: proxyContainersModel
@@ -254,7 +280,7 @@ PageType {
                         checked: accessTypeSelector.currentIndex === 0
 
                         implicitWidth: (root.width - 32) / accessTypeSelector.tabCount
-                        text: qsTr("Connection")
+                        text: qsTr("Create access")
 
                         onClicked: {
                             accessTypeSelector.currentIndex = 0
@@ -292,7 +318,7 @@ PageType {
 
                 visible: accessTypeSelector.currentIndex === 0
 
-                text: qsTr("Share VPN access without the ability to manage the server")
+                text: qsTr("Create a separate VPN user on this server. Each user has independent credentials and can be revoked separately.")
                 color: AmneziaStyle.color.mutedGray
             }
 
@@ -544,7 +570,7 @@ PageType {
                 enabled: shareButtonEnabled
                 visible: accessTypeSelector.currentIndex === 0
 
-                text: qsTr("Share")
+                text: qsTr("Create access")
                 leftImageSource: "qrc:/images/controls/share-2.svg"
 
                 clickedFunc: function(){
@@ -759,21 +785,33 @@ PageType {
                                 BasicButtonType {
                                     Layout.fillWidth: true
                                     Layout.topMargin: 24
-                                    text: qsTr("Create and share new access")
+                                    text: qsTr("Share this user")
                                     leftImageSource: "qrc:/images/controls/share-2.svg"
                                     clickedFunc: function() {
-                                        // Client private credentials are not retained in the users list;
-                                        // create a fresh credential with a clear, distinct name.
-                                        var suffix = " (new)"
-                                        clientNameTextField.textField.text = clientName.substring(0, 20 - suffix.length) + suffix
+                                        var selectedServerId = ServersUiController.processedServerId
+                                        var selectedContainerIndex = ServersUiController.processedContainerIndex
+                                        var selectedClientId = clientId
+                                        var selectedClientName = clientName
+                                        var selectedCreationDate = creationDate
+                                        if (!ExportController.loadClientShareConfig(selectedServerId,
+                                                                                     selectedContainerIndex,
+                                                                                     selectedClientId)) {
+                                            PageController.showNotificationMessage(qsTr("This user's original connection config is not available on this device. It cannot be re-shared without that config. Create a separate new user from the access creation screen if needed."))
+                                            return
+                                        }
+
+                                        ExportController.setSharingContext(root.shareKindForContainer(selectedContainerIndex),
+                                                                           serverSelector.text,
+                                                                           selectedClientName,
+                                                                           selectedCreationDate,
+                                                                           ExportController.shareNativeFormat)
+                                        var extension = ExportController.shareConfigExtension || ".vpn"
+                                        var title = qsTr("Access for %1").arg(selectedClientName)
                                         clientInfoDrawer.closeTriggered()
-                                        accessTypeSelector.currentIndex = 0
-                                        Qt.callLater(function() {
-                                            a.contentY = 0
-                                            if (root.connectionTypesModel.length > 0) {
-                                                ExportController.generateConfig(root.connectionTypesModel[exportTypeSelector.currentIndex].type)
-                                            }
-                                        })
+                                        PageController.goToShareConnectionPage(title,
+                                            qsTr("Connection settings for %1").arg(selectedClientName),
+                                            qsTr("Save access config"), extension,
+                                            "cocovpn_" + root.shareKindForContainer(selectedContainerIndex) + "_access")
                                     }
                                 }
 
@@ -871,6 +909,9 @@ PageType {
 
                                         var yesButtonFunction = function() {
                                             clientInfoDrawer.closeTriggered()
+                                            root.pendingRevokeClientId = clientId
+                                            root.pendingRevokeServerId = ServersUiController.processedServerId
+                                            root.pendingRevokeContainerIndex = ServersUiController.processedContainerIndex
                                             PageController.showBusyIndicator(true)
                                             ExportController.revokeConfig(proxyClientManagementModel.mapToSource(index),
                                                                               ServersUiController.processedServerId,
@@ -898,3 +939,4 @@ PageType {
     }
 
 }
+

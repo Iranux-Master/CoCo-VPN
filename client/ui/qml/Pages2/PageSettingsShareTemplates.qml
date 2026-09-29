@@ -130,11 +130,20 @@ PageType {
                     ]
 
                     delegate: BasicButtonType {
-                        text: modelData.label
-                        defaultColor: AmneziaStyle.color.transparent
-                        hoveredColor: AmneziaStyle.color.translucentWhite
-                        pressedColor: AmneziaStyle.color.sheerWhite
+                        width: Math.min(168, Math.max(136, (root.width - 64) / 4))
+                        height: 56
+                        implicitHeight: 56
+                        text: modelData.label + "\n" + modelData.tag
+                        textColor: AmneziaStyle.color.paleGray
+                        defaultColor: AmneziaStyle.color.onyxBlack
+                        hoveredColor: AmneziaStyle.color.slateGray
+                        pressedColor: AmneziaStyle.color.richBrown
+                        borderColor: AmneziaStyle.color.mutedGray
+                        borderFocusedColor: AmneziaStyle.color.paleGray
                         borderWidth: 1
+                        buttonTextLabel.font.pixelSize: 13
+                        buttonTextLabel.horizontalAlignment: Text.AlignHCenter
+                        buttonTextLabel.verticalAlignment: Text.AlignVCenter
                         clickedFunc: function() { root.insertTemplateTag(modelData.tag) }
                     }
                 }
@@ -143,7 +152,7 @@ PageType {
             TextAreaType {
                 id: templateEditor
                 Layout.fillWidth: true
-                Layout.preferredHeight: 300
+                Layout.preferredHeight: Math.min(260, Math.max(200, root.height * 0.24))
                 textArea.wrapMode: TextEdit.Wrap
                 textArea.text: ExportController.shareTemplate(root.selectedKind, root.selectedLanguage)
             }
@@ -166,6 +175,8 @@ PageType {
                 defaultColor: AmneziaStyle.color.transparent
                 hoveredColor: AmneziaStyle.color.translucentWhite
                 pressedColor: AmneziaStyle.color.sheerWhite
+                textColor: AmneziaStyle.color.paleGray
+                borderColor: AmneziaStyle.color.mutedGray
                 borderWidth: 1
                 text: qsTr("Download TXT preview")
                 clickedFunc: function() { root.downloadTemplatePreview(false) }
@@ -176,6 +187,7 @@ PageType {
                 Layout.fillWidth: true
                 headerText: qsTr("Your template name")
                 placeholderText: qsTr("Name a personal template")
+                placeholderTextColor: AmneziaStyle.color.mutedGray
                 textField.text: root.templateName(root.selectedTemplateId) === qsTr("Built-in default") ? "" : root.templateName(root.selectedTemplateId)
             }
 
@@ -202,6 +214,7 @@ PageType {
             BasicButtonType {
                 Layout.fillWidth: true
                 enabled: templateNameField.textField.text.trim().length > 0 && templateEditor.textArea.text.trim().length > 0
+                textColor: enabled ? AmneziaStyle.color.midnightBlack : AmneziaStyle.color.mutedGray
                 text: qsTr("Save as a new personal template")
                 clickedFunc: function() {
                     var id = ExportController.saveCustomShareTemplate(root.selectedKind, root.selectedLanguage,
@@ -290,3 +303,4 @@ PageType {
             PageController.showNotificationMessage(qsTr("Could not save the template preview"))
     }
 }
+
