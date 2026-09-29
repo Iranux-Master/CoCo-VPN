@@ -10,10 +10,28 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
     property string selectedKind: "wireguard"
-    property string selectedLanguage: ExportController.shareLanguage
+    property string selectedLanguage: LanguageUiController.persianUi ? "fa" : "en"
     property string selectedTemplateId: ExportController.defaultShareTemplateId(selectedKind, selectedLanguage)
     property var kinds: ExportController.shareTemplateKinds
     property var templateOptions: ExportController.shareTemplates(selectedKind, selectedLanguage)
+
+    ListModel { id: kindMenuModel }
+    ListModel { id: templateMenuModel }
+
+    Component.onCompleted: {
+        syncKindMenu()
+        syncTemplateMenu()
+        ExportController.setShareLanguage(selectedLanguage)
+    }
+
+    Connections {
+        target: LanguageUiController
+        function onTranslationsUpdated() {
+            root.selectedLanguage = LanguageUiController.persianUi ? "fa" : "en"
+            ExportController.setShareLanguage(root.selectedLanguage)
+            root.loadSelectedTemplate()
+        }
+    }
 
     BackButtonType {
         id: backButton
@@ -41,8 +59,8 @@ PageType {
             BaseHeaderType {
                 Layout.fillWidth: true
                 Layout.topMargin: 18
-                headerText: qsTr("Share Content Templates / قالب‌های محتوای اشتراک‌گذاری")
-                descriptionText: qsTr("Choose the default language and edit the built-in guide for each access type. The guide is included when you save a sharing file.")
+                headerText: qsTr("Share Content Templates")
+                descriptionText: qsTr("Edit the sharing guide used for each access type. The guide follows the app language and is included in HTML and TXT files.")
             }
 
             DropDownType {
@@ -50,14 +68,14 @@ PageType {
                 Layout.fillWidth: true
                 drawerParent: root
                 drawerHeight: 0.55
-                headerText: qsTr("Access type / protocol / service")
+                headerText: qsTr("Access type, protocol, or service")
                 text: root.kindName(root.selectedKind)
                 listView: ListViewWithRadioButtonType {
                     rootWidth: root.width
-                    model: root.kinds
+                    model: kindMenuModel
                     selectedIndex: root.kindIndex(root.selectedKind)
                     clickedFunction: function() {
-                        root.selectedKind = root.kinds[selectedIndex].id
+                        root.selectedKind = kindMenuModel.get(selectedIndex).kindId
                         root.loadSelectedTemplate()
                         kindSelector.text = root.kindName(root.selectedKind)
                         kindSelector.closeTriggered()
@@ -71,14 +89,14 @@ PageType {
                 drawerParent: root
                 drawerHeight: 0.45
                 headerText: qsTr("Default template")
-                descriptionText: qsTr("Choose which template will be used for this access type and language.")
+                descriptionText: qsTr("Choose the template used for this access type.")
                 text: root.templateName(root.selectedTemplateId)
                 listView: ListViewWithRadioButtonType {
                     rootWidth: root.width
-                    model: root.templateOptions
+                    model: templateMenuModel
                     selectedIndex: root.templateIndex(root.selectedTemplateId)
                     clickedFunction: function() {
-                        var chosen = root.templateOptions[selectedIndex]
+                        var chosen = templateMenuModel.get(selectedIndex)
                         root.selectedTemplateId = chosen.id
                         ExportController.setDefaultShareTemplate(root.selectedKind, root.selectedLanguage, chosen.id)
                         templateNameField.textField.text = chosen.builtIn ? "" : chosen.name
@@ -86,27 +104,6 @@ PageType {
                         templateSelector.text = chosen.name
                         templateSelector.closeTriggered()
                     }
-                }
-            }
-
-            Header2Type {
-                Layout.fillWidth: true
-                headerText: qsTr("Default sharing language")
-                descriptionText: qsTr("This language is used for new HTML and TXT share files.")
-            }
-            RowLayout {
-                Layout.fillWidth: true
-                HorizontalRadioButton {
-                    Layout.fillWidth: true
-                    checked: root.selectedLanguage === "fa"
-                    text: qsTr("فارسی")
-                    onClicked: root.changeLanguage("fa")
-                }
-                HorizontalRadioButton {
-                    Layout.fillWidth: true
-                    checked: root.selectedLanguage === "en"
-                    text: qsTr("English")
-                    onClicked: root.changeLanguage("en")
                 }
             }
 
@@ -145,6 +142,7 @@ PageType {
                         if (id !== "") {
                             root.selectedTemplateId = id
                             root.templateOptions = ExportController.shareTemplates(root.selectedKind, root.selectedLanguage)
+                            root.syncTemplateMenu()
                             templateSelector.text = root.templateName(id)
                         }
                     }
@@ -162,6 +160,7 @@ PageType {
                     root.selectedTemplateId = id
                     ExportController.setDefaultShareTemplate(root.selectedKind, root.selectedLanguage, id)
                     root.templateOptions = ExportController.shareTemplates(root.selectedKind, root.selectedLanguage)
+                    root.syncTemplateMenu()
                     templateSelector.text = root.templateName(id)
                     PageController.showNotificationMessage(qsTr("Personal template saved and selected as default"))
                 }
@@ -201,6 +200,7 @@ PageType {
     }
     function loadSelectedTemplate() {
         templateOptions = ExportController.shareTemplates(selectedKind, selectedLanguage)
+        syncTemplateMenu()
         selectedTemplateId = ExportController.defaultShareTemplateId(selectedKind, selectedLanguage)
         var selected = templateOptions[templateIndex(selectedTemplateId)]
         if (!selected) return
@@ -208,9 +208,15 @@ PageType {
         templateNameField.textField.text = selected.builtIn ? "" : selected.name
         templateSelector.text = selected.name
     }
-    function changeLanguage(language) {
-        selectedLanguage = language
-        ExportController.setShareLanguage(language)
-        root.loadSelectedTemplate()
+    function syncKindMenu() {
+        kindMenuModel.clear()
+        for (var i = 0; i < kinds.length; ++i)
+            kindMenuModel.append({ kindId: kinds[i].id, name: kinds[i].name })
+    }
+    function syncTemplateMenu() {
+        templateMenuModel.clear()
+        for (var i = 0; i < templateOptions.length; ++i)
+            templateMenuModel.append({ id: templateOptions[i].id, name: templateOptions[i].name,
+                                       body: templateOptions[i].body, builtIn: templateOptions[i].builtIn })
     }
 }

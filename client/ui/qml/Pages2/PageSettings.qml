@@ -148,7 +148,7 @@ PageType {
     QtObject {
         id: shareTemplates
 
-        property string title: qsTr("Share Content Templates / قالب‌های محتوای اشتراک‌گذاری")
+        property string title: qsTr("Share Content Templates")
         readonly property string leftImagePath: "qrc:/images/controls/share-2.svg"
         property bool isVisible: true
         readonly property var clickedHandler: function() {

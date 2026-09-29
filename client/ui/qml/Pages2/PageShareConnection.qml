@@ -20,6 +20,17 @@ import "../Components"
 PageType {
     id: pageShareConnection
 
+    Component.onCompleted: {
+        ExportController.setShareLanguage(LanguageUiController.persianUi ? "fa" : "en")
+    }
+
+    Connections {
+        target: LanguageUiController
+        function onTranslationsUpdated() {
+            ExportController.setShareLanguage(LanguageUiController.persianUi ? "fa" : "en")
+        }
+    }
+
     property string headerText
     property string configContentHeaderText
     property string shareButtonText: qsTr("Share")

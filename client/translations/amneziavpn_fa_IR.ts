@@ -3375,6 +3375,7 @@ Create one from the current settings.</source>
         <source>Dev console</source>
         <translation>کنسول توسعه</translation>
     </message>
+    <message><source>Share Content Templates</source><translation>قالب‌های محتوای اشتراک‌گذاری</translation></message>
 </context>
 <context>
     <name>PageSettingsAbout</name>
@@ -7275,5 +7276,27 @@ Remove the server from the app to continue.</source>
         <source>Cannot remove server during active connection</source>
         <translation>نمی‌توان سرور را در حین اتصال فعال حذف کرد.</translation>
     </message>
+</context>
+<context>
+    <name>PageSettingsShareTemplates</name>
+    <message><source>Share Content Templates</source><translation>قالب‌های محتوای اشتراک‌گذاری</translation></message>
+    <message><source>Edit the sharing guide used for each access type. The guide follows the app language and is included in HTML and TXT files.</source><translation>راهنمای هر نوع دسترسی را ویرایش کنید. زبان راهنما با زبان برنامه هماهنگ است و هنگام ذخیره، در فایل HTML یا TXT قرار می‌گیرد.</translation></message>
+    <message><source>Access type, protocol, or service</source><translation>نوع دسترسی، پروتکل یا سرویس</translation></message>
+    <message><source>Default template</source><translation>قالب پیش‌فرض</translation></message>
+    <message><source>Choose the template used for this access type.</source><translation>قالب مورد استفاده برای این نوع دسترسی را انتخاب کنید.</translation></message>
+    <message><source>Tags: {{PROTOCOL}}, {{APP_LINK}}, {{SERVER}}, {{NAME}}, {{CREATED}}, {{CONFIG}}, {{QR}}</source><translation>متغیرهای قالب: {{PROTOCOL}}، {{APP_LINK}}، {{SERVER}}، {{NAME}}، {{CREATED}}، {{CONFIG}}، {{QR}}</translation></message>
+    <message><source>Your template name</source><translation>نام قالب شما</translation></message>
+    <message><source>Name a personal template</source><translation>برای قالب شخصی نام بنویسید</translation></message>
+    <message><source>Save template</source><translation>ذخیره قالب</translation></message>
+    <message><source>Save as a new personal template</source><translation>ذخیره به‌عنوان قالب شخصی جدید</translation></message>
+    <message><source>Restore built-in template</source><translation>بازگردانی قالب داخلی</translation></message>
+    <message><source>Template saved</source><translation>قالب ذخیره شد</translation></message>
+    <message><source>Personal template saved and selected as default</source><translation>قالب شخصی ذخیره و به‌عنوان قالب پیش‌فرض انتخاب شد</translation></message>
+    <message><source>Built-in default</source><translation>قالب پیش‌فرض داخلی</translation></message>
+</context>
+<context>
+    <name>ExportUiController</name>
+    <message><source>Administrator / Full access</source><translation>مدیر / دسترسی کامل</translation></message>
+    <message><source>Tor website</source><translation>وب‌سایت تور</translation></message>
 </context>
 </TS>
