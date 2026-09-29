@@ -312,4 +312,3 @@ void SecureQSettings::setSecTag(const QString &tag, const QByteArray &data)
         qCritical() << "SecureQSettings::setSecTag Error:" << job->errorString();
     }
 }
-

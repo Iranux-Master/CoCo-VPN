@@ -59,4 +59,3 @@ private:
 };
 
 #endif // SECUREQSETTINGS_H
-

@@ -524,4 +524,3 @@ bool ExportUiController::saveRenderedShareDocument(const QString &fileName, cons
 {
     return SystemController::saveFile(fileName, document);
 }
-

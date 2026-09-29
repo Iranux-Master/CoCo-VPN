@@ -403,4 +403,3 @@ PageType {
             PageController.showNotificationMessage(qsTr("Sharing guide saved"))
     }
 }
-

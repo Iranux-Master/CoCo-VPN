@@ -170,4 +170,3 @@ void ShareTemplatesTest::savedClientCredentialsAreExcludedFromBackups()
 
 QTEST_MAIN(ShareTemplatesTest)
 #include "testShareTemplates.moc"
-

@@ -54,4 +54,3 @@ qrcodegen::QrCode qrCodeUtils::generateQrCode(const QByteArray &data)
 {
     return qrcodegen::QrCode::encodeText(data.constData(), qrcodegen::QrCode::Ecc::LOW);
 }
-

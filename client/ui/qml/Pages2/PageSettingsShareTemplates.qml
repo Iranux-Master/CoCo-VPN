@@ -303,4 +303,3 @@ PageType {
             PageController.showNotificationMessage(qsTr("Could not save the template preview"))
     }
 }
-

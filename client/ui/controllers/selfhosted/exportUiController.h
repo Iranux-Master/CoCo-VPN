@@ -136,4 +136,3 @@ private:
 };
 
 #endif // EXPORTUICONTROLLER_H
-
