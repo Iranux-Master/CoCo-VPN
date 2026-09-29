@@ -202,6 +202,37 @@ QString ExportUiController::renderShareDocument(const QString &kind, const QStri
                                                  const QString &createdAt, const QString &config,
                                                  const QStringList &qrCodes, bool nativeFormat, bool html) const
 {
+    return renderShareDocumentWithTemplate(kind, language, serverName, accountName, createdAt,
+                                           config, qrCodes, shareTemplate(kind, language),
+                                           nativeFormat, html, false);
+}
+
+QString ExportUiController::renderShareTemplatePreview(const QString &kind, const QString &language,
+                                                        const QString &templateBody, bool html) const
+{
+    const bool fa = language != QLatin1String("en");
+    const QString server = fa ? QStringLiteral("نمونه سرور") : QStringLiteral("Example server");
+    const QString account = fa ? QStringLiteral("حساب نمونه") : QStringLiteral("Example account");
+    const QString date = fa ? QStringLiteral("تاریخ نمونه") : QStringLiteral("Example date");
+    const QString config = fa ? QStringLiteral("نمونه؛ اطلاعات اتصال واقعی هنگام اشتراک‌گذاری حساب درج می‌شود.")
+                              : QStringLiteral("Sample only; real connection details appear when an account is shared.");
+    return renderShareDocumentWithTemplate(kind, language, server, account, date, config, {},
+                                           templateBody, false, html, true);
+}
+
+bool ExportUiController::saveShareTemplatePreview(const QString &fileName, const QString &kind,
+                                                   const QString &language, const QString &templateBody,
+                                                   bool html) const
+{
+    return SystemController::saveFile(fileName, renderShareTemplatePreview(kind, language, templateBody, html));
+}
+
+QString ExportUiController::renderShareDocumentWithTemplate(const QString &kind, const QString &language,
+                                                             const QString &serverName, const QString &accountName,
+                                                             const QString &createdAt, const QString &config,
+                                                             const QStringList &qrCodes, const QString &templateBody,
+                                                             bool nativeFormat, bool html, bool preview) const
+{
     QString protocol = kind.toUpper();
     const bool fa = language != QLatin1String("en");
     if (kind == QLatin1String("full")) protocol = language == QLatin1String("en") ? QStringLiteral("Full Access") : QStringLiteral("دسترسی کامل");
@@ -210,14 +241,23 @@ QString ExportUiController::renderShareDocument(const QString &kind, const QStri
     if (nativeFormat && kind == QLatin1String("wireguard")) appLink = QStringLiteral("https://www.wireguard.com/install/");
     if (nativeFormat && kind == QLatin1String("openvpn")) appLink = QStringLiteral("https://openvpn.net/client/");
     if (kind == QLatin1String("mtproxy") || kind == QLatin1String("telemt") || kind == QLatin1String("tproxy")) appLink = QStringLiteral("https://telegram.org/apps");
-    QString body = shareTemplate(kind, language);
+    QString body = templateBody;
     body.replace("{{PROTOCOL}}", protocol).replace("{{APP_LINK}}", appLink)
         .replace("{{SERVER}}", serverName).replace("{{NAME}}", accountName)
         .replace("{{CREATED}}", createdAt);
     body.replace("{{CONFIG}}", html ? QStringLiteral("__COCO_CONFIG_BLOCK__") : config);
-    QString qrText = html ? QStringLiteral("{{QR_MARKUP}}")
+    QString qrText = preview
+                          ? (fa ? QStringLiteral("پیش‌نمایش: QR واقعی هنگام اشتراک‌گذاری حساب درج می‌شود.")
+                                : QStringLiteral("Preview: a real QR code is added when an account is shared."))
+                      : html ? QStringLiteral("{{QR_MARKUP}}")
                           : (language == QLatin1String("en") ? QStringLiteral("QR code is included in the HTML version.") : QStringLiteral("برای مشاهده QR کد، فایل HTML را باز کنید."));
     body.replace("{{QR}}", qrText);
+    if (preview) {
+        const QString previewNotice = fa
+            ? QStringLiteral("پیش‌نمایش قالب — مقادیر نمونه هستند و دسترسی واقعی ایجاد نمی‌کنند.")
+            : QStringLiteral("Template preview — sample values only; this is not a working account.");
+        body.prepend(previewNotice + QStringLiteral("\n\nCoCo VPN\n\n"));
+    }
     if (!html) return body;
 
     QString content = htmlEscape(body).replace("\n", "<br>");

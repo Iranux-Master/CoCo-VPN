@@ -14,6 +14,7 @@ private slots:
     void builtInGuidesExistInBothLanguages();
     void languageAndTemplateOverridesPersist();
     void shareDocumentContainsEscapedConfigAndQr();
+    void templatePreviewUsesDraftAndMarksSampleData();
     void oversizedAccessQrIsSkipped();
 };
 
@@ -96,6 +97,28 @@ void ShareTemplatesTest::shareDocumentContainsEscapedConfigAndQr()
         QStringLiteral("Test server"), QStringLiteral("Test user"), QStringLiteral("2026-09-29"), config, {}, false, false);
     QVERIFY(text.contains(config));
     QVERIFY(text.contains(QStringLiteral("QR code is included in the HTML version.")));
+}
+
+void ShareTemplatesTest::templatePreviewUsesDraftAndMarksSampleData()
+{
+    SecureQSettings settings(QStringLiteral("CoCoVpnTests"), QStringLiteral("ShareTemplates"), nullptr, false);
+    settings.clearSettings();
+    ExportController exporter(nullptr, nullptr);
+    ExportUiController controller(&exporter, &settings);
+    const QString draft = QStringLiteral("Guide for {{PROTOCOL}} at {{SERVER}}\n{{NAME}}\n{{CONFIG}}\n{{QR}}");
+
+    const QString html = controller.renderShareTemplatePreview(QStringLiteral("wireguard"), QStringLiteral("en"), draft, true);
+    QVERIFY(html.contains(QStringLiteral("Template preview — sample values only")));
+    QVERIFY(html.contains(QStringLiteral("Example server")));
+    QVERIFY(html.contains(QStringLiteral("Example account")));
+    QVERIFY(html.contains(QStringLiteral("a real QR code is added")));
+    QVERIFY(!html.contains(QStringLiteral("{{SERVER}}")));
+
+    const QString text = controller.renderShareTemplatePreview(QStringLiteral("wireguard"), QStringLiteral("fa"), draft, false);
+    QVERIFY(text.contains(QStringLiteral("پیش‌نمایش قالب")));
+    QVERIFY(text.contains(QStringLiteral("نمونه سرور")));
+    QVERIFY(text.contains(QStringLiteral("QR واقعی")));
+    QVERIFY(!text.contains(QStringLiteral("{{CONFIG}}")));
 }
 
 void ShareTemplatesTest::oversizedAccessQrIsSkipped()

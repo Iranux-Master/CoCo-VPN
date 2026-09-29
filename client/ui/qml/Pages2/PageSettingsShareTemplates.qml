@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtCore
 import PageEnum 1.0
 import Style 1.0
 import "./"
@@ -107,10 +108,36 @@ PageType {
                 }
             }
 
-            ParagraphTextType {
+            Header2Type {
                 Layout.fillWidth: true
-                text: qsTr("Tags: {{PROTOCOL}}, {{APP_LINK}}, {{SERVER}}, {{NAME}}, {{CREATED}}, {{CONFIG}}, {{QR}}")
-                color: AmneziaStyle.color.mutedGray
+                headerText: qsTr("Insert a tag")
+                descriptionText: qsTr("Click a tag to insert it at the cursor position in your template.")
+            }
+
+            Flow {
+                Layout.fillWidth: true
+                spacing: 8
+
+                Repeater {
+                    model: [
+                        { label: qsTr("Protocol"), tag: "{{PROTOCOL}}" },
+                        { label: qsTr("App link"), tag: "{{APP_LINK}}" },
+                        { label: qsTr("Server"), tag: "{{SERVER}}" },
+                        { label: qsTr("Account name"), tag: "{{NAME}}" },
+                        { label: qsTr("Creation date"), tag: "{{CREATED}}" },
+                        { label: qsTr("Configuration"), tag: "{{CONFIG}}" },
+                        { label: qsTr("QR code"), tag: "{{QR}}" }
+                    ]
+
+                    delegate: BasicButtonType {
+                        text: modelData.label
+                        defaultColor: AmneziaStyle.color.transparent
+                        hoveredColor: AmneziaStyle.color.translucentWhite
+                        pressedColor: AmneziaStyle.color.sheerWhite
+                        borderWidth: 1
+                        clickedFunc: function() { root.insertTemplateTag(modelData.tag) }
+                    }
+                }
             }
 
             TextAreaType {
@@ -119,6 +146,29 @@ PageType {
                 Layout.preferredHeight: 300
                 textArea.wrapMode: TextEdit.Wrap
                 textArea.text: ExportController.shareTemplate(root.selectedKind, root.selectedLanguage)
+            }
+
+            Header2Type {
+                Layout.fillWidth: true
+                headerText: qsTr("Download a preview")
+                descriptionText: qsTr("Preview files use sample values. Real account details and QR codes are added when you share an account.")
+            }
+
+            BasicButtonType {
+                Layout.fillWidth: true
+                text: qsTr("Download HTML preview")
+                leftImageSource: "qrc:/images/controls/save.svg"
+                clickedFunc: function() { root.downloadTemplatePreview(true) }
+            }
+
+            BasicButtonType {
+                Layout.fillWidth: true
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                borderWidth: 1
+                text: qsTr("Download TXT preview")
+                clickedFunc: function() { root.downloadTemplatePreview(false) }
             }
 
             TextFieldWithHeaderType {
@@ -218,5 +268,25 @@ PageType {
         for (var i = 0; i < templateOptions.length; ++i)
             templateMenuModel.append({ id: templateOptions[i].id, name: templateOptions[i].name,
                                        body: templateOptions[i].body, builtIn: templateOptions[i].builtIn })
+    }
+    function insertTemplateTag(tag) {
+        var editor = templateEditor.textArea
+        var position = editor.cursorPosition
+        editor.insert(position, tag)
+        editor.cursorPosition = position + tag.length
+        editor.forceActiveFocus()
+    }
+    function downloadTemplatePreview(asHtml) {
+        var extension = asHtml ? "html" : "txt"
+        var filter = asHtml ? qsTr("HTML files (*.html)") : qsTr("Text files (*.txt)")
+        var fileName = SystemController.getFileName(qsTr("Save template preview"), filter,
+            StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/CoCoVPN_" + selectedKind + "_template_preview." + extension,
+            true, extension)
+        if (fileName === "") return
+        if (ExportController.saveShareTemplatePreview(fileName, selectedKind, selectedLanguage,
+                                                       templateEditor.textArea.text, asHtml))
+            PageController.showNotificationMessage(qsTr("Template preview saved"))
+        else
+            PageController.showNotificationMessage(qsTr("Could not save the template preview"))
     }
 }

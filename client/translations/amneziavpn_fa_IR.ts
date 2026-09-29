@@ -7293,6 +7293,24 @@ Remove the server from the app to continue.</source>
     <message><source>Template saved</source><translation>قالب ذخیره شد</translation></message>
     <message><source>Personal template saved and selected as default</source><translation>قالب شخصی ذخیره و به‌عنوان قالب پیش‌فرض انتخاب شد</translation></message>
     <message><source>Built-in default</source><translation>قالب پیش‌فرض داخلی</translation></message>
+    <message><source>Insert a tag</source><translation>درج متغیر</translation></message>
+    <message><source>Click a tag to insert it at the cursor position in your template.</source><translation>برای درج هر متغیر در محل نشانگر متن، روی آن بزنید.</translation></message>
+    <message><source>Protocol</source><translation>پروتکل</translation></message>
+    <message><source>App link</source><translation>پیوند برنامه</translation></message>
+    <message><source>Server</source><translation>سرور</translation></message>
+    <message><source>Account name</source><translation>نام حساب</translation></message>
+    <message><source>Creation date</source><translation>تاریخ ساخت</translation></message>
+    <message><source>Configuration</source><translation>کانفیگ</translation></message>
+    <message><source>QR code</source><translation>کد QR</translation></message>
+    <message><source>Download a preview</source><translation>دریافت پیش‌نمایش</translation></message>
+    <message><source>Preview files use sample values. Real account details and QR codes are added when you share an account.</source><translation>فایل‌های پیش‌نمایش از مقادیر نمونه استفاده می‌کنند. اطلاعات واقعی حساب و QR هنگام اشتراک‌گذاری حساب درج می‌شوند.</translation></message>
+    <message><source>Download HTML preview</source><translation>دریافت پیش‌نمایش HTML</translation></message>
+    <message><source>Download TXT preview</source><translation>دریافت پیش‌نمایش TXT</translation></message>
+    <message><source>HTML files (*.html)</source><translation>فایل‌های HTML ‏(*.html)</translation></message>
+    <message><source>Text files (*.txt)</source><translation>فایل‌های متنی ‏(*.txt)</translation></message>
+    <message><source>Save template preview</source><translation>ذخیره پیش‌نمایش قالب</translation></message>
+    <message><source>Template preview saved</source><translation>پیش‌نمایش قالب ذخیره شد</translation></message>
+    <message><source>Could not save the template preview</source><translation>ذخیره پیش‌نمایش قالب انجام نشد.</translation></message>
 </context>
 <context>
     <name>ExportUiController</name>

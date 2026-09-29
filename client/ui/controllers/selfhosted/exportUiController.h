@@ -73,6 +73,11 @@ public slots:
                                             const QString &serverName, const QString &accountName,
                                             const QString &createdAt, const QString &config,
                                             const QStringList &qrCodes, bool nativeFormat, bool html) const;
+    Q_INVOKABLE QString renderShareTemplatePreview(const QString &kind, const QString &language,
+                                                   const QString &templateBody, bool html) const;
+    Q_INVOKABLE bool saveShareTemplatePreview(const QString &fileName, const QString &kind,
+                                              const QString &language, const QString &templateBody,
+                                              bool html) const;
     Q_INVOKABLE void setSharingContext(const QString &kind, const QString &serverName,
                                        const QString &accountName, const QString &createdAt,
                                        bool nativeFormat = false);
@@ -96,6 +101,11 @@ private:
     void applyExportResult(const ExportController::ExportResult &result);
     QString defaultShareTemplate(const QString &kind, const QString &language) const;
     QString htmlEscape(const QString &value) const;
+    QString renderShareDocumentWithTemplate(const QString &kind, const QString &language,
+                                            const QString &serverName, const QString &accountName,
+                                            const QString &createdAt, const QString &config,
+                                            const QStringList &qrCodes, const QString &templateBody,
+                                            bool nativeFormat, bool html, bool preview) const;
 
     ExportController* m_exportController;
     SecureQSettings* m_settings;
