@@ -6,6 +6,7 @@
 #include <QBuffer>
 #include <QRegularExpression>
 #include <QImage>
+#include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -277,7 +278,10 @@ QString ExportUiController::renderShareDocumentWithTemplate(const QString &kind,
     linkedContent += content.mid(lastUrlEnd);
     content = linkedContent.replace(QStringLiteral("__COCO_APP_LINK__"),
                                     QStringLiteral("<a href=\"%1\">%1</a>").arg(escapedLink));
-    content.replace("__COCO_CONFIG_BLOCK__", QStringLiteral("<pre dir=\"ltr\">%1</pre>").arg(htmlEscape(config)));
+    const QString copyButtonLabel = fa ? QStringLiteral("کپی کانفیگ") : QStringLiteral("Copy config");
+    const QString configBlock = QStringLiteral("<div class=\"config-actions\"><button type=\"button\" class=\"copy-config\" onclick=\"copyCocoConfig()\">%1</button><span id=\"copy-status\" role=\"status\" aria-live=\"polite\"></span></div><pre id=\"coco-config\" dir=\"ltr\">%2</pre>")
+                                    .arg(copyButtonLabel, htmlEscape(config));
+    content.replace("__COCO_CONFIG_BLOCK__", configBlock);
     content.replace(htmlEscape(qrText), QStringLiteral("__COCO_QR_MARKUP__"));
     QString qrMarkup;
     for (const QString &qr : qrCodes) {
@@ -293,9 +297,27 @@ QString ExportUiController::renderShareDocumentWithTemplate(const QString &kind,
     if (!logo.isNull()) logo.scaled(56, 56, Qt::KeepAspectRatio, Qt::SmoothTransformation).save(&logoBuffer, "PNG");
     const QString logoMarkup = logoPng.isEmpty() ? QStringLiteral("<strong>CoCo VPN</strong>")
         : QStringLiteral("<img class=\"logo\" alt=\"CoCo VPN\" src=\"data:image/png;base64,%1\"><strong>CoCo VPN</strong>").arg(QString::fromLatin1(logoPng.toBase64()));
-    return QStringLiteral("<!doctype html><html lang=\"%1\" dir=\"%2\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>CoCo VPN · %3</title><style>body{margin:0;background:#eef3ef;color:#17231d;font:16px/1.8 Arial,Tahoma,sans-serif}.page{max-width:820px;margin:32px auto;padding:28px;background:#fff;border:1px solid #d8e4dc;border-radius:20px}header{display:flex;align-items:center;gap:12px;color:#176b36;font-size:19px;border-bottom:1px solid #d8e4dc;padding-bottom:16px;margin-bottom:20px}.logo{width:42px;height:42px;object-fit:contain}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f7f4;padding:16px;border-radius:12px;font:13px/1.6 Consolas,monospace}.qr{display:block;width:220px;max-width:100%%;margin:18px auto}a{color:#176b36}footer{color:#637268;font-size:12px;margin-top:24px}@media print{body{background:#fff}.page{margin:0;border:0}}</style></head><body><main class=\"page\"><header>%6　|　%3</header><article>%4</article><footer>%5</footer></main></body></html>")
+    QString fontCss;
+    if (fa) {
+        const auto embeddedFont = [](const QString &path) {
+            QFile fontFile(path);
+            return fontFile.open(QIODevice::ReadOnly) ? QString::fromLatin1(fontFile.readAll().toBase64()) : QString();
+        };
+        fontCss = QStringLiteral("@font-face{font-family:Shabnam;src:url(data:font/ttf;base64,%1) format('truetype');font-style:normal;font-weight:400}@font-face{font-family:Shabnam;src:url(data:font/ttf;base64,%2) format('truetype');font-style:normal;font-weight:500}@font-face{font-family:Shabnam;src:url(data:font/ttf;base64,%3) format('truetype');font-style:normal;font-weight:700}")
+                       .arg(embeddedFont(QStringLiteral(":/fonts/Shabnam.ttf")),
+                            embeddedFont(QStringLiteral(":/fonts/Shabnam-Medium.ttf")),
+                            embeddedFont(QStringLiteral(":/fonts/Shabnam-Bold.ttf")));
+    }
+    const QString fontFamily = fa ? QStringLiteral("Shabnam,Arial,Tahoma,sans-serif")
+                                  : QStringLiteral("Arial,Tahoma,sans-serif");
+    QString html = QStringLiteral("<!doctype html><html lang=\"%1\" dir=\"%2\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>CoCo VPN · %3</title><style>%7body{margin:0;background:#eef3ef;color:#17231d;font:16px/1.8 %8}.page{max-width:820px;margin:32px auto;padding:28px;background:#fff;border:1px solid #d8e4dc;border-radius:20px}header{display:flex;align-items:center;gap:12px;color:#176b36;font-size:19px;border-bottom:1px solid #d8e4dc;padding-bottom:16px;margin-bottom:20px}.logo{width:42px;height:42px;object-fit:contain}.config-actions{display:flex;align-items:center;gap:12px;margin:12px 0 0}.copy-config{min-height:44px;padding:9px 16px;border:0;border-radius:10px;background:#176b36;color:#fff;font:inherit;cursor:pointer}.copy-config:hover{background:#12552b}.copy-config:focus-visible{outline:3px solid #c57b32;outline-offset:2px}#copy-status{font-size:14px;color:#176b36}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f7f4;padding:16px;border-radius:12px;font:13px/1.6 Consolas,monospace}.qr{display:block;width:220px;max-width:100%%;margin:18px auto}a{color:#176b36}footer{color:#637268;font-size:12px;margin-top:24px}@media print{body{background:#fff}.page{margin:0;border:0}.copy-config{display:none}}</style></head><body><main class=\"page\"><header>%6　|　%3</header><article>%4</article><footer>%5</footer></main></body></html>")
         .arg(fa ? "fa" : "en", fa ? "rtl" : "ltr", htmlEscape(protocol), content,
-             fa ? QStringLiteral("این اطلاعات محرمانه است. فقط برای دریافت‌کننده موردنظر ارسال کنید.") : QStringLiteral("Connection details are private. Share only with the intended recipient."), logoMarkup);
+             fa ? QStringLiteral("این اطلاعات محرمانه است. فقط برای دریافت‌کننده موردنظر ارسال کنید.") : QStringLiteral("Connection details are private. Share only with the intended recipient."), logoMarkup)
+        .arg(fontCss, fontFamily);
+    const QString copiedMessage = fa ? QStringLiteral("کپی شد") : QStringLiteral("Copied");
+    const QString copyFailedMessage = fa ? QStringLiteral("کپی انجام نشد") : QStringLiteral("Copy failed");
+    html.replace("</body>", QStringLiteral("<script>function copyCocoConfig(){const config=document.getElementById('coco-config');const status=document.getElementById('copy-status');const copied='%1';const failed='%2';if(!config||!status)return;const fallback=()=>{const field=document.createElement('textarea');field.value=config.innerText;field.setAttribute('readonly','');field.style.position='fixed';field.style.opacity='0';document.body.appendChild(field);field.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}field.remove();status.textContent=ok?copied:failed};if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(config.innerText).then(()=>status.textContent=copied).catch(fallback)}else fallback()}</script></body>").arg(copiedMessage, copyFailedMessage));
+    return html;
 }
 
 void ExportUiController::generateFullAccessConfig(const QString &serverId)

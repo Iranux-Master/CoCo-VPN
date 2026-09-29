@@ -91,6 +91,10 @@ void ShareTemplatesTest::shareDocumentContainsEscapedConfigAndQr()
     QVERIFY(html.contains(QStringLiteral("CoCo VPN")));
     QVERIFY(html.contains(QStringLiteral("&lt;secret&gt;")));
     QVERIFY(html.contains(QStringLiteral("data:image/svg+xml;base64,PHN2Zy8+")));
+    QVERIFY(html.contains(QStringLiteral("class=\"copy-config\"")));
+    QVERIFY(html.contains(QStringLiteral("copyCocoConfig()")));
+    QVERIFY(html.contains(QStringLiteral("font-family:Shabnam")));
+    QVERIFY(html.contains(QStringLiteral("font-weight:700")));
     QVERIFY(!html.contains(QStringLiteral("<secret>")));
 
     const QString text = controller.renderShareDocument(QStringLiteral("wireguard"), QStringLiteral("en"),
