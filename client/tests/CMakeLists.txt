@@ -194,6 +194,15 @@ if(NOT ANDROID)
         test_common
     )
 
+    add_executable(test_share_templates
+        testShareTemplates.cpp
+    )
+
+    target_link_libraries(test_share_templates PRIVATE
+        Qt6::Test
+        test_common
+    )
+
     add_executable(test_openssl_library
         testOpenSSLLibrary.cpp
     )
@@ -410,6 +419,7 @@ if(NOT ANDROID)
     add_test(NAME UiAllowedDnsModelAndControllerTest COMMAND test_ui_allowed_dns_model_and_controller)
     add_test(NAME BackupExportImportTest           COMMAND test_backup_export_import)
     add_test(NAME ConnectionTest                   COMMAND test_connection)
+    add_test(NAME ShareTemplatesTest               COMMAND test_share_templates)
     add_test(NAME OpenSSLLibraryTest               COMMAND test_openssl_library)
 endif()
 

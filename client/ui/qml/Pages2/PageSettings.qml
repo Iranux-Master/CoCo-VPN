@@ -105,6 +105,7 @@ PageType {
         servers,
         connection,
         application,
+        shareTemplates,
         news,
         backup,
         about,
@@ -141,6 +142,17 @@ PageType {
         property bool isVisible: true
         readonly property var clickedHandler: function() {
             PageController.goToPage(PageEnum.PageSettingsApplication)
+        }
+    }
+
+    QtObject {
+        id: shareTemplates
+
+        property string title: qsTr("Share Content Templates / قالب‌های محتوای اشتراک‌گذاری")
+        readonly property string leftImagePath: "qrc:/images/controls/share-2.svg"
+        property bool isVisible: true
+        readonly property var clickedHandler: function() {
+            PageController.goToPage(PageEnum.PageSettingsShareTemplates)
         }
     }
 

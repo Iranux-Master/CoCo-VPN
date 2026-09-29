@@ -86,6 +86,19 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Copied"))
                 }
             }
+
+            BasicButtonType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                text: qsTr("Share Tor website guide")
+                leftImageSource: "qrc:/images/controls/share-2.svg"
+                clickedFunc: function() {
+                    ExportController.setSharingContext("tor", ServersUiController.serverName(ServersUiController.processedServerId), qsTr("Tor website"), new Date().toISOString(), false)
+                    ExportController.generateQrFromStringRaw(site || "")
+                    PageController.goToShareConnectionPage(qsTr("Tor website guide"), qsTr("Tor website address"), "", ".txt", "cocovpn_tor_website")
+                }
+            }
         }
 
         footer: ColumnLayout {

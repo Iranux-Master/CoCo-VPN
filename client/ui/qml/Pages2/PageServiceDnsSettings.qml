@@ -93,6 +93,22 @@ PageType {
                     enabled: false
                 }
             }
+
+            BasicButtonType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 12
+                text: qsTr("Share DNS setup guide")
+                leftImageSource: "qrc:/images/controls/share-2.svg"
+                clickedFunc: function() {
+                    var server = ServersUiController.serverName(ServersUiController.processedServerId)
+                    var details = qsTr("DNS address: %1").arg(ServersUiController.serverHostName(ServersUiController.processedServerId))
+                    ExportController.setSharingContext("dns", server, qsTr("Private DNS"), new Date().toISOString(), false)
+                    ExportController.generateQrFromStringRaw(details)
+                    PageController.goToShareConnectionPage(qsTr("DNS setup guide"), qsTr("DNS service details"), "", ".txt", "cocovpn_dns")
+                }
+            }
         }
     }
 }

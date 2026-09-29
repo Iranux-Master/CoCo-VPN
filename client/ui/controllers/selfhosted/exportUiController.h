@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QVariantList>
 #include <QVariantMap>
-#include <QTimer>
+#include <QStringList>
 
 #include "core/controllers/selfhosted/exportController.h"
 #include "core/utils/errorCodes.h"
@@ -20,11 +20,13 @@ public:
     Q_PROPERTY(int qrCodesCount READ getQrCodesCount NOTIFY exportConfigChanged)
     Q_PROPERTY(QString config READ getConfig NOTIFY exportConfigChanged)
     Q_PROPERTY(QString nativeConfigString READ getNativeConfigString NOTIFY exportConfigChanged)
-    Q_PROPERTY(QVariantList accountGroups READ accountGroups NOTIFY accountGroupsChanged)
-    Q_PROPERTY(QVariantList shareTemplates READ shareTemplates NOTIFY shareTemplatesChanged)
-    Q_PROPERTY(int batchProgress READ batchProgress NOTIFY batchProgressChanged)
-    Q_PROPERTY(int batchTotal READ batchTotal NOTIFY batchProgressChanged)
-    Q_PROPERTY(bool batchRunning READ batchRunning NOTIFY batchProgressChanged)
+    Q_PROPERTY(QString shareLanguage READ shareLanguage NOTIFY shareLanguageChanged)
+    Q_PROPERTY(QString shareKind READ shareKind NOTIFY sharingContextChanged)
+    Q_PROPERTY(QString shareServer READ shareServer NOTIFY sharingContextChanged)
+    Q_PROPERTY(QString shareAccount READ shareAccount NOTIFY sharingContextChanged)
+    Q_PROPERTY(QString shareCreatedAt READ shareCreatedAt NOTIFY sharingContextChanged)
+    Q_PROPERTY(bool shareNativeFormat READ shareNativeFormat NOTIFY sharingContextChanged)
+    Q_PROPERTY(QVariantList shareTemplateKinds READ shareTemplateKinds CONSTANT)
 
 public slots:
     void generateFullAccessConfig(const QString &serverId);
@@ -50,20 +52,30 @@ public slots:
 
     void renameClient(int row, const QString &clientName, const QString &serverId, int containerIndex);
 
-    QVariantList accountGroups() const;
-    QVariantList shareTemplates() const;
-    int batchProgress() const;
-    int batchTotal() const;
-    bool batchRunning() const;
-    Q_INVOKABLE void startAccountBatch(const QString &serverId, const QString &serverName,
-                                       const QString &baseName, int count, const QVariantList &containers);
-    Q_INVOKABLE void saveShareTemplate(const QString &name, const QString &body);
-    Q_INVOKABLE void deleteShareTemplate(const QString &id);
-    Q_INVOKABLE void deleteAccountGroup(const QString &id);
-    Q_INVOKABLE QString renderAccountTemplate(const QString &groupId, const QString &templateBody);
-    Q_INVOKABLE QString renderAccountsTemplate(const QVariantList &groupIds, const QString &templateBody);
-    Q_INVOKABLE QString renderAccountsText(const QVariantList &groupIds, const QString &templateBody);
-    Q_INVOKABLE QVariantMap accountGroup(const QString &id) const;
+    QString shareLanguage() const;
+    QString shareKind() const;
+    QString shareServer() const;
+    QString shareAccount() const;
+    QString shareCreatedAt() const;
+    bool shareNativeFormat() const;
+    QVariantList shareTemplateKinds() const;
+    Q_INVOKABLE void setShareLanguage(const QString &language);
+    Q_INVOKABLE QString shareTemplate(const QString &kind, const QString &language) const;
+    Q_INVOKABLE QVariantList shareTemplates(const QString &kind, const QString &language) const;
+    Q_INVOKABLE QString defaultShareTemplateId(const QString &kind, const QString &language) const;
+    Q_INVOKABLE void setDefaultShareTemplate(const QString &kind, const QString &language, const QString &templateId);
+    Q_INVOKABLE void saveShareTemplate(const QString &kind, const QString &language, const QString &body);
+    Q_INVOKABLE QString saveCustomShareTemplate(const QString &kind, const QString &language,
+                                                const QString &templateId, const QString &name,
+                                                const QString &body);
+    Q_INVOKABLE void resetShareTemplate(const QString &kind, const QString &language);
+    Q_INVOKABLE QString renderShareDocument(const QString &kind, const QString &language,
+                                            const QString &serverName, const QString &accountName,
+                                            const QString &createdAt, const QString &config,
+                                            const QStringList &qrCodes, bool nativeFormat, bool html) const;
+    Q_INVOKABLE void setSharingContext(const QString &kind, const QString &serverName,
+                                       const QString &accountName, const QString &createdAt,
+                                       bool nativeFormat = false);
 
 signals:
     void generateConfig(int type);
@@ -74,38 +86,25 @@ signals:
     void exportConfigChanged();
 
     void saveFile(const QString &fileName, const QString &data);
-    void accountBatchFinished(int succeeded, int failed);
-    void accountGroupsChanged();
-    void shareTemplatesChanged();
-    void batchProgressChanged();
+    void shareLanguageChanged();
+    void shareTemplateChanged();
+    void sharingContextChanged();
 
 private:
     int getQrCodesCount();
     void clearPreviousConfig();
     void applyExportResult(const ExportController::ExportResult &result);
-    void createNextBatchAccount();
-    void saveAccountGroups();
-    void saveShareTemplates();
-    void persistBatchGroup();
-    QString renderAccountTemplateFragment(const QVariantMap &group, const QString &templateBody) const;
-    QString renderAccountTextFragment(const QVariantMap &group, const QString &templateBody) const;
-    QString wrapAccountsHtml(const QString &sections) const;
+    QString defaultShareTemplate(const QString &kind, const QString &language) const;
+    QString htmlEscape(const QString &value) const;
 
     ExportController* m_exportController;
     SecureQSettings* m_settings;
-    QVariantList m_accountGroups;
-    QVariantList m_shareTemplates;
-    QVariantList m_batchContainers;
-    QVariantMap m_batchGroup;
-    QString m_batchServerId;
-    QString m_batchServerName;
-    QString m_batchBaseName;
-    int m_batchCount = 0;
-    int m_batchIndex = 0;
-    int m_batchProtocolIndex = 0;
-    int m_batchSucceeded = 0;
-    int m_batchFailed = 0;
-    bool m_batchRunning = false;
+    QString m_shareLanguage;
+    QString m_shareKind = QStringLiteral("wireguard");
+    QString m_shareServer;
+    QString m_shareAccount;
+    QString m_shareCreatedAt;
+    bool m_shareNativeFormat = false;
 
     QString m_config;
     QString m_nativeConfigString;

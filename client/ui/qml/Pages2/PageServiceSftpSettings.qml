@@ -152,6 +152,23 @@ PageType {
             }
 
             BasicButtonType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 12
+                text: qsTr("Share SFTP setup guide")
+                leftImageSource: "qrc:/images/controls/share-2.svg"
+                clickedFunc: function() {
+                    var server = ServersUiController.serverName(ServersUiController.processedServerId)
+                    var details = "Host: " + ServersUiController.serverHostName(ServersUiController.processedServerId)
+                            + "\nPort: " + port + "\nUsername: " + username + "\nPassword: " + password
+                    ExportController.setSharingContext("sftp", server, username, new Date().toISOString(), false)
+                    ExportController.generateQrFromStringRaw(details)
+                    PageController.goToShareConnectionPage(qsTr("SFTP access guide"), qsTr("SFTP connection details"), "", ".txt", "cocovpn_sftp")
+                }
+            }
+
+            BasicButtonType {
                 id: mountButton
 
                 visible: !GC.isMobile()

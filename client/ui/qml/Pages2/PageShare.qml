@@ -45,6 +45,15 @@ PageType {
 
             var containerIndex = ServersUiController.processedContainerIndex
             var serverId = ServersUiController.processedServerId
+            var shareKind = "wireguard"
+            if (containerIndex === ContainerProps.containerFromString("amnezia-openvpn")) shareKind = "openvpn"
+            else if (containerIndex === ContainerProps.containerFromString("amnezia-awg")
+                     || containerIndex === ContainerProps.containerFromString("amnezia-awg2")) shareKind = "awg"
+            else if (containerIndex === ContainerProps.containerFromString("amnezia-ipsec")) shareKind = "ikev2"
+            else if (containerIndex === ContainerProps.containerFromString("amnezia-xray")) shareKind = "xray"
+            else if (containerIndex === ContainerProps.containerFromString("amnezia-ssxray")) shareKind = "shadowsocks"
+            ExportController.setSharingContext(shareKind, serverSelector.text, clientNameTextField.textField.text,
+                                               new Date().toISOString(), type !== PageShare.ConfigType.AmneziaConnection)
 
             switch (type) {
             case PageShare.ConfigType.AmneziaConnection: {
@@ -96,94 +105,12 @@ PageType {
             PageController.showErrorMessage(error)
         }
 
-        function onAccountBatchFinished(succeeded, failed) {
-            accountSectionSelector.currentIndex = 1
-            PageController.showNotificationMessage(qsTr("Account creation finished: %1 succeeded, %2 failed").arg(succeeded).arg(failed))
-        }
     }
 
     property bool isSearchBarVisible: false
     property bool showContent: false
     property bool shareButtonEnabled: true
-    property var selectedBatchProtocols: []
-    property var selectedAccountIds: []
-    property string sharePreview: ""
-    property string accountSearchQuery: ""
-    property string accountServerFilter: ""
-    property string accountProtocolFilter: ""
-    property string accountStatusFilter: ""
-    property var shareTemplateTags: ["{{NAME}}", "{{SERVER}}", "{{PROTOCOLS}}", "{{CONFIGS}}", "{{QR}}"]
-    property var accountServerOptions: {
-        var options = [{"value": "", "label": qsTr("All servers"), "name": qsTr("All servers")}]
-        var known = {}
-        ExportController.accountGroups.forEach(function(group) {
-            var id = group.serverId || group.serverName
-            if (id && !known[id]) {
-                known[id] = true
-                options.push({"value": id, "label": group.serverName || id, "name": group.serverName || id})
-            }
-        })
-        return options
-    }
-    property var accountProtocolOptions: {
-        var options = [{"value": "", "label": qsTr("All protocols"), "name": qsTr("All protocols")}]
-        var known = {}
-        ExportController.accountGroups.forEach(function(group) {
-            (group.methods || []).forEach(function(method) {
-                var name = method.name || ""
-                if (name && !known[name]) {
-                    known[name] = true
-                    options.push({"value": name, "label": name, "name": name})
-                }
-            })
-        })
-        return options
-    }
-    property var accountStatusOptions: [
-        {"value": "", "label": qsTr("All statuses"), "name": qsTr("All statuses")},
-        {"value": "complete", "label": qsTr("Complete"), "name": qsTr("Complete")},
-        {"value": "partial", "label": qsTr("Partially created"), "name": qsTr("Partially created")},
-        {"value": "inProgress", "label": qsTr("In progress"), "name": qsTr("In progress")}
-    ]
-    property var filteredAccountGroups: {
-        var query = accountSearchQuery.trim().toLowerCase()
-        return ExportController.accountGroups.filter(function(group) {
-            var serverId = group.serverId || group.serverName
-            if (accountServerFilter && serverId !== accountServerFilter) return false
-            if (accountStatusFilter && group.status !== accountStatusFilter) return false
-            var methods = group.methods || []
-            if (accountProtocolFilter && !methods.some(function(method) { return method.name === accountProtocolFilter })) return false
-            if (!query) return true
-            var haystack = [group.name, group.serverName, group.status]
-            methods.forEach(function(method) { haystack.push(method.name) })
-            return haystack.join(" ").toLowerCase().indexOf(query) >= 0
-        })
-    }
-
-    function optionIndex(options, value) {
-        for (var i = 0; i < options.length; ++i) {
-            if (options[i].value === value) return i
-        }
-        return 0
-    }
-
-    function selectVisibleAccounts() {
-        root.selectedAccountIds = root.filteredAccountGroups.map(function(group) { return group.id })
-        root.sharePreview = ""
-    }
-
-    function clearAccountSelection() {
-        root.selectedAccountIds = []
-        root.sharePreview = ""
-    }
-
-    function updateSharePreview(formatIndex, accountIds, templateBody) {
-        root.sharePreview = formatIndex === 0
-                ? ExportController.renderAccountsTemplate(accountIds, templateBody)
-                : ExportController.renderAccountsText(accountIds, templateBody)
-    }
-    // Shared by the single-protocol selector and the Windows multi-account form.
-    // Keep it at page scope so it exists even when the selector drawer is closed.
+    // Shared by protocol selection and the legacy per-protocol client manager.
     SortFilterProxyModel {
         id: proxyContainersModel
         sourceModel: ContainersModel
@@ -249,9 +176,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: 24 + PageController.safeAreaTopMargin
 
-                headerText: Qt.platform.os === "windows" && accessTypeSelector.currentIndex === 1
-                            ? qsTr("User management")
-                            : qsTr("Share VPN Access")
+                headerText: qsTr("Share VPN Access")
 
                 actionButtonImage: "qrc:/images/controls/more-vertical.svg"
                 actionButtonFunction: function() {
@@ -348,50 +273,14 @@ PageType {
 
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
-                            if (Qt.platform.os !== "windows" || userManagementSelector.currentIndex === 0) {
-                                PageController.showBusyIndicator(true)
-                                ExportController.updateClientManagementModel(ServersUiController.processedServerId,
-                                                                             ServersUiController.processedContainerIndex)
-                                PageController.showBusyIndicator(false)
-                            }
-                        }
-
-                        Keys.onEnterPressed: this.clicked()
-                        Keys.onReturnPressed: this.clicked()
-                    }
-                }
-            }
-
-            Rectangle {
-                id: userManagementSelector
-                property int currentIndex: 1
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                visible: Qt.platform.os === "windows" && accessTypeSelector.currentIndex === 1
-                implicitHeight: userManagementRow.implicitHeight
-                radius: 16
-                color: AmneziaStyle.color.onyxBlack
-                RowLayout {
-                    id: userManagementRow
-                    anchors.fill: parent
-                    spacing: 0
-                    HorizontalRadioButton {
-                        Layout.fillWidth: true
-                        checked: userManagementSelector.currentIndex === 0
-                        text: qsTr("Protocol users")
-                        onClicked: {
-                            userManagementSelector.currentIndex = 0
                             PageController.showBusyIndicator(true)
                             ExportController.updateClientManagementModel(ServersUiController.processedServerId,
                                                                          ServersUiController.processedContainerIndex)
                             PageController.showBusyIndicator(false)
                         }
-                    }
-                    HorizontalRadioButton {
-                        Layout.fillWidth: true
-                        checked: userManagementSelector.currentIndex === 1
-                        text: qsTr("Account management")
-                        onClicked: userManagementSelector.currentIndex = 1
+
+                        Keys.onEnterPressed: this.clicked()
+                        Keys.onReturnPressed: this.clicked()
                     }
                 }
             }
@@ -494,7 +383,7 @@ PageType {
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
-                visible: accessTypeSelector.currentIndex === 0 || (accessTypeSelector.currentIndex === 1 && (Qt.platform.os !== "windows" || userManagementSelector.currentIndex === 0))
+                visible: accessTypeSelector.currentIndex === 0 || accessTypeSelector.currentIndex === 1
 
                 drawerHeight: 0.5
                 drawerParent: root
@@ -551,7 +440,7 @@ PageType {
 
                         fillConnectionTypeModel()
 
-                        if (accessTypeSelector.currentIndex === 1 && (Qt.platform.os !== "windows" || userManagementSelector.currentIndex === 0)) {
+                        if (accessTypeSelector.currentIndex === 1) {
                             PageController.showBusyIndicator(true)
                             ExportController.updateClientManagementModel(ServersUiController.processedServerId,
                                                                          ServersUiController.processedContainerIndex)
@@ -579,18 +468,7 @@ PageType {
                         }
                     }
                 }
-            }
-
-            Connections {
-                target: serverSelector
-
-                function onServerSelectorIndexChanged() {
-                    // Protocol indices belong to the selected server's container model.
-                    root.selectedBatchProtocols = []
-                }
-            }
-
-            DropDownType {
+            }DropDownType {
                 id: exportTypeSelector
 
                 property int currentIndex: 0
@@ -656,476 +534,6 @@ PageType {
                 }
             }
 
-            ColumnLayout {
-                id: accountsPane
-                visible: Qt.platform.os === "windows" && accessTypeSelector.currentIndex === 1 && userManagementSelector.currentIndex === 1
-                Layout.fillWidth: true
-                Layout.topMargin: 24
-                spacing: 12
-
-                Rectangle {
-                    id: accountSectionSelector
-                    property int currentIndex: 0
-                    Layout.fillWidth: true
-                    implicitHeight: accountSectionRow.implicitHeight
-                    radius: 16
-                    color: AmneziaStyle.color.onyxBlack
-
-                    RowLayout {
-                        id: accountSectionRow
-                        anchors.fill: parent
-                        spacing: 0
-
-                        HorizontalRadioButton {
-                            Layout.fillWidth: true
-                            checked: accountSectionSelector.currentIndex === 0
-                            text: qsTr("Create accounts")
-                            onClicked: accountSectionSelector.currentIndex = 0
-                        }
-
-                        HorizontalRadioButton {
-                            Layout.fillWidth: true
-                            checked: accountSectionSelector.currentIndex === 1
-                            text: qsTr("Manage accounts")
-                            onClicked: accountSectionSelector.currentIndex = 1
-                        }
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    visible: accountSectionSelector.currentIndex === 0
-                    spacing: 12
-
-                    Header2Type {
-                        Layout.fillWidth: true
-                        headerText: qsTr("Create multiple accounts")
-                        descriptionText: qsTr("Choose a server, select one or more installed protocols, then enter a name and account count.")
-                    }
-                    TextFieldWithHeaderType {
-                        id: batchNameField
-                        Layout.fillWidth: true
-                        headerText: qsTr("Account name")
-                        textField.text: qsTr("Client")
-                        textField.maximumLength: 20
-                        textField.inputMethodHints: Qt.ImhLatinOnly
-                    }
-                    TextFieldWithHeaderType {
-                        id: batchCountField
-                        Layout.fillWidth: true
-                        headerText: qsTr("Number of accounts (1–100)")
-                        textField.text: "1"
-                        textField.inputMethodHints: Qt.ImhDigitsOnly
-                    }
-                    ParagraphTextType {
-                        Layout.fillWidth: true
-                        text: proxyContainersModel.count > 0
-                              ? qsTr("Select installed VPN protocols")
-                              : qsTr("This server has no shareable VPN protocols installed.")
-                        color: AmneziaStyle.color.paleGray
-                    }
-                    ListView {
-                        id: batchProtocolList
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: Math.min(contentHeight, 5 * 64)
-                        implicitHeight: Layout.preferredHeight
-                        visible: proxyContainersModel.count > 0
-                        model: proxyContainersModel
-                        clip: true
-                        interactive: contentHeight > height
-                        spacing: 4
-                        delegate: CheckBoxType {
-                            required property int index
-                            required property string name
-                            width: batchProtocolList.width
-                            implicitHeight: 64
-                            text: name
-                            checked: root.selectedBatchProtocols.indexOf(proxyContainersModel.mapToSource(index)) >= 0
-                            onToggled: {
-                                var values = root.selectedBatchProtocols.slice()
-                                var sourceIndex = proxyContainersModel.mapToSource(index)
-                                if (checked && values.indexOf(sourceIndex) < 0) values.push(sourceIndex)
-                                if (!checked) values = values.filter(function(value) { return value !== sourceIndex })
-                                root.selectedBatchProtocols = values
-                            }
-                        }
-                    }
-                    BasicButtonType {
-                        Layout.fillWidth: true
-                        enabled: !ExportController.batchRunning
-                                 && ServersUiController.processedServerId !== ""
-                                 && root.selectedBatchProtocols.length > 0
-                        text: ExportController.batchRunning
-                              ? qsTr("Creating accounts: %1 of %2").arg(ExportController.batchProgress).arg(ExportController.batchTotal)
-                              : qsTr("Create accounts")
-                        clickedFunc: function() {
-                            var countText = batchCountField.textField.text.trim()
-                            var count = Number(countText)
-                            if (!/^\d+$/.test(countText) || count < 1 || count > 100) {
-                                batchCountField.errorText = qsTr("Enter a whole number from 1 to 100.")
-                                return
-                            }
-                            if (batchNameField.textField.text.trim() === "") {
-                                batchNameField.errorText = qsTr("Enter an account name.")
-                                return
-                            }
-                            ExportController.startAccountBatch(ServersUiController.processedServerId, serverSelector.text,
-                                                               batchNameField.textField.text, count, root.selectedBatchProtocols)
-                        }
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    visible: accountSectionSelector.currentIndex === 1
-                    spacing: 12
-
-                    Header2Type {
-                        Layout.fillWidth: true
-                        headerText: qsTr("Created accounts")
-                        descriptionText: qsTr("Search, filter, select and share one or more accounts.")
-                    }
-                    TextFieldWithHeaderType {
-                        id: accountSearchField
-                        Layout.fillWidth: true
-                        headerText: qsTr("Search accounts")
-                        placeholderText: qsTr("Account, server or protocol")
-                    }
-                    Connections {
-                        target: accountSearchField.textField
-                        function onTextChanged() {
-                            root.accountSearchQuery = accountSearchField.textField.text
-                        }
-                    }
-                    Flow {
-                    Layout.fillWidth: true
-                    spacing: 8
-                    DropDownType {
-                        id: serverFilter
-                        width: Math.max(180, (parent.width - 16) / 3)
-                        drawerParent: root
-                        drawerHeight: 0.4
-                        text: root.accountServerOptions[root.optionIndex(root.accountServerOptions, root.accountServerFilter)].label
-                        headerText: qsTr("Server filter")
-                        listView: ListViewWithRadioButtonType {
-                            rootWidth: root.width
-                            model: root.accountServerOptions
-                            selectedIndex: root.optionIndex(root.accountServerOptions, root.accountServerFilter)
-                            clickedFunction: function() {
-                                var item = root.accountServerOptions[selectedIndex]
-                                root.accountServerFilter = item.value
-                                serverFilter.text = item.label
-                                serverFilter.closeTriggered()
-                            }
-                        }
-                    }
-                    DropDownType {
-                        id: protocolFilter
-                        width: Math.max(180, (parent.width - 16) / 3)
-                        drawerParent: root
-                        drawerHeight: 0.4
-                        text: root.accountProtocolOptions[root.optionIndex(root.accountProtocolOptions, root.accountProtocolFilter)].label
-                        headerText: qsTr("Protocol filter")
-                        listView: ListViewWithRadioButtonType {
-                            rootWidth: root.width
-                            model: root.accountProtocolOptions
-                            selectedIndex: root.optionIndex(root.accountProtocolOptions, root.accountProtocolFilter)
-                            clickedFunction: function() {
-                                var item = root.accountProtocolOptions[selectedIndex]
-                                root.accountProtocolFilter = item.value
-                                protocolFilter.text = item.label
-                                protocolFilter.closeTriggered()
-                            }
-                        }
-                    }
-                    DropDownType {
-                        id: statusFilter
-                        width: Math.max(180, (parent.width - 16) / 3)
-                        drawerParent: root
-                        drawerHeight: 0.4
-                        text: root.accountStatusOptions[root.optionIndex(root.accountStatusOptions, root.accountStatusFilter)].label
-                        headerText: qsTr("Status filter")
-                        listView: ListViewWithRadioButtonType {
-                            rootWidth: root.width
-                            model: root.accountStatusOptions
-                            selectedIndex: root.optionIndex(root.accountStatusOptions, root.accountStatusFilter)
-                            clickedFunction: function() {
-                                var item = root.accountStatusOptions[selectedIndex]
-                                root.accountStatusFilter = item.value
-                                statusFilter.text = item.label
-                                statusFilter.closeTriggered()
-                            }
-                        }
-                    }
-                    }
-                    RowLayout {
-                    Layout.fillWidth: true
-                    CaptionTextType {
-                        Layout.fillWidth: true
-                        text: qsTr("%1 accounts · %2 selected")
-                              .arg(root.filteredAccountGroups.length).arg(root.selectedAccountIds.length)
-                        color: AmneziaStyle.color.mutedGray
-                    }
-                    BasicButtonType {
-                        text: qsTr("Select filtered")
-                        enabled: root.filteredAccountGroups.length > 0
-                        clickedFunc: root.selectVisibleAccounts
-                    }
-                    BasicButtonType {
-                        text: qsTr("Clear selection")
-                        enabled: root.selectedAccountIds.length > 0
-                        clickedFunc: root.clearAccountSelection
-                    }
-                    }
-                    BasicButtonType {
-                    Layout.fillWidth: true
-                    enabled: root.selectedAccountIds.length > 0
-                    text: qsTr("Share selected accounts")
-                    leftImageSource: "qrc:/images/controls/share-2.svg"
-                    clickedFunc: function() {
-                        root.sharePreview = ""
-                        templateShareDrawer.openTriggered()
-                    }
-                    }
-                    Repeater {
-                    model: root.filteredAccountGroups
-                    delegate: CheckBoxType {
-                        required property var modelData
-                        Layout.fillWidth: true
-                        text: modelData.name + " · " + modelData.serverName + " · " + modelData.methods.length + " " + qsTr("methods")
-                              + (modelData.status === "partial" ? " · " + qsTr("Some methods failed") : "")
-                        descriptionText: modelData.createdAt || ""
-                        checked: root.selectedAccountIds.indexOf(modelData.id) >= 0
-                        onToggled: {
-                            var ids = root.selectedAccountIds.slice()
-                            if (checked && ids.indexOf(modelData.id) < 0) ids.push(modelData.id)
-                            if (!checked) ids = ids.filter(function(value) { return value !== modelData.id })
-                            root.selectedAccountIds = ids
-                            root.sharePreview = ""
-                        }
-                    }
-                    }
-                    ParagraphTextType {
-                    Layout.fillWidth: true
-                    visible: root.filteredAccountGroups.length === 0
-                    text: ExportController.accountGroups.length === 0
-                          ? qsTr("No accounts have been created yet.")
-                          : qsTr("No accounts match the current search and filters.")
-                    color: AmneziaStyle.color.mutedGray
-                    }
-                }
-                DrawerType2 {
-                    id: templateShareDrawer
-                    parent: root
-                    anchors.fill: parent
-                    expandedHeight: root.height
-                    expandedStateContent: ColumnLayout {
-                        anchors.fill: parent
-                        anchors.topMargin: 16
-                        spacing: 0
-                        BackButtonType {
-                            Layout.leftMargin: 16
-                            backButtonFunction: function() { templateShareDrawer.closeTriggered() }
-                        }
-                        Header2Type {
-                            Layout.fillWidth: true
-                            Layout.leftMargin: 16
-                            Layout.rightMargin: 16
-                            Layout.bottomMargin: 16
-                            headerText: qsTr("Share accounts")
-                            descriptionText: qsTr("Choose a message template and save the selected accounts as a file.")
-                        }
-                        ScrollView {
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            Layout.leftMargin: 16
-                            Layout.rightMargin: 16
-                            clip: true
-                            ColumnLayout {
-                                width: parent.width
-                                spacing: 12
-                                DropDownType {
-                                    id: savedTemplatesBox
-                                    Layout.fillWidth: true
-                                    drawerParent: root
-                                    drawerHeight: 0.45
-                                    headerText: qsTr("Message template")
-                                    descriptionText: qsTr("Saved templates")
-                                    text: qsTr("Choose a saved template")
-                                    listView: ListViewWithRadioButtonType {
-                                        id: savedTemplatesList
-                                        rootWidth: root.width
-                                        imageSource: "qrc:/images/controls/check.svg"
-                                        model: ExportController.shareTemplates
-                                        clickedFunction: function() {
-                                            var templates = ExportController.shareTemplates
-                                            if (selectedIndex >= 0 && selectedIndex < templates.length) {
-                                                templateTextArea.textArea.text = templates[selectedIndex].body
-                                                savedTemplatesBox.text = templates[selectedIndex].name
-                                                root.sharePreview = ""
-                                            }
-                                            savedTemplatesBox.closeTriggered()
-                                        }
-                                    }
-                                }
-                                BasicButtonType {
-                                    Layout.fillWidth: true
-                                    text: templateEditor.visible ? qsTr("Close template editor") : qsTr("Create or edit template")
-                                    clickedFunc: function() { templateEditor.visible = !templateEditor.visible }
-                                }
-                                ColumnLayout {
-                                    id: templateEditor
-                                    Layout.fillWidth: true
-                                    visible: false
-                                    spacing: 10
-                                    Flow {
-                                        Layout.fillWidth: true
-                                        spacing: 8
-                                        Repeater {
-                                            model: root.shareTemplateTags
-                                            BasicButtonType {
-                                                required property string modelData
-                                                implicitHeight: 44
-                                                width: Math.max(buttonTextLabel.implicitWidth + 32, 84)
-                                                defaultColor: AmneziaStyle.color.transparent
-                                                hoveredColor: AmneziaStyle.color.translucentWhite
-                                                pressedColor: AmneziaStyle.color.sheerWhite
-                                                textColor: AmneziaStyle.color.paleGray
-                                                borderColor: AmneziaStyle.color.slateGray
-                                                borderWidth: 1
-                                                text: modelData
-                                                clickedFunc: function() {
-                                                    var field = templateTextArea.textArea
-                                                    var first = Math.min(field.selectionStart, field.selectionEnd)
-                                                    var last = Math.max(field.selectionStart, field.selectionEnd)
-                                                    if (first !== last) field.remove(first, last)
-                                                    field.insert(first, modelData)
-                                                    field.forceActiveFocus()
-                                                }
-                                            }
-                                        }
-                                    }
-                                    ParagraphTextType {
-                                        Layout.fillWidth: true
-                                        text: qsTr("Click a tag to insert it at the cursor in the template.")
-                                        color: AmneziaStyle.color.mutedGray
-                                    }
-                                    RowLayout {
-                                        Layout.fillWidth: true
-                                        TextFieldWithHeaderType {
-                                            id: templateNameField
-                                            Layout.fillWidth: true
-                                            headerText: qsTr("Template name")
-                                            placeholderText: qsTr("Enter a name for this template")
-                                        }
-                                        BasicButtonType {
-                                            enabled: templateNameField.textField.text.trim().length > 0
-                                                     && templateTextArea.textArea.text.trim().length > 0
-                                            text: qsTr("Save template")
-                                            clickedFunc: function() {
-                                                ExportController.saveShareTemplate(templateNameField.textField.text,
-                                                                                    templateTextArea.textArea.text)
-                                                templateNameField.textField.text = ""
-                                            }
-                                        }
-                                    }
-                                }
-                                TextAreaType {
-                                    id: templateTextArea
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 160
-                                    text: "سلام {{NAME}}،\nسرور: {{SERVER}}\nروش‌های اتصال: {{PROTOCOLS}}\n{{CONFIGS}}\n{{QR}}\nبرای اتصال، کانفیگ پروتکل مناسب را در برنامهٔ مربوط وارد کنید."
-                                    placeholderText: qsTr("Write a sharing message")
-                                    textArea.wrapMode: TextEdit.Wrap
-                                }
-                                Connections {
-                                    target: templateTextArea.textArea
-                                    function onTextChanged() { root.sharePreview = "" }
-                                }
-                                BasicButtonType {
-                                    Layout.fillWidth: true
-                                    enabled: root.selectedAccountIds.length > 0 && templateTextArea.textArea.text.trim().length > 0
-                                    text: qsTr("Preview")
-                                    clickedFunc: function() {
-                                        root.updateSharePreview(shareFormatSelector.currentIndex, root.selectedAccountIds,
-                                                                templateTextArea.textArea.text)
-                                    }
-                                }
-                                DropDownType {
-                                    id: shareFormatSelector
-                                    property int currentIndex: 0
-                                    Layout.fillWidth: true
-                                    drawerParent: root
-                                    drawerHeight: 0.35
-                                    headerText: qsTr("File format")
-                                    text: currentIndex === 0 ? qsTr("HTML file (includes QR codes)") : qsTr("Plain text file (TXT)")
-                                    listView: ListViewWithRadioButtonType {
-                                        rootWidth: root.width
-                                        model: [qsTr("HTML file (includes QR codes)"), qsTr("Plain text file (TXT)")]
-                                        selectedIndex: shareFormatSelector.currentIndex
-                                        clickedFunction: function() {
-                                            shareFormatSelector.currentIndex = selectedIndex
-                                            shareFormatSelector.text = selectedText
-                                            root.sharePreview = ""
-                                            shareFormatSelector.closeTriggered()
-                                        }
-                                    }
-                                }
-                                TextArea {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 140
-                                    readOnly: true
-                                    wrapMode: TextEdit.Wrap
-                                    textFormat: shareFormatSelector.currentIndex === 0 ? TextEdit.RichText : TextEdit.PlainText
-                                    text: root.sharePreview
-                                    visible: root.sharePreview.length > 0
-                                    color: AmneziaStyle.color.paleGray
-                                    selectionColor: AmneziaStyle.color.richBrown
-                                    selectedTextColor: AmneziaStyle.color.paleGray
-                                    placeholderTextColor: AmneziaStyle.color.mutedGray
-                                    font.pixelSize: 16
-                                    font.weight: Font.Medium
-                                    font.family: "PT Root UI VF"
-                                    background: Rectangle {
-                                        color: AmneziaStyle.color.onyxBlack
-                                        radius: 16
-                                        border.color: AmneziaStyle.color.slateGray
-                                        border.width: 1
-                                    }
-                                }
-                                BasicButtonType {
-                                    Layout.fillWidth: true
-                                    enabled: root.sharePreview.length > 0
-                                    text: shareFormatSelector.currentIndex === 0 ? qsTr("Save HTML share file") : qsTr("Save text share file")
-                                    leftImageSource: "qrc:/images/controls/share-2.svg"
-                                    clickedFunc: function() {
-                                        var isHtml = shareFormatSelector.currentIndex === 0
-                                        var extension = isHtml ? "html" : "txt"
-                                        var filter = isHtml ? qsTr("HTML files (*.html)") : qsTr("Text files (*.txt)")
-                                        var fileName = SystemController.getFileName(qsTr("Save sharing message"),
-                                                                                    filter,
-                                                                                    StandardPaths.standardLocations(StandardPaths.DocumentsLocation)
-                                                                                        + "/cocovpn_accounts." + extension,
-                                                                                    true,
-                                                                                    extension)
-                                        if (fileName !== "" && ExportController.setConfigFromString(root.sharePreview, fileName)) {
-                                            PageController.showNotificationMessage(qsTr("Sharing message saved"))
-                                            templateShareDrawer.closeTriggered()
-                                        }
-                                    }
-                                }
-                                ParagraphTextType {
-                                    Layout.fillWidth: true
-                                    Layout.bottomMargin: 16
-                                    text: qsTr("The {{QR}} tag embeds QR codes in HTML. TXT includes a note to use HTML for QR codes. Share these private connection details only with their intended users.")
-                                    color: AmneziaStyle.color.mutedGray
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
             BasicButtonType {
                 id: shareButton
 
@@ -1152,7 +560,7 @@ PageType {
                 Layout.topMargin: 24
                 Layout.bottomMargin: 16
 
-                visible: accessTypeSelector.currentIndex === 1 && (Qt.platform.os !== "windows" || userManagementSelector.currentIndex === 0) && !root.isSearchBarVisible
+                visible: accessTypeSelector.currentIndex === 1 && !root.isSearchBarVisible
 
                 headerText: qsTr("Users")
                 actionButtonImage: "qrc:/images/controls/search.svg"
@@ -1164,7 +572,7 @@ PageType {
             RowLayout {
                 Layout.topMargin: 24
                 Layout.bottomMargin: 16
-                visible: accessTypeSelector.currentIndex === 1 && (Qt.platform.os !== "windows" || userManagementSelector.currentIndex === 0) && root.isSearchBarVisible
+                visible: accessTypeSelector.currentIndex === 1 && root.isSearchBarVisible
 
                 TextFieldWithHeaderType {
                     id: searchTextField
@@ -1209,7 +617,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.preferredHeight: contentHeight
 
-                visible: accessTypeSelector.currentIndex === 1 && (Qt.platform.os !== "windows" || userManagementSelector.currentIndex === 0)
+                visible: accessTypeSelector.currentIndex === 1
 
                 function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') }
 

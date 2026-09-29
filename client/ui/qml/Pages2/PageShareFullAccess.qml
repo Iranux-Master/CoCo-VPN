@@ -155,6 +155,7 @@ PageType {
                         ExportController.exportErrorOccurred(qsTr("Access error!"))
                         return
                     } else {
+                        ExportController.setSharingContext("full", serverSelector.text, qsTr("Administrator"), new Date().toISOString(), false)
                         ExportController.generateFullAccessConfig(ServersUiController.processedServerId)
                     }
 

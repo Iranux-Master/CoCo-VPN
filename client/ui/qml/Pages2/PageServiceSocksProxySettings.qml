@@ -143,6 +143,23 @@ PageType {
                 }
             }
 
+            BasicButtonType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 12
+                text: qsTr("Share SOCKS5 setup guide")
+                leftImageSource: "qrc:/images/controls/share-2.svg"
+                clickedFunc: function() {
+                    var server = ServersUiController.serverName(ServersUiController.processedServerId)
+                    var details = "Host: " + ServersUiController.serverHostName(ServersUiController.processedServerId)
+                            + "\nPort: " + port + "\nUsername: " + username + "\nPassword: " + password
+                    ExportController.setSharingContext("socks5", server, username, new Date().toISOString(), false)
+                    ExportController.generateQrFromStringRaw(details)
+                    PageController.goToShareConnectionPage(qsTr("SOCKS5 access guide"), qsTr("SOCKS5 connection details"), "", ".txt", "cocovpn_socks5")
+                }
+            }
+
             DrawerType2 {
                 id: changeSettingsDrawer
                 parent: root

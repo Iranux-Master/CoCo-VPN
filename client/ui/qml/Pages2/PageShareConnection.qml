@@ -115,6 +115,32 @@ PageType {
             }
 
             BasicButtonType {
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                visible: pageShareConnection.isSelfHostedConfig
+                text: qsTr("Save step-by-step guide (HTML)")
+                leftImageSource: "qrc:/images/controls/share-2.svg"
+                clickedFunc: function() { pageShareConnection.saveGuidedShareFile(true) }
+            }
+
+            BasicButtonType {
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                visible: pageShareConnection.isSelfHostedConfig
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                textColor: AmneziaStyle.color.paleGray
+                borderWidth: 1
+                text: qsTr("Save step-by-step guide (TXT)")
+                clickedFunc: function() { pageShareConnection.saveGuidedShareFile(false) }
+            }
+
+            BasicButtonType {
                 id: copyConfigTextButton
                 Layout.fillWidth: true
                 Layout.topMargin: 8
@@ -347,5 +373,21 @@ PageType {
                 textString: qsTr("This config is too large for a QR code. Share the file or copy the connection settings instead.")
             }
         }
+    }
+
+    function saveGuidedShareFile(asHtml) {
+        var extension = asHtml ? "html" : "txt"
+        var filter = asHtml ? qsTr("HTML files (*.html)") : qsTr("Text files (*.txt)")
+        var baseName = "cocovpn_" + (ExportController.shareKind || "connection") + "_guide." + extension
+        var fileName = SystemController.getFileName(qsTr("Save sharing guide"), filter,
+                    StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/" + baseName,
+                    true, extension)
+        if (fileName === "") return
+        var document = ExportController.renderShareDocument(ExportController.shareKind,
+                    ExportController.shareLanguage, ExportController.shareServer,
+                    ExportController.shareAccount, ExportController.shareCreatedAt,
+                    ExportController.config, ExportController.qrCodes, ExportController.shareNativeFormat, asHtml)
+        if (ExportController.setConfigFromString(document, fileName))
+            PageController.showNotificationMessage(qsTr("Sharing guide saved"))
     }
 }

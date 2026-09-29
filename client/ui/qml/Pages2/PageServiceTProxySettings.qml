@@ -442,6 +442,7 @@ PageType {
                             image: "qrc:/images/controls/qr-code.svg"
                             imageColor: AmneziaStyle.color.paleGray
                             onClicked: {
+                                ExportController.setSharingContext("tproxy", ServersUiController.serverName(ServersUiController.processedServerId), qsTr("Telegram WEB proxy"), new Date().toISOString(), false)
                                 ExportController.generateQrFromStringRaw(displayTgLink())
                                 PageController.goToShareConnectionPage(qsTr("Telegram connection link"),
                                     qsTr("TProxy WEB proxy link"), "", "", "")
