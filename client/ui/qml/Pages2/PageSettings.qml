@@ -107,6 +107,7 @@ PageType {
         application,
         news,
         backup,
+        shareTemplates,
         about,
         devConsole
     ]
@@ -168,6 +169,17 @@ PageType {
         property bool isVisible: true
         readonly property var clickedHandler: function() {
             PageController.goToPage(PageEnum.PageSettingsBackup)
+        }
+    }
+
+    QtObject {
+        id: shareTemplates
+
+        property string title: qsTr("Sharing templates")
+        readonly property string leftImagePath: "qrc:/images/controls/file-cog-2.svg"
+        property bool isVisible: Qt.platform.os === "windows"
+        readonly property var clickedHandler: function() {
+            PageController.goToPage(PageEnum.PageSettingsShareTemplates)
         }
     }
 

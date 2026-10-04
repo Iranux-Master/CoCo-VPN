@@ -6,6 +6,7 @@
 #include <QJsonObject>
 #include <QDateTime>
 #include <QStringList>
+#include <QSet>
 #include <QUuid>
 
 #include "../systemController.h"
@@ -16,11 +17,19 @@ ExportUiController::ExportUiController(ExportController* exportController, Secur
       m_exportController(exportController),
       m_settings(settings)
 {
+    addSystemShareTemplates();
     if (m_settings) {
         const auto groups = QJsonDocument::fromJson(m_settings->value("Sharing/accountGroups").toByteArray()).array();
         const auto templates = QJsonDocument::fromJson(m_settings->value("Sharing/templates").toByteArray()).array();
         for (const auto &v : groups) m_accountGroups.append(v.toObject().toVariantMap());
-        for (const auto &v : templates) m_shareTemplates.append(v.toObject().toVariantMap());
+        for (const auto &v : templates) {
+            QVariantMap item = v.toObject().toVariantMap();
+            item.insert("isSystem", false);
+            if (item.value("protocol").toString().isEmpty()) item.insert("protocol", QStringLiteral("general"));
+            m_shareTemplates.append(item);
+        }
+        m_templateDefaults = QJsonDocument::fromJson(
+            m_settings->value("Sharing/templateDefaults").toByteArray()).object().toVariantMap();
     }
     connect(m_exportController, &ExportController::revokeFinished, this, [this](ErrorCode errorCode) {
         if (errorCode == ErrorCode::NoError) {
@@ -48,9 +57,38 @@ void ExportUiController::saveAccountGroups()
 void ExportUiController::saveShareTemplates()
 {
     QJsonArray array;
-    for (const auto &item : m_shareTemplates) array.append(QJsonObject::fromVariantMap(item.toMap()));
+    for (const auto &item : m_shareTemplates) {
+        const QVariantMap value = item.toMap();
+        if (!value.value("isSystem").toBool()) array.append(QJsonObject::fromVariantMap(value));
+    }
     if (m_settings) m_settings->setValue("Sharing/templates", QJsonDocument(array).toJson(QJsonDocument::Compact));
     emit shareTemplatesChanged();
+}
+
+void ExportUiController::saveTemplateDefaults()
+{
+    if (m_settings) {
+        m_settings->setValue("Sharing/templateDefaults",
+                             QJsonDocument(QJsonObject::fromVariantMap(m_templateDefaults)).toJson(QJsonDocument::Compact));
+    }
+    emit shareTemplatesChanged();
+}
+
+void ExportUiController::addSystemShareTemplates()
+{
+    const QString common = QStringLiteral(
+        "سلام {{NAME}}،\nسرور: {{SERVER}}\nروش اتصال: {{PROTOCOLS}}\n{{CONFIGS}}\n{{QR}}\n"
+        "برای اتصال، کانفیگ را در برنامهٔ سازگار وارد کنید.");
+    const auto add = [this](const QString &id, const QString &name, const QString &protocol, const QString &body) {
+        m_shareTemplates.append(QVariantMap{{"id", id}, {"name", name}, {"protocol", protocol},
+                                            {"body", body}, {"isSystem", true}});
+    };
+    add(QStringLiteral("system-general"), tr("General system template"), QStringLiteral("general"), common);
+    add(QStringLiteral("system-openvpn"), tr("OpenVPN system template"), QStringLiteral("openvpn"), common);
+    add(QStringLiteral("system-wireguard"), tr("WireGuard system template"), QStringLiteral("wireguard"), common);
+    add(QStringLiteral("system-awg"), tr("AWG system template"), QStringLiteral("awg"), common);
+    add(QStringLiteral("system-xray"), tr("XRay system template"), QStringLiteral("xray"), common);
+    add(QStringLiteral("system-ikev2"), tr("IKEv2 system template"), QStringLiteral("ikev2"), common);
 }
 
 void ExportUiController::startAccountBatch(const QString &serverId, const QString &serverName,
@@ -156,17 +194,104 @@ void ExportUiController::persistBatchGroup()
 
 void ExportUiController::saveShareTemplate(const QString &name, const QString &body)
 {
+    upsertShareTemplate({}, name, body, QStringLiteral("general"));
+}
+
+void ExportUiController::upsertShareTemplate(const QString &id, const QString &name,
+                                               const QString &body, const QString &protocol)
+{
     if (name.trimmed().isEmpty() || body.trimmed().isEmpty()) return;
-    QVariantMap item{{"id", QUuid::createUuid().toString(QUuid::WithoutBraces)}, {"name", name.trimmed()}, {"body", body}};
-    m_shareTemplates.prepend(item);
+    const QString normalizedProtocol = protocol.isEmpty() ? QStringLiteral("general") : protocol;
+    if (!id.isEmpty()) {
+        for (qsizetype i = 0; i < m_shareTemplates.size(); ++i) {
+            QVariantMap item = m_shareTemplates.at(i).toMap();
+            if (item.value("id").toString() == id && !item.value("isSystem").toBool()) {
+                item.insert("name", name.trimmed());
+                item.insert("body", body);
+                item.insert("protocol", normalizedProtocol);
+                m_shareTemplates[i] = item;
+                saveShareTemplates();
+                return;
+            }
+        }
+    }
+    QVariantMap item{{"id", QUuid::createUuid().toString(QUuid::WithoutBraces)},
+                     {"name", name.trimmed()}, {"body", body}, {"protocol", normalizedProtocol},
+                     {"isSystem", false}};
+    m_shareTemplates.append(item);
     saveShareTemplates();
 }
 
 void ExportUiController::deleteShareTemplate(const QString &id)
 {
-    for (qsizetype i = m_shareTemplates.size() - 1; i >= 0; --i)
-        if (m_shareTemplates.at(i).toMap().value("id").toString() == id) m_shareTemplates.removeAt(i);
+    for (qsizetype i = m_shareTemplates.size() - 1; i >= 0; --i) {
+        const QVariantMap item = m_shareTemplates.at(i).toMap();
+        if (item.value("id").toString() == id && !item.value("isSystem").toBool()) m_shareTemplates.removeAt(i);
+    }
+    for (auto it = m_templateDefaults.begin(); it != m_templateDefaults.end();) {
+        if (it.value().toString() == id) it = m_templateDefaults.erase(it); else ++it;
+    }
     saveShareTemplates();
+    saveTemplateDefaults();
+}
+
+void ExportUiController::setDefaultShareTemplate(const QString &protocol, const QString &templateId)
+{
+    if (protocol.isEmpty() || shareTemplate(templateId).isEmpty()) return;
+    m_templateDefaults.insert(protocol, templateId);
+    saveTemplateDefaults();
+}
+
+QString ExportUiController::defaultShareTemplateId(const QString &protocol) const
+{
+    const QString configured = m_templateDefaults.value(protocol).toString();
+    if (!configured.isEmpty() && !shareTemplate(configured).isEmpty()) return configured;
+    const QString systemId = QStringLiteral("system-") + protocol;
+    if (!shareTemplate(systemId).isEmpty()) return systemId;
+    return QStringLiteral("system-general");
+}
+
+QString ExportUiController::shareTemplateName(const QString &id) const
+{
+    return shareTemplate(id).value("name").toString();
+}
+
+QVariantMap ExportUiController::shareTemplate(const QString &id) const
+{
+    for (const auto &value : m_shareTemplates) {
+        const QVariantMap item = value.toMap();
+        if (item.value("id").toString() == id) return item;
+    }
+    return {};
+}
+
+QVariantList ExportUiController::templatesForProtocol(const QString &protocol) const
+{
+    QVariantList result;
+    for (const auto &value : m_shareTemplates) {
+        const QVariantMap item = value.toMap();
+        const QString itemProtocol = item.value("protocol").toString();
+        if (itemProtocol == protocol || itemProtocol == QStringLiteral("general")) result.append(item);
+    }
+    return result;
+}
+
+QVariantList ExportUiController::shareProtocols(const QVariantList &groupIds) const
+{
+    QVariantList result;
+    QSet<QString> seen;
+    for (const auto &groupId : groupIds) {
+        const QVariantMap group = accountGroup(groupId.toString());
+        for (const auto &entry : group.value("methods").toList()) {
+            const QVariantMap method = entry.toMap();
+            const QString key = protocolKeyForMethod(method);
+            if (seen.contains(key)) continue;
+            seen.insert(key);
+            result.append(QVariantMap{{"key", key}, {"name", protocolDisplayName(key)},
+                                      {"defaultTemplateId", defaultShareTemplateId(key)}});
+        }
+    }
+    return result;
 }
 
 void ExportUiController::deleteAccountGroup(const QString &id)
@@ -209,6 +334,64 @@ QString ExportUiController::renderAccountsText(const QVariantList &groupIds, con
         if (!group.isEmpty()) sections.append(renderAccountTextFragment(group, templateBody));
     }
     return sections.join(QStringLiteral("\n\n----------------------------------------\n\n"));
+}
+
+QString ExportUiController::renderAccountsWithTemplates(const QVariantList &groupIds,
+                                                         const QVariantMap &templateIdsByProtocol,
+                                                         bool html) const
+{
+    QStringList sections;
+    for (const auto &groupId : groupIds) {
+        const QVariantMap group = accountGroup(groupId.toString());
+        if (group.isEmpty()) continue;
+        for (const auto &entry : group.value("methods").toList()) {
+            const QVariantMap method = entry.toMap();
+            const QString protocol = protocolKeyForMethod(method);
+            QString templateId = templateIdsByProtocol.value(protocol).toString();
+            if (templateId.isEmpty()) templateId = defaultShareTemplateId(protocol);
+            QString body = templateBodyById(templateId);
+            if (body.isEmpty()) body = templateBodyById(QStringLiteral("system-general"));
+            QVariantMap singleMethodGroup = group;
+            singleMethodGroup.insert("methods", QVariantList{method});
+            sections.append(html ? renderAccountTemplateFragment(singleMethodGroup, body)
+                                 : renderAccountTextFragment(singleMethodGroup, body));
+        }
+    }
+    if (sections.isEmpty()) return {};
+    return html ? wrapAccountsHtml(sections.join(QString()))
+                : sections.join(QStringLiteral("\n\n----------------------------------------\n\n"));
+}
+
+QString ExportUiController::protocolKeyForMethod(const QVariantMap &method) const
+{
+    const auto container = static_cast<amnezia::DockerContainer>(method.value("container").toInt());
+    switch (container) {
+    case amnezia::DockerContainer::OpenVpn:
+    case amnezia::DockerContainer::ShadowSocks:
+    case amnezia::DockerContainer::Cloak: return QStringLiteral("openvpn");
+    case amnezia::DockerContainer::WireGuard: return QStringLiteral("wireguard");
+    case amnezia::DockerContainer::Awg:
+    case amnezia::DockerContainer::Awg2: return QStringLiteral("awg");
+    case amnezia::DockerContainer::Xray:
+    case amnezia::DockerContainer::SSXray: return QStringLiteral("xray");
+    case amnezia::DockerContainer::Ipsec: return QStringLiteral("ikev2");
+    default: return QStringLiteral("general");
+    }
+}
+
+QString ExportUiController::protocolDisplayName(const QString &protocol) const
+{
+    if (protocol == QStringLiteral("openvpn")) return QStringLiteral("OpenVPN");
+    if (protocol == QStringLiteral("wireguard")) return QStringLiteral("WireGuard");
+    if (protocol == QStringLiteral("awg")) return QStringLiteral("AWG");
+    if (protocol == QStringLiteral("xray")) return QStringLiteral("XRay");
+    if (protocol == QStringLiteral("ikev2")) return QStringLiteral("IKEv2");
+    return tr("General");
+}
+
+QString ExportUiController::templateBodyById(const QString &id) const
+{
+    return shareTemplate(id).value("body").toString();
 }
 
 QString ExportUiController::wrapAccountsHtml(const QString &sections) const

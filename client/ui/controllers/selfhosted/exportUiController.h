@@ -58,11 +58,22 @@ public slots:
     Q_INVOKABLE void startAccountBatch(const QString &serverId, const QString &serverName,
                                        const QString &baseName, int count, const QVariantList &containers);
     Q_INVOKABLE void saveShareTemplate(const QString &name, const QString &body);
+    Q_INVOKABLE void upsertShareTemplate(const QString &id, const QString &name,
+                                         const QString &body, const QString &protocol);
     Q_INVOKABLE void deleteShareTemplate(const QString &id);
+    Q_INVOKABLE void setDefaultShareTemplate(const QString &protocol, const QString &templateId);
+    Q_INVOKABLE QString defaultShareTemplateId(const QString &protocol) const;
+    Q_INVOKABLE QString shareTemplateName(const QString &id) const;
+    Q_INVOKABLE QVariantMap shareTemplate(const QString &id) const;
+    Q_INVOKABLE QVariantList templatesForProtocol(const QString &protocol) const;
+    Q_INVOKABLE QVariantList shareProtocols(const QVariantList &groupIds) const;
     Q_INVOKABLE void deleteAccountGroup(const QString &id);
     Q_INVOKABLE QString renderAccountTemplate(const QString &groupId, const QString &templateBody);
     Q_INVOKABLE QString renderAccountsTemplate(const QVariantList &groupIds, const QString &templateBody);
     Q_INVOKABLE QString renderAccountsText(const QVariantList &groupIds, const QString &templateBody);
+    Q_INVOKABLE QString renderAccountsWithTemplates(const QVariantList &groupIds,
+                                                    const QVariantMap &templateIdsByProtocol,
+                                                    bool html) const;
     Q_INVOKABLE QVariantMap accountGroup(const QString &id) const;
 
 signals:
@@ -86,15 +97,21 @@ private:
     void createNextBatchAccount();
     void saveAccountGroups();
     void saveShareTemplates();
+    void saveTemplateDefaults();
+    void addSystemShareTemplates();
     void persistBatchGroup();
     QString renderAccountTemplateFragment(const QVariantMap &group, const QString &templateBody) const;
     QString renderAccountTextFragment(const QVariantMap &group, const QString &templateBody) const;
     QString wrapAccountsHtml(const QString &sections) const;
+    QString protocolKeyForMethod(const QVariantMap &method) const;
+    QString protocolDisplayName(const QString &protocol) const;
+    QString templateBodyById(const QString &id) const;
 
     ExportController* m_exportController;
     SecureQSettings* m_settings;
     QVariantList m_accountGroups;
     QVariantList m_shareTemplates;
+    QVariantMap m_templateDefaults;
     QVariantList m_batchContainers;
     QVariantMap m_batchGroup;
     QString m_batchServerId;

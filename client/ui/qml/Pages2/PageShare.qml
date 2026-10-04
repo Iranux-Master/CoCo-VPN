@@ -108,11 +108,12 @@ PageType {
     property var selectedBatchProtocols: []
     property var selectedAccountIds: []
     property string sharePreview: ""
+    property var shareProtocolOptions: []
+    property var shareTemplateSelection: ({})
     property string accountSearchQuery: ""
     property string accountServerFilter: ""
     property string accountProtocolFilter: ""
     property string accountStatusFilter: ""
-    property var shareTemplateTags: ["{{NAME}}", "{{SERVER}}", "{{PROTOCOLS}}", "{{CONFIGS}}", "{{QR}}"]
     property var accountServerOptions: {
         var options = [{"value": "", "label": qsTr("All servers"), "name": qsTr("All servers")}]
         var known = {}
@@ -177,10 +178,35 @@ PageType {
         root.sharePreview = ""
     }
 
-    function updateSharePreview(formatIndex, accountIds, templateBody) {
-        root.sharePreview = formatIndex === 0
-                ? ExportController.renderAccountsTemplate(accountIds, templateBody)
-                : ExportController.renderAccountsText(accountIds, templateBody)
+    function prepareShare() {
+        root.shareProtocolOptions = ExportController.shareProtocols(root.selectedAccountIds)
+        var selections = {}
+        root.shareProtocolOptions.forEach(function(protocol) {
+            selections[protocol.key] = protocol.defaultTemplateId
+        })
+        root.shareTemplateSelection = selections
+        root.refreshSharePreview()
+    }
+
+    function setProtocolTemplate(protocolKey, templateId) {
+        var selections = {}
+        Object.keys(root.shareTemplateSelection).forEach(function(key) {
+            selections[key] = root.shareTemplateSelection[key]
+        })
+        selections[protocolKey] = templateId
+        root.shareTemplateSelection = selections
+        root.refreshSharePreview()
+    }
+
+    function refreshSharePreview() {
+        if (root.selectedAccountIds.length === 0) {
+            root.sharePreview = ""
+            return
+        }
+        root.sharePreview = ExportController.renderAccountsWithTemplates(
+                    root.selectedAccountIds,
+                    root.shareTemplateSelection,
+                    shareFormatSelector.currentIndex === 0)
     }
     // Shared by the single-protocol selector and the Windows multi-account form.
     // Keep it at page scope so it exists even when the selector drawer is closed.
@@ -805,6 +831,7 @@ PageType {
                         width: Math.max(180, (parent.width - 16) / 3)
                         drawerParent: root
                         drawerHeight: 0.4
+                        fitContent: true
                         text: root.accountServerOptions[root.optionIndex(root.accountServerOptions, root.accountServerFilter)].label
                         headerText: qsTr("Server filter")
                         listView: ListViewWithRadioButtonType {
@@ -824,6 +851,7 @@ PageType {
                         width: Math.max(180, (parent.width - 16) / 3)
                         drawerParent: root
                         drawerHeight: 0.4
+                        fitContent: true
                         text: root.accountProtocolOptions[root.optionIndex(root.accountProtocolOptions, root.accountProtocolFilter)].label
                         headerText: qsTr("Protocol filter")
                         listView: ListViewWithRadioButtonType {
@@ -843,6 +871,7 @@ PageType {
                         width: Math.max(180, (parent.width - 16) / 3)
                         drawerParent: root
                         drawerHeight: 0.4
+                        fitContent: true
                         text: root.accountStatusOptions[root.optionIndex(root.accountStatusOptions, root.accountStatusFilter)].label
                         headerText: qsTr("Status filter")
                         listView: ListViewWithRadioButtonType {
@@ -866,15 +895,27 @@ PageType {
                               .arg(root.filteredAccountGroups.length).arg(root.selectedAccountIds.length)
                         color: AmneziaStyle.color.mutedGray
                     }
-                    BasicButtonType {
-                        text: qsTr("Select filtered")
+                    ImageButtonType {
+                        implicitWidth: 48
+                        implicitHeight: 48
+                        image: "qrc:/images/controls/check.svg"
+                        imageColor: AmneziaStyle.color.paleGray
                         enabled: root.filteredAccountGroups.length > 0
-                        clickedFunc: root.selectVisibleAccounts
+                        onClicked: root.selectVisibleAccounts()
+                        ToolTip.visible: hovered
+                        ToolTip.text: qsTr("Select filtered")
+                        ToolTip.delay: 500
                     }
-                    BasicButtonType {
-                        text: qsTr("Clear selection")
+                    ImageButtonType {
+                        implicitWidth: 48
+                        implicitHeight: 48
+                        image: "qrc:/images/controls/x-circle.svg"
+                        imageColor: AmneziaStyle.color.paleGray
                         enabled: root.selectedAccountIds.length > 0
-                        clickedFunc: root.clearAccountSelection
+                        onClicked: root.clearAccountSelection()
+                        ToolTip.visible: hovered
+                        ToolTip.text: qsTr("Clear selection")
+                        ToolTip.delay: 500
                     }
                     }
                     BasicButtonType {
@@ -883,7 +924,7 @@ PageType {
                     text: qsTr("Share selected accounts")
                     leftImageSource: "qrc:/images/controls/share-2.svg"
                     clickedFunc: function() {
-                        root.sharePreview = ""
+                        root.prepareShare()
                         templateShareDrawer.openTriggered()
                     }
                     }
@@ -936,120 +977,69 @@ PageType {
                             descriptionText: qsTr("Choose a message template and save the selected accounts as a file.")
                         }
                         ScrollView {
+                            id: shareScroll
                             Layout.fillWidth: true
                             Layout.fillHeight: true
                             Layout.leftMargin: 16
                             Layout.rightMargin: 16
                             clip: true
+                            contentWidth: availableWidth
+                            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+
                             ColumnLayout {
-                                width: parent.width
-                                spacing: 12
-                                DropDownType {
-                                    id: savedTemplatesBox
-                                    Layout.fillWidth: true
-                                    drawerParent: root
-                                    drawerHeight: 0.45
-                                    headerText: qsTr("Message template")
-                                    descriptionText: qsTr("Saved templates")
-                                    text: qsTr("Choose a saved template")
-                                    listView: ListViewWithRadioButtonType {
-                                        id: savedTemplatesList
-                                        rootWidth: root.width
-                                        imageSource: "qrc:/images/controls/check.svg"
-                                        model: ExportController.shareTemplates
-                                        clickedFunction: function() {
-                                            var templates = ExportController.shareTemplates
-                                            if (selectedIndex >= 0 && selectedIndex < templates.length) {
-                                                templateTextArea.textArea.text = templates[selectedIndex].body
-                                                savedTemplatesBox.text = templates[selectedIndex].name
-                                                root.sharePreview = ""
-                                            }
-                                            savedTemplatesBox.closeTriggered()
-                                        }
-                                    }
-                                }
-                                BasicButtonType {
-                                    Layout.fillWidth: true
-                                    text: templateEditor.visible ? qsTr("Close template editor") : qsTr("Create or edit template")
-                                    clickedFunc: function() { templateEditor.visible = !templateEditor.visible }
-                                }
-                                ColumnLayout {
-                                    id: templateEditor
-                                    Layout.fillWidth: true
-                                    visible: false
-                                    spacing: 10
-                                    Flow {
+                                width: shareScroll.availableWidth
+                                spacing: 16
+
+                                Repeater {
+                                    model: root.shareProtocolOptions
+                                    delegate: ColumnLayout {
+                                        id: protocolSection
+                                        required property var modelData
+                                        property var availableTemplates: ExportController.templatesForProtocol(modelData.key)
                                         Layout.fillWidth: true
                                         spacing: 8
-                                        Repeater {
-                                            model: root.shareTemplateTags
-                                            BasicButtonType {
-                                                required property string modelData
-                                                implicitHeight: 44
-                                                width: Math.max(buttonTextLabel.implicitWidth + 32, 84)
-                                                defaultColor: AmneziaStyle.color.transparent
-                                                hoveredColor: AmneziaStyle.color.translucentWhite
-                                                pressedColor: AmneziaStyle.color.sheerWhite
-                                                textColor: AmneziaStyle.color.paleGray
-                                                borderColor: AmneziaStyle.color.slateGray
-                                                borderWidth: 1
-                                                text: modelData
-                                                clickedFunc: function() {
-                                                    var field = templateTextArea.textArea
-                                                    var first = Math.min(field.selectionStart, field.selectionEnd)
-                                                    var last = Math.max(field.selectionStart, field.selectionEnd)
-                                                    if (first !== last) field.remove(first, last)
-                                                    field.insert(first, modelData)
-                                                    field.forceActiveFocus()
+
+                                        ParagraphTextType {
+                                            Layout.fillWidth: true
+                                            text: qsTr("Template for %1").arg(protocolSection.modelData.name)
+                                            color: AmneziaStyle.color.paleGray
+                                        }
+                                        DropDownType {
+                                            id: protocolTemplateSelector
+                                            Layout.fillWidth: true
+                                            drawerParent: root
+                                            drawerHeight: 0.45
+                                            fitContent: true
+                                            headerText: qsTr("Message template")
+                                            descriptionText: protocolSection.modelData.name
+                                            text: ExportController.shareTemplateName(root.shareTemplateSelection[protocolSection.modelData.key] || "")
+                                            listView: ListViewWithRadioButtonType {
+                                                rootWidth: root.width
+                                                imageSource: "qrc:/images/controls/check.svg"
+                                                model: protocolSection.availableTemplates
+                                                selectedIndex: {
+                                                    var selectedId = root.shareTemplateSelection[protocolSection.modelData.key] || ""
+                                                    for (var i = 0; i < protocolSection.availableTemplates.length; ++i) {
+                                                        if (protocolSection.availableTemplates[i].id === selectedId)
+                                                            return i
+                                                    }
+                                                    return 0
+                                                }
+                                                clickedFunction: function() {
+                                                    if (selectedIndex >= 0 && selectedIndex < protocolSection.availableTemplates.length)
+                                                        root.setProtocolTemplate(protocolSection.modelData.key, protocolSection.availableTemplates[selectedIndex].id)
+                                                    protocolTemplateSelector.closeTriggered()
                                                 }
                                             }
                                         }
                                     }
-                                    ParagraphTextType {
-                                        Layout.fillWidth: true
-                                        text: qsTr("Click a tag to insert it at the cursor in the template.")
-                                        color: AmneziaStyle.color.mutedGray
-                                    }
-                                    RowLayout {
-                                        Layout.fillWidth: true
-                                        TextFieldWithHeaderType {
-                                            id: templateNameField
-                                            Layout.fillWidth: true
-                                            headerText: qsTr("Template name")
-                                            placeholderText: qsTr("Enter a name for this template")
-                                        }
-                                        BasicButtonType {
-                                            enabled: templateNameField.textField.text.trim().length > 0
-                                                     && templateTextArea.textArea.text.trim().length > 0
-                                            text: qsTr("Save template")
-                                            clickedFunc: function() {
-                                                ExportController.saveShareTemplate(templateNameField.textField.text,
-                                                                                    templateTextArea.textArea.text)
-                                                templateNameField.textField.text = ""
-                                            }
-                                        }
-                                    }
                                 }
-                                TextAreaType {
-                                    id: templateTextArea
+
+                                ParagraphTextType {
                                     Layout.fillWidth: true
-                                    Layout.preferredHeight: 160
-                                    text: "سلام {{NAME}}،\nسرور: {{SERVER}}\nروش‌های اتصال: {{PROTOCOLS}}\n{{CONFIGS}}\n{{QR}}\nبرای اتصال، کانفیگ پروتکل مناسب را در برنامهٔ مربوط وارد کنید."
-                                    placeholderText: qsTr("Write a sharing message")
-                                    textArea.wrapMode: TextEdit.Wrap
-                                }
-                                Connections {
-                                    target: templateTextArea.textArea
-                                    function onTextChanged() { root.sharePreview = "" }
-                                }
-                                BasicButtonType {
-                                    Layout.fillWidth: true
-                                    enabled: root.selectedAccountIds.length > 0 && templateTextArea.textArea.text.trim().length > 0
-                                    text: qsTr("Preview")
-                                    clickedFunc: function() {
-                                        root.updateSharePreview(shareFormatSelector.currentIndex, root.selectedAccountIds,
-                                                                templateTextArea.textArea.text)
-                                    }
+                                    visible: root.shareProtocolOptions.length === 0
+                                    text: qsTr("No shareable protocol was found for the selected accounts.")
+                                    color: AmneziaStyle.color.goldenApricot
                                 }
                                 DropDownType {
                                     id: shareFormatSelector
@@ -1057,6 +1047,7 @@ PageType {
                                     Layout.fillWidth: true
                                     drawerParent: root
                                     drawerHeight: 0.35
+                                    fitContent: true
                                     headerText: qsTr("File format")
                                     text: currentIndex === 0 ? qsTr("HTML file (includes QR codes)") : qsTr("Plain text file (TXT)")
                                     listView: ListViewWithRadioButtonType {
@@ -1065,23 +1056,26 @@ PageType {
                                         selectedIndex: shareFormatSelector.currentIndex
                                         clickedFunction: function() {
                                             shareFormatSelector.currentIndex = selectedIndex
-                                            shareFormatSelector.text = selectedText
-                                            root.sharePreview = ""
                                             shareFormatSelector.closeTriggered()
+                                            root.refreshSharePreview()
                                         }
                                     }
                                 }
+                                Header2TextType {
+                                    Layout.fillWidth: true
+                                    text: qsTr("Preview")
+                                }
                                 TextArea {
                                     Layout.fillWidth: true
-                                    Layout.preferredHeight: 140
+                                    Layout.preferredHeight: 240
                                     readOnly: true
                                     wrapMode: TextEdit.Wrap
                                     textFormat: shareFormatSelector.currentIndex === 0 ? TextEdit.RichText : TextEdit.PlainText
                                     text: root.sharePreview
-                                    visible: root.sharePreview.length > 0
                                     color: AmneziaStyle.color.paleGray
                                     selectionColor: AmneziaStyle.color.richBrown
                                     selectedTextColor: AmneziaStyle.color.paleGray
+                                    placeholderText: qsTr("The preview will appear here.")
                                     placeholderTextColor: AmneziaStyle.color.mutedGray
                                     font.pixelSize: 16
                                     font.weight: Font.Medium
@@ -1093,6 +1087,12 @@ PageType {
                                         border.width: 1
                                     }
                                 }
+                                ParagraphTextType {
+                                    Layout.fillWidth: true
+                                    visible: root.selectedAccountIds.length > 0 && root.sharePreview.length === 0
+                                    text: qsTr("A preview could not be created. Check that the selected accounts contain a completed protocol.")
+                                    color: AmneziaStyle.color.goldenApricot
+                                }
                                 BasicButtonType {
                                     Layout.fillWidth: true
                                     enabled: root.sharePreview.length > 0
@@ -1102,12 +1102,10 @@ PageType {
                                         var isHtml = shareFormatSelector.currentIndex === 0
                                         var extension = isHtml ? "html" : "txt"
                                         var filter = isHtml ? qsTr("HTML files (*.html)") : qsTr("Text files (*.txt)")
-                                        var fileName = SystemController.getFileName(qsTr("Save sharing message"),
-                                                                                    filter,
+                                        var fileName = SystemController.getFileName(qsTr("Save sharing message"), filter,
                                                                                     StandardPaths.standardLocations(StandardPaths.DocumentsLocation)
                                                                                         + "/cocovpn_accounts." + extension,
-                                                                                    true,
-                                                                                    extension)
+                                                                                    true, extension)
                                         if (fileName !== "" && ExportController.setConfigFromString(root.sharePreview, fileName)) {
                                             PageController.showNotificationMessage(qsTr("Sharing message saved"))
                                             templateShareDrawer.closeTriggered()
@@ -1117,7 +1115,7 @@ PageType {
                                 ParagraphTextType {
                                     Layout.fillWidth: true
                                     Layout.bottomMargin: 16
-                                    text: qsTr("The {{QR}} tag embeds QR codes in HTML. TXT includes a note to use HTML for QR codes. Share these private connection details only with their intended users.")
+                                    text: qsTr("HTML is recommended because it includes QR codes. Share these private connection details only with their intended users.")
                                     color: AmneziaStyle.color.mutedGray
                                 }
                             }

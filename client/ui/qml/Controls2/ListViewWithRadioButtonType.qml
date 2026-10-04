@@ -43,6 +43,12 @@ ListViewType {
         id: content
 
         property alias selectable: radioButton
+        readonly property var rawModelData: typeof modelData === "undefined" ? null : modelData
+        readonly property string itemName: typeof name !== "undefined"
+                                                   ? String(name)
+                                                   : (rawModelData && rawModelData.name !== undefined
+                                                      ? String(rawModelData.name)
+                                                      : (typeof rawModelData === "string" ? rawModelData : ""))
 
         implicitWidth: rootWidth
 
@@ -115,7 +121,7 @@ ListViewType {
                     Layout.topMargin: 20
                     Layout.bottomMargin: 20
 
-                    text: name
+                    text: content.itemName
                     maximumLineCount: root.textMaximumLineCount
                     elide: root.textElide
 
@@ -133,11 +139,11 @@ ListViewType {
             }
 
             ButtonGroup.group: buttonGroup
-            checked: root.currentValue !== "" ? (name === root.currentValue) : (root.selectedIndex === index)
+            checked: root.currentValue !== "" ? (content.itemName === root.currentValue) : (root.selectedIndex === index)
 
             onClicked: {
                 root.selectedIndex = index
-                root.selectedText = name
+                root.selectedText = content.itemName
                 if (clickedFunction && typeof clickedFunction === "function") {
                     clickedFunction()
                 }
@@ -146,7 +152,7 @@ ListViewType {
 
         Component.onCompleted: {
             if (root.selectedIndex === index) {
-                root.selectedText = name
+                root.selectedText = content.itemName
             }
         }
 

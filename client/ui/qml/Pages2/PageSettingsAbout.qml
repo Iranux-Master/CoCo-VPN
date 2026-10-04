@@ -91,11 +91,22 @@ PageType {
 
             ParagraphTextType {
                 Layout.fillWidth: true
+                Layout.topMargin: 12
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                horizontalAlignment: Text.AlignHCenter
+                text: qsTr("Developed by the Iranux team.")
+                color: AmneziaStyle.color.paleGray
+            }
+
+            ParagraphTextType {
+                Layout.fillWidth: true
                 Layout.topMargin: 32
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: qsTr("Source code")
+                text: qsTr("Links")
             }
         }
 
@@ -194,7 +205,18 @@ PageType {
         }
     }
     
-    property list<QtObject> contacts: [ github, upstream ]
+    property list<QtObject> contacts: [ iranux, github, upstream ]
+
+    QtObject {
+        id: iranux
+
+        readonly property string title: qsTr("Iranux")
+        readonly property string description: qsTr("CoCo VPN developer · Iranux.site")
+        readonly property string imageSource: "qrc:/images/controls/globe-2.svg"
+        readonly property var handler: function() {
+            Qt.openUrlExternally("https://iranux.site")
+        }
+    }
 
     QtObject {
         id: github

@@ -7272,4 +7272,53 @@ Remove the server from the app to continue.</source>
         <translation>نمی‌توان سرور را در حین اتصال فعال حذف کرد.</translation>
     </message>
 </context>
+<context>
+    <name>PageSettingsShareTemplates</name>
+    <message><source>General</source><translation>عمومی</translation></message>
+    <message><source>Sharing templates</source><translation>قالب‌های اشتراک‌گذاری</translation></message>
+    <message><source>Create reusable messages and choose the default template for each VPN protocol.</source><translation>پیام‌های قابل استفادهٔ مجدد بسازید و قالب پیش‌فرض هر پروتکل VPN را انتخاب کنید.</translation></message>
+    <message><source>Default templates</source><translation>قالب‌های پیش‌فرض</translation></message>
+    <message><source>The matching template is selected automatically when accounts are shared.</source><translation>هنگام اشتراک‌گذاری حساب‌ها، قالب متناسب به‌صورت خودکار انتخاب می‌شود.</translation></message>
+    <message><source>Default template for %1</source><translation>قالب پیش‌فرض برای %1</translation></message>
+    <message><source>Available templates</source><translation>قالب‌های موجود</translation></message>
+    <message><source>System templates are protected. You can create, edit and delete your own templates.</source><translation>قالب‌های سیستم محافظت می‌شوند. می‌توانید قالب‌های خود را بسازید، ویرایش یا حذف کنید.</translation></message>
+    <message><source>Create template</source><translation>ساخت قالب</translation></message>
+    <message><source>System template</source><translation>قالب سیستم</translation></message>
+    <message><source>Custom template</source><translation>قالب سفارشی</translation></message>
+    <message><source>Edit template</source><translation>ویرایش قالب</translation></message>
+    <message><source>Click a tag to insert it at the current cursor position.</source><translation>برای درج تگ در محل نشانگر، روی آن کلیک کنید.</translation></message>
+    <message><source>Template protocol</source><translation>پروتکل قالب</translation></message>
+    <message><source>Template saved</source><translation>قالب ذخیره شد</translation></message>
+    <message><source>Delete template</source><translation>حذف قالب</translation></message>
+    <message><source>Delete this template?</source><translation>این قالب حذف شود؟</translation></message>
+</context>
+<context>
+    <name>PageShare</name>
+    <message><source>Template for %1</source><translation>قالب برای %1</translation></message>
+    <message><source>No shareable protocol was found for the selected accounts.</source><translation>برای حساب‌های انتخاب‌شده پروتکل قابل اشتراک‌گذاری پیدا نشد.</translation></message>
+    <message><source>The preview will appear here.</source><translation>پیش‌نمایش اینجا نمایش داده می‌شود.</translation></message>
+    <message><source>A preview could not be created. Check that the selected accounts contain a completed protocol.</source><translation>ساخت پیش‌نمایش ممکن نشد. بررسی کنید حساب‌های انتخاب‌شده حداقل یک پروتکل تکمیل‌شده داشته باشند.</translation></message>
+    <message><source>HTML is recommended because it includes QR codes. Share these private connection details only with their intended users.</source><translation>HTML به‌دلیل داشتن کدهای QR پیشنهاد می‌شود. اطلاعات خصوصی اتصال را فقط برای کاربران مربوط ارسال کنید.</translation></message>
+</context>
+<context>
+    <name>PageSettingsAbout</name>
+    <message><source>Developed by the Iranux team.</source><translation>توسعه‌یافته توسط تیم Iranux.</translation></message>
+    <message><source>Links</source><translation>پیوندها</translation></message>
+    <message><source>Iranux</source><translation>Iranux</translation></message>
+    <message><source>CoCo VPN developer · Iranux.site</source><translation>توسعه‌دهندهٔ CoCo VPN · Iranux.site</translation></message>
+</context>
+<context>
+    <name>PageSettings</name>
+    <message><source>Sharing templates</source><translation>قالب‌های اشتراک‌گذاری</translation></message>
+</context>
+<context>
+    <name>ExportUiController</name>
+    <message><source>General</source><translation>عمومی</translation></message>
+    <message><source>General system template</source><translation>قالب عمومی سیستم</translation></message>
+    <message><source>OpenVPN system template</source><translation>قالب سیستم OpenVPN</translation></message>
+    <message><source>WireGuard system template</source><translation>قالب سیستم WireGuard</translation></message>
+    <message><source>AWG system template</source><translation>قالب سیستم AWG</translation></message>
+    <message><source>XRay system template</source><translation>قالب سیستم XRay</translation></message>
+    <message><source>IKEv2 system template</source><translation>قالب سیستم IKEv2</translation></message>
+</context>
 </TS>

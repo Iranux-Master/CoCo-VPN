@@ -27,6 +27,7 @@ namespace PageLoader
         PageSettingsNewsNotifications,
         PageSettingsNewsDetail,
         PageSettingsBackup,
+        PageSettingsShareTemplates,
         PageSettingsAbout,
         PageSettingsLogging,
         PageSettingsSplitTunneling,
