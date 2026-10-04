@@ -7286,6 +7286,8 @@ Remove the server from the app to continue.</source>
     <message><source>System template</source><translation>قالب سیستم</translation></message>
     <message><source>Custom template</source><translation>قالب سفارشی</translation></message>
     <message><source>Edit template</source><translation>ویرایش قالب</translation></message>
+    <message><source>Template preview</source><translation>پیش‌نمایش قالب</translation></message>
+    <message><source>System templates are read-only.</source><translation>قالب‌های سیستم فقط قابل مشاهده هستند.</translation></message>
     <message><source>Click a tag to insert it at the current cursor position.</source><translation>برای درج تگ در محل نشانگر، روی آن کلیک کنید.</translation></message>
     <message><source>Template protocol</source><translation>پروتکل قالب</translation></message>
     <message><source>Template saved</source><translation>قالب ذخیره شد</translation></message>
@@ -7294,6 +7296,7 @@ Remove the server from the app to continue.</source>
 </context>
 <context>
     <name>PageShare</name>
+    <message><source>General</source><translation>عمومی</translation></message>
     <message><source>Template for %1</source><translation>قالب برای %1</translation></message>
     <message><source>No shareable protocol was found for the selected accounts.</source><translation>برای حساب‌های انتخاب‌شده پروتکل قابل اشتراک‌گذاری پیدا نشد.</translation></message>
     <message><source>The preview will appear here.</source><translation>پیش‌نمایش اینجا نمایش داده می‌شود.</translation></message>

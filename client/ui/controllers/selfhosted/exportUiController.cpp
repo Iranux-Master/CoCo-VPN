@@ -83,12 +83,12 @@ void ExportUiController::addSystemShareTemplates()
         m_shareTemplates.append(QVariantMap{{"id", id}, {"name", name}, {"protocol", protocol},
                                             {"body", body}, {"isSystem", true}});
     };
-    add(QStringLiteral("system-general"), tr("General system template"), QStringLiteral("general"), common);
-    add(QStringLiteral("system-openvpn"), tr("OpenVPN system template"), QStringLiteral("openvpn"), common);
-    add(QStringLiteral("system-wireguard"), tr("WireGuard system template"), QStringLiteral("wireguard"), common);
-    add(QStringLiteral("system-awg"), tr("AWG system template"), QStringLiteral("awg"), common);
-    add(QStringLiteral("system-xray"), tr("XRay system template"), QStringLiteral("xray"), common);
-    add(QStringLiteral("system-ikev2"), tr("IKEv2 system template"), QStringLiteral("ikev2"), common);
+    add(QStringLiteral("system-general"), tr("General"), QStringLiteral("general"), common);
+    add(QStringLiteral("system-openvpn"), QStringLiteral("OpenVPN"), QStringLiteral("openvpn"), common);
+    add(QStringLiteral("system-wireguard"), QStringLiteral("WireGuard"), QStringLiteral("wireguard"), common);
+    add(QStringLiteral("system-awg"), QStringLiteral("AWG"), QStringLiteral("awg"), common);
+    add(QStringLiteral("system-xray"), QStringLiteral("XRay"), QStringLiteral("xray"), common);
+    add(QStringLiteral("system-ikev2"), QStringLiteral("IKEv2"), QStringLiteral("ikev2"), common);
 }
 
 void ExportUiController::startAccountBatch(const QString &serverId, const QString &serverName,

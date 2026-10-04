@@ -108,6 +108,7 @@ PageType {
     property var selectedBatchProtocols: []
     property var selectedAccountIds: []
     property string sharePreview: ""
+    property int shareFormatIndex: 0
     property var shareProtocolOptions: []
     property var shareTemplateSelection: ({})
     property string accountSearchQuery: ""
@@ -168,6 +169,33 @@ PageType {
         return 0
     }
 
+    function templateDisplayName(item) {
+        if (!item) return ""
+        if (!item.isSystem) return item.name || ""
+        if (item.id === "system-general") return qsTr("General")
+        if (item.id === "system-openvpn") return "OpenVPN"
+        if (item.id === "system-wireguard") return "WireGuard"
+        if (item.id === "system-awg") return "AWG"
+        if (item.id === "system-xray") return "XRay"
+        if (item.id === "system-ikev2") return "IKEv2"
+        return item.name || ""
+    }
+
+    function templateDisplayNameById(id) {
+        return root.templateDisplayName(ExportController.shareTemplate(id))
+    }
+
+    function templateOptionsForProtocol(protocol) {
+        var source = ExportController.templatesForProtocol(protocol)
+        var result = []
+        for (var i = 0; i < source.length; ++i) {
+            var item = source[i]
+            result.push({"id": item.id, "name": root.templateDisplayName(item),
+                         "protocol": item.protocol, "isSystem": item.isSystem})
+        }
+        return result
+    }
+
     function selectVisibleAccounts() {
         root.selectedAccountIds = root.filteredAccountGroups.map(function(group) { return group.id })
         root.sharePreview = ""
@@ -181,9 +209,10 @@ PageType {
     function prepareShare() {
         root.shareProtocolOptions = ExportController.shareProtocols(root.selectedAccountIds)
         var selections = {}
-        root.shareProtocolOptions.forEach(function(protocol) {
+        for (var i = 0; i < root.shareProtocolOptions.length; ++i) {
+            var protocol = root.shareProtocolOptions[i]
             selections[protocol.key] = protocol.defaultTemplateId
-        })
+        }
         root.shareTemplateSelection = selections
         root.refreshSharePreview()
     }
@@ -206,7 +235,7 @@ PageType {
         root.sharePreview = ExportController.renderAccountsWithTemplates(
                     root.selectedAccountIds,
                     root.shareTemplateSelection,
-                    shareFormatSelector.currentIndex === 0)
+                    root.shareFormatIndex === 0)
     }
     // Shared by the single-protocol selector and the Windows multi-account form.
     // Keep it at page scope so it exists even when the selector drawer is closed.
@@ -995,7 +1024,7 @@ PageType {
                                     delegate: ColumnLayout {
                                         id: protocolSection
                                         required property var modelData
-                                        property var availableTemplates: ExportController.templatesForProtocol(modelData.key)
+                                        property var availableTemplates: root.templateOptionsForProtocol(modelData.key)
                                         Layout.fillWidth: true
                                         spacing: 8
 
@@ -1012,7 +1041,7 @@ PageType {
                                             fitContent: true
                                             headerText: qsTr("Message template")
                                             descriptionText: protocolSection.modelData.name
-                                            text: ExportController.shareTemplateName(root.shareTemplateSelection[protocolSection.modelData.key] || "")
+                                            text: root.templateDisplayNameById(root.shareTemplateSelection[protocolSection.modelData.key] || "")
                                             listView: ListViewWithRadioButtonType {
                                                 rootWidth: root.width
                                                 imageSource: "qrc:/images/controls/check.svg"
@@ -1043,19 +1072,18 @@ PageType {
                                 }
                                 DropDownType {
                                     id: shareFormatSelector
-                                    property int currentIndex: 0
                                     Layout.fillWidth: true
                                     drawerParent: root
                                     drawerHeight: 0.35
                                     fitContent: true
                                     headerText: qsTr("File format")
-                                    text: currentIndex === 0 ? qsTr("HTML file (includes QR codes)") : qsTr("Plain text file (TXT)")
+                                    text: root.shareFormatIndex === 0 ? qsTr("HTML file (includes QR codes)") : qsTr("Plain text file (TXT)")
                                     listView: ListViewWithRadioButtonType {
                                         rootWidth: root.width
                                         model: [qsTr("HTML file (includes QR codes)"), qsTr("Plain text file (TXT)")]
-                                        selectedIndex: shareFormatSelector.currentIndex
+                                        selectedIndex: root.shareFormatIndex
                                         clickedFunction: function() {
-                                            shareFormatSelector.currentIndex = selectedIndex
+                                            root.shareFormatIndex = selectedIndex
                                             shareFormatSelector.closeTriggered()
                                             root.refreshSharePreview()
                                         }
@@ -1070,7 +1098,7 @@ PageType {
                                     Layout.preferredHeight: 240
                                     readOnly: true
                                     wrapMode: TextEdit.Wrap
-                                    textFormat: shareFormatSelector.currentIndex === 0 ? TextEdit.RichText : TextEdit.PlainText
+                                    textFormat: root.shareFormatIndex === 0 ? TextEdit.RichText : TextEdit.PlainText
                                     text: root.sharePreview
                                     color: AmneziaStyle.color.paleGray
                                     selectionColor: AmneziaStyle.color.richBrown
@@ -1096,10 +1124,10 @@ PageType {
                                 BasicButtonType {
                                     Layout.fillWidth: true
                                     enabled: root.sharePreview.length > 0
-                                    text: shareFormatSelector.currentIndex === 0 ? qsTr("Save HTML share file") : qsTr("Save text share file")
+                                    text: root.shareFormatIndex === 0 ? qsTr("Save HTML share file") : qsTr("Save text share file")
                                     leftImageSource: "qrc:/images/controls/share-2.svg"
                                     clickedFunc: function() {
-                                        var isHtml = shareFormatSelector.currentIndex === 0
+                                        var isHtml = root.shareFormatIndex === 0
                                         var extension = isHtml ? "html" : "txt"
                                         var filter = isHtml ? qsTr("HTML files (*.html)") : qsTr("Text files (*.txt)")
                                         var fileName = SystemController.getFileName(qsTr("Save sharing message"), filter,

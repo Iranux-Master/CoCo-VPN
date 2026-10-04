@@ -13,6 +13,9 @@ PageType {
 
     property string editingTemplateId: ""
     property string editingProtocol: "general"
+    property string editingTemplateName: ""
+    property string editingTemplateBody: ""
+    property bool editingIsSystem: false
     property var templateTags: ["{{NAME}}", "{{SERVER}}", "{{PROTOCOLS}}", "{{CONFIGS}}", "{{QR}}"]
     property var protocolOptions: [
         {"key": "general", "name": qsTr("General")},
@@ -30,22 +33,48 @@ PageType {
         return qsTr("General")
     }
 
+    function templateDisplayName(item) {
+        if (!item) return ""
+        if (!item.isSystem) return item.name || ""
+        if (item.id === "system-general") return qsTr("General")
+        if (item.id === "system-openvpn") return "OpenVPN"
+        if (item.id === "system-wireguard") return "WireGuard"
+        if (item.id === "system-awg") return "AWG"
+        if (item.id === "system-xray") return "XRay"
+        if (item.id === "system-ikev2") return "IKEv2"
+        return item.name || ""
+    }
+
+    function templateDisplayNameById(id) {
+        return root.templateDisplayName(ExportController.shareTemplate(id))
+    }
+
+    function templateOptionsForProtocol(protocol) {
+        var source = ExportController.templatesForProtocol(protocol)
+        var result = []
+        for (var i = 0; i < source.length; ++i) {
+            var item = source[i]
+            result.push({"id": item.id, "name": root.templateDisplayName(item),
+                         "protocol": item.protocol, "isSystem": item.isSystem})
+        }
+        return result
+    }
+
     function openNewTemplate() {
         editingTemplateId = ""
         editingProtocol = "general"
-        templateNameField.textField.text = ""
-        templateBodyField.textArea.text = "سلام {{NAME}}،\nسرور: {{SERVER}}\nروش اتصال: {{PROTOCOLS}}\n{{CONFIGS}}\n{{QR}}"
-        templateProtocolSelector.text = protocolName(editingProtocol)
+        editingTemplateName = ""
+        editingTemplateBody = "سلام {{NAME}}،\nسرور: {{SERVER}}\nروش اتصال: {{PROTOCOLS}}\n{{CONFIGS}}\n{{QR}}"
+        editingIsSystem = false
         templateEditor.openTriggered()
     }
 
     function openTemplate(item) {
-        if (item.isSystem) return
         editingTemplateId = item.id
         editingProtocol = item.protocol || "general"
-        templateNameField.textField.text = item.name
-        templateBodyField.textArea.text = item.body
-        templateProtocolSelector.text = protocolName(editingProtocol)
+        editingTemplateName = root.templateDisplayName(item)
+        editingTemplateBody = item.body || ""
+        editingIsSystem = item.isSystem === true
         templateEditor.openTriggered()
     }
 
@@ -90,7 +119,10 @@ PageType {
                     id: defaultSelector
                     required property var modelData
                     property string protocolKey: modelData.key
-                    property var availableTemplates: ExportController.templatesForProtocol(protocolKey)
+                    property var availableTemplates: {
+                        var revision = ExportController.shareTemplates
+                        return root.templateOptionsForProtocol(protocolKey)
+                    }
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
@@ -99,13 +131,19 @@ PageType {
                     drawerHeight: 0.55
                     descriptionText: modelData.name
                     headerText: qsTr("Default template for %1").arg(modelData.name)
-                    text: ExportController.shareTemplateName(ExportController.defaultShareTemplateId(protocolKey))
+                    text: {
+                        var revision = ExportController.shareTemplates
+                        return root.templateDisplayNameById(ExportController.defaultShareTemplateId(protocolKey))
+                    }
 
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
                         model: defaultSelector.availableTemplates
-                        currentValue: ExportController.shareTemplateName(
-                                          ExportController.defaultShareTemplateId(defaultSelector.protocolKey))
+                        currentValue: {
+                            var revision = ExportController.shareTemplates
+                            return root.templateDisplayNameById(
+                                        ExportController.defaultShareTemplateId(defaultSelector.protocolKey))
+                        }
                         clickedFunction: function() {
                             var item = defaultSelector.availableTemplates[selectedIndex]
                             if (!item) return
@@ -131,7 +169,7 @@ PageType {
                 Layout.rightMargin: 16
                 text: qsTr("Create template")
                 leftImageSource: "qrc:/images/controls/plus.svg"
-                clickedFunc: root.openNewTemplate
+                clickedFunc: function() { root.openNewTemplate() }
             }
 
             Repeater {
@@ -144,13 +182,15 @@ PageType {
 
                     LabelWithButtonType {
                         Layout.fillWidth: true
-                        text: modelData.name
+                        text: root.templateDisplayName(modelData)
                         descriptionText: root.protocolName(modelData.protocol)
                                          + " · " + (modelData.isSystem ? qsTr("System template") : qsTr("Custom template"))
                         leftImageSource: modelData.isSystem
                                          ? "qrc:/images/controls/file-check-2.svg"
                                          : "qrc:/images/controls/edit-3.svg"
-                        rightImageSource: modelData.isSystem ? "" : "qrc:/images/controls/chevron-right.svg"
+                        rightImageSource: modelData.isSystem
+                                          ? "qrc:/images/controls/eye.svg"
+                                          : "qrc:/images/controls/edit-3.svg"
                         clickedFunction: function() { root.openTemplate(modelData) }
                     }
 
@@ -171,6 +211,15 @@ PageType {
             anchors.topMargin: 16
             spacing: 0
 
+            Connections {
+                target: templateEditor
+                function onAboutToShow() {
+                    templateNameField.textField.text = root.editingTemplateName
+                    templateBodyField.textArea.text = root.editingTemplateBody
+                    templateProtocolSelector.text = root.protocolName(root.editingProtocol)
+                }
+            }
+
             BackButtonType {
                 Layout.leftMargin: 16
                 backButtonFunction: function() { templateEditor.closeTriggered() }
@@ -181,8 +230,12 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 16
-                headerText: root.editingTemplateId === "" ? qsTr("Create template") : qsTr("Edit template")
-                descriptionText: qsTr("Click a tag to insert it at the current cursor position.")
+                headerText: root.editingTemplateId === ""
+                            ? qsTr("Create template")
+                            : (root.editingIsSystem ? qsTr("Template preview") : qsTr("Edit template"))
+                descriptionText: root.editingIsSystem
+                                 ? qsTr("System templates are read-only.")
+                                 : qsTr("Click a tag to insert it at the current cursor position.")
             }
 
             ScrollView {
@@ -202,6 +255,7 @@ PageType {
                     TextFieldWithHeaderType {
                         id: templateNameField
                         Layout.fillWidth: true
+                        textFieldEditable: !root.editingIsSystem
                         headerText: qsTr("Template name")
                         placeholderText: qsTr("Enter a name for this template")
                     }
@@ -209,6 +263,7 @@ PageType {
                     DropDownType {
                         id: templateProtocolSelector
                         Layout.fillWidth: true
+                        enabled: !root.editingIsSystem
                         drawerParent: root
                         fitContent: true
                         drawerHeight: 0.5
@@ -230,6 +285,7 @@ PageType {
 
                     Flow {
                         Layout.fillWidth: true
+                        visible: !root.editingIsSystem
                         spacing: 8
                         Repeater {
                             model: root.templateTags
@@ -261,11 +317,13 @@ PageType {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 240
                         placeholderText: qsTr("Write a sharing message")
+                        textArea.readOnly: root.editingIsSystem
                         textArea.wrapMode: TextEdit.Wrap
                     }
 
                     BasicButtonType {
                         Layout.fillWidth: true
+                        visible: !root.editingIsSystem
                         enabled: templateNameField.textField.text.trim().length > 0
                                  && templateBodyField.textArea.text.trim().length > 0
                         text: qsTr("Save template")
@@ -282,7 +340,7 @@ PageType {
                     BasicButtonType {
                         Layout.fillWidth: true
                         Layout.bottomMargin: 16
-                        visible: root.editingTemplateId !== ""
+                        visible: root.editingTemplateId !== "" && !root.editingIsSystem
                         defaultColor: AmneziaStyle.color.transparent
                         hoveredColor: AmneziaStyle.color.translucentWhite
                         pressedColor: AmneziaStyle.color.sheerWhite
