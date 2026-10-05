@@ -206,10 +206,9 @@ PageType {
         anchors.fill: parent
         expandedHeight: root.height
 
-        expandedStateContent: ColumnLayout {
-            anchors.fill: parent
-            anchors.topMargin: 16
-            spacing: 0
+        expandedStateContent: Item {
+            // DrawerType2's Loader derives its height from this content.
+            implicitHeight: templateEditor.expandedHeight
 
             Connections {
                 target: templateEditor
@@ -221,15 +220,21 @@ PageType {
             }
 
             BackButtonType {
-                Layout.leftMargin: 16
+                id: editorBackButton
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.topMargin: 16
                 backButtonFunction: function() { templateEditor.closeTriggered() }
             }
 
             Header2Type {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 16
+                id: editorHeader
+                anchors.top: editorBackButton.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
                 headerText: root.editingTemplateId === ""
                             ? qsTr("Create template")
                             : (root.editingIsSystem ? qsTr("Template preview") : qsTr("Edit template"))
@@ -238,18 +243,22 @@ PageType {
                                  : qsTr("Click a tag to insert it at the current cursor position.")
             }
 
-            ScrollView {
+            FlickableType {
                 id: editorScroll
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                contentWidth: availableWidth
-                clip: true
-                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                anchors.top: editorHeader.bottom
+                anchors.topMargin: 16
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                contentHeight: editorContent.implicitHeight + 32
 
                 ColumnLayout {
-                    width: editorScroll.availableWidth
+                    id: editorContent
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.leftMargin: 16
+                    anchors.rightMargin: 16
                     spacing: 12
 
                     TextFieldWithHeaderType {

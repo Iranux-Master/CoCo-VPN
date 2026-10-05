@@ -989,34 +989,43 @@ PageType {
                     parent: root
                     anchors.fill: parent
                     expandedHeight: root.height
-                    expandedStateContent: ColumnLayout {
-                        anchors.fill: parent
-                        anchors.topMargin: 16
-                        spacing: 0
+                    expandedStateContent: Item {
+                        // DrawerType2's Loader derives its height from this content.
+                        implicitHeight: templateShareDrawer.expandedHeight
                         BackButtonType {
-                            Layout.leftMargin: 16
+                            id: shareDrawerBackButton
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.topMargin: 16
                             backButtonFunction: function() { templateShareDrawer.closeTriggered() }
                         }
                         Header2Type {
-                            Layout.fillWidth: true
-                            Layout.leftMargin: 16
-                            Layout.rightMargin: 16
-                            Layout.bottomMargin: 16
+                            id: shareDrawerHeader
+                            anchors.top: shareDrawerBackButton.bottom
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.leftMargin: 16
+                            anchors.rightMargin: 16
                             headerText: qsTr("Share accounts")
                             descriptionText: qsTr("Choose a message template and save the selected accounts as a file.")
                         }
-                        ScrollView {
+                        FlickableType {
                             id: shareScroll
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            Layout.leftMargin: 16
-                            Layout.rightMargin: 16
-                            clip: true
-                            contentWidth: availableWidth
-                            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                            anchors.top: shareDrawerHeader.bottom
+                            anchors.topMargin: 16
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.bottom: parent.bottom
+                            contentHeight: shareDrawerContent.implicitHeight + 32
 
                             ColumnLayout {
-                                width: shareScroll.availableWidth
+                                id: shareDrawerContent
+                                anchors.top: parent.top
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.leftMargin: 16
+                                anchors.rightMargin: 16
                                 spacing: 16
 
                                 Repeater {
