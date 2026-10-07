@@ -5,6 +5,7 @@
 #include <QVariantList>
 #include <QVariantMap>
 #include <QTimer>
+#include <QTemporaryDir>
 
 #include "core/controllers/selfhosted/exportController.h"
 #include "core/utils/errorCodes.h"
@@ -75,6 +76,9 @@ public slots:
                                                     const QVariantMap &templateIdsByProtocol,
                                                     bool html) const;
     Q_INVOKABLE QVariantMap accountGroup(const QString &id) const;
+    Q_INVOKABLE QString renderShareTemplatePreview(const QString &templateId) const;
+    Q_INVOKABLE QString renderShareTemplateDraft(const QString &name, const QString &body, const QString &protocol) const;
+    Q_INVOKABLE bool openHtmlPreview(const QString &html);
 
 signals:
     void generateConfig(int type);
@@ -103,6 +107,8 @@ private:
     QString renderAccountTemplateFragment(const QVariantMap &group, const QString &templateBody) const;
     QString renderAccountTextFragment(const QVariantMap &group, const QString &templateBody) const;
     QString wrapAccountsHtml(const QString &sections) const;
+    QString renderGuidedAccount(const QVariantMap &group, const QString &message = {}, bool sample = false) const;
+    QString renderTemplatePreview(const QVariantMap &item) const;
     QString protocolKeyForMethod(const QVariantMap &method) const;
     QString protocolDisplayName(const QString &protocol) const;
     QString templateBodyById(const QString &id) const;
@@ -127,6 +133,7 @@ private:
     QString m_config;
     QString m_nativeConfigString;
     QList<QString> m_qrCodes;
+    QTemporaryDir m_previewDirectory;
 };
 
 #endif // EXPORTUICONTROLLER_H

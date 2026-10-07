@@ -5831,6 +5831,14 @@ Create one from the current settings.</source>
         <source>Cancel</source>
         <translation>لغو</translation>
     </message>
+
+    <message><source>Save HTML preview</source><translation>دانلود پیش‌نمایش HTML</translation></message>
+
+    <message><source>Open HTML preview</source><translation>نمایش صفحه HTML</translation></message>
+
+    <message><source>Could not open HTML preview</source><translation>باز کردن پیش‌نمایش ممکن نشد.</translation></message>
+
+    <message><source>The complete sharing page opens in your browser. You can check its guide, QR codes and download buttons before saving.</source><translation>صفحه کامل در مرورگر باز می‌شود. پیش از ذخیره فایل، راهنما، کدهای QR و دکمه‌های دانلود را بررسی کنید.</translation></message>
 </context>
 <context>
     <name>PageShareConnection</name>
@@ -7293,6 +7301,14 @@ Remove the server from the app to continue.</source>
     <message><source>Template saved</source><translation>قالب ذخیره شد</translation></message>
     <message><source>Delete template</source><translation>حذف قالب</translation></message>
     <message><source>Delete this template?</source><translation>این قالب حذف شود؟</translation></message>
+
+    <message><source>Save HTML preview</source><translation>دانلود پیش‌نمایش HTML</translation></message>
+
+    <message><source>Open HTML preview</source><translation>نمایش صفحه HTML</translation></message>
+
+    <message><source>Could not open HTML preview</source><translation>باز کردن پیش‌نمایش ممکن نشد.</translation></message>
+
+    <message><source>The complete sharing page opens in your browser. You can check its guide, QR codes and download buttons before saving.</source><translation>صفحه کامل در مرورگر باز می‌شود. پیش از ذخیره فایل، راهنما، کدهای QR و دکمه‌های دانلود را بررسی کنید.</translation></message>
 </context>
 <context>
     <name>PageShare</name>
@@ -7302,6 +7318,14 @@ Remove the server from the app to continue.</source>
     <message><source>The preview will appear here.</source><translation>پیش‌نمایش اینجا نمایش داده می‌شود.</translation></message>
     <message><source>A preview could not be created. Check that the selected accounts contain a completed protocol.</source><translation>ساخت پیش‌نمایش ممکن نشد. بررسی کنید حساب‌های انتخاب‌شده حداقل یک پروتکل تکمیل‌شده داشته باشند.</translation></message>
     <message><source>HTML is recommended because it includes QR codes. Share these private connection details only with their intended users.</source><translation>HTML به‌دلیل داشتن کدهای QR پیشنهاد می‌شود. اطلاعات خصوصی اتصال را فقط برای کاربران مربوط ارسال کنید.</translation></message>
+
+    <message><source>Save HTML preview</source><translation>دانلود پیش‌نمایش HTML</translation></message>
+
+    <message><source>Open HTML preview</source><translation>نمایش صفحه HTML</translation></message>
+
+    <message><source>Could not open HTML preview</source><translation>باز کردن پیش‌نمایش ممکن نشد.</translation></message>
+
+    <message><source>The complete sharing page opens in your browser. You can check its guide, QR codes and download buttons before saving.</source><translation>صفحه کامل در مرورگر باز می‌شود. پیش از ذخیره فایل، راهنما، کدهای QR و دکمه‌های دانلود را بررسی کنید.</translation></message>
 </context>
 <context>
     <name>PageSettingsAbout</name>

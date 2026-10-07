@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtCore
 
 import Style 1.0
 
@@ -69,7 +70,26 @@ PageType {
         templateEditor.openTriggered()
     }
 
+    function previewTemplate(id) {
+        if (!ExportController.openHtmlPreview(ExportController.renderShareTemplatePreview(id)))
+            PageController.showNotificationMessage(qsTr("Could not open HTML preview"))
+    }
+
+    function downloadPreview(id) {
+        var html = ExportController.renderShareTemplatePreview(id)
+        if (html.length === 0) return
+        var fileName = SystemController.getFileName(qsTr("Save HTML preview"), qsTr("HTML files (*.html)"),
+                StandardPaths.writableLocation(StandardPaths.DocumentsLocation) + "/CoCoVPN-template-preview.html",
+                true, "html")
+        if (fileName !== "" && ExportController.setConfigFromString(html, fileName))
+            PageController.showNotificationMessage(qsTr("Sharing message saved"))
+    }
+
     function openTemplate(item) {
+        if (item.isSystem && Qt.platform.os === "windows") {
+            root.previewTemplate(item.id)
+            return
+        }
         editingTemplateId = item.id
         editingProtocol = item.protocol || "general"
         editingTemplateName = root.templateDisplayName(item)
@@ -192,6 +212,16 @@ PageType {
                                           ? "qrc:/images/controls/eye.svg"
                                           : "qrc:/images/controls/edit-3.svg"
                         clickedFunction: function() { root.openTemplate(modelData) }
+                    }
+
+                    BasicButtonType {
+                        Layout.alignment: Qt.AlignRight
+                        Layout.rightMargin: 16
+                        Layout.bottomMargin: 12
+                        implicitHeight: 44
+                        visible: Qt.platform.os === "windows"
+                        text: qsTr("Save HTML preview")
+                        clickedFunc: function() { root.downloadPreview(modelData.id) }
                     }
 
                     DividerType {}
@@ -343,6 +373,18 @@ PageType {
                                                                  root.editingProtocol)
                             PageController.showNotificationMessage(qsTr("Template saved"))
                             templateEditor.closeTriggered()
+                        }
+                    }
+
+                    BasicButtonType {
+                        Layout.fillWidth: true
+                        visible: Qt.platform.os === "windows"
+                        text: qsTr("Open HTML preview")
+                        clickedFunc: function() {
+                            var html = ExportController.renderShareTemplateDraft(templateNameField.textField.text,
+                                          templateBodyField.textArea.text, root.editingProtocol)
+                            if (!ExportController.openHtmlPreview(html))
+                                PageController.showNotificationMessage(qsTr("Could not open HTML preview"))
                         }
                     }
 

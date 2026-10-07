@@ -81,4 +81,15 @@
         <file>tray/error.png</file>
         <file>controls/monitor.svg</file>
     </qresource>
+
+    <qresource prefix="/share">
+        <file alias="document.html">../ui/share/document.html</file>
+        <file alias="account.html">../ui/share/account.html</file>
+        <file alias="awg.html">../ui/share/awg.html</file>
+        <file alias="wireguard.html">../ui/share/wireguard.html</file>
+        <file alias="openvpn.html">../ui/share/openvpn.html</file>
+        <file alias="xray.html">../ui/share/xray.html</file>
+        <file alias="general.html">../ui/share/general.html</file>
+        <file alias="font-license.txt">../fonts/Shabnam-LICENSE.txt</file>
+    </qresource>
 </RCC>

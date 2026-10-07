@@ -8,6 +8,11 @@
 #include <QStringList>
 #include <QSet>
 #include <QUuid>
+#include <QFile>
+#include <QDesktopServices>
+#include <QUrl>
+#include <QRegularExpression>
+#include <QMap>
 
 #include "../systemController.h"
 #include "core/utils/qrCodeUtils.h"
@@ -78,10 +83,11 @@ void ExportUiController::addSystemShareTemplates()
 {
     const QString common = QStringLiteral(
         "سلام {{NAME}}،\nسرور: {{SERVER}}\nروش اتصال: {{PROTOCOLS}}\n{{CONFIGS}}\n{{QR}}\n"
-        "برای اتصال، کانفیگ را در برنامهٔ سازگار وارد کنید.");
+        "برای اتصال، فایل تنظیمات را دانلود کنید و مراحل راهنمای همین حساب را انجام دهید.");
     const auto add = [this](const QString &id, const QString &name, const QString &protocol, const QString &body) {
+        const QString help = QStringLiteral("https://iranux.site/cocoVPN/");
         m_shareTemplates.append(QVariantMap{{"id", id}, {"name", name}, {"protocol", protocol},
-                                            {"body", body}, {"isSystem", true}});
+                                            {"body", body + QStringLiteral("\nراهنمای برنامه: ") + help}, {"isSystem", true}});
     };
     add(QStringLiteral("system-general"), tr("General"), QStringLiteral("general"), common);
     add(QStringLiteral("system-openvpn"), QStringLiteral("OpenVPN"), QStringLiteral("openvpn"), common);
@@ -346,14 +352,32 @@ QString ExportUiController::renderAccountsWithTemplates(const QVariantList &grou
         if (group.isEmpty()) continue;
         for (const auto &entry : group.value("methods").toList()) {
             const QVariantMap method = entry.toMap();
+            if (method.value("config").toString().trimmed().isEmpty()) continue;
             const QString protocol = protocolKeyForMethod(method);
             QString templateId = templateIdsByProtocol.value(protocol).toString();
             if (templateId.isEmpty()) templateId = defaultShareTemplateId(protocol);
-            QString body = templateBodyById(templateId);
-            if (body.isEmpty()) body = templateBodyById(QStringLiteral("system-general"));
+            QVariantMap selectedTemplate = shareTemplate(templateId);
+            const QString templateProtocol = selectedTemplate.value("protocol").toString();
+            if (selectedTemplate.isEmpty() || (templateProtocol != protocol && templateProtocol != "general"))
+                selectedTemplate = shareTemplate(QStringLiteral("system-") + protocol);
+            if (selectedTemplate.isEmpty()) selectedTemplate = shareTemplate(QStringLiteral("system-general"));
+            QString body = selectedTemplate.value("body").toString();
+            if (!html && selectedTemplate.value("isSystem").toBool()) {
+                const bool wrappedKey = method.value("config").toString().startsWith(QStringLiteral("vpn://"));
+                body = QStringLiteral("سلام {{NAME}}،\nسرور: {{SERVER}}\nنوع اتصال: {{PROTOCOLS}}\n\n{{CONFIGS}}\n\n"
+                                      "راهنمای اتصال در ویندوز با CoCo VPN:\n"
+                                      "دانلود برنامه و راهنمای نصب: https://iranux.site/cocoVPN/\n"
+                                      "۱. برنامه CoCo VPN را نصب و باز کنید.\n۲. علامت + پایین صفحه را بزنید.\n");
+                body += wrappedKey
+                    ? QStringLiteral("۳. متن کلید بالا را کامل کپی کنید و در کادر کلید برنامه وارد کنید. سپس ادامه را بزنید.\n")
+                    : QStringLiteral("۳. برای دریافت فایل تنظیمات این حساب، خروجی HTML را باز کنید و دکمه دانلود فایل تنظیمات را بزنید. سپس در برنامه گزینه فایل تنظیمات اتصال را انتخاب کنید و فایل همان حساب را باز کنید.\n");
+                body += QStringLiteral("۴. حساب اضافه‌شده را انتخاب کنید و دکمه اتصال را بزنید. برای قطع اتصال، همان دکمه را دوباره بزنید.\n"
+                                       "برای راهنمای دستگاه‌های دیگر و نمایش کد QR در صورت موجود بودن، فایل HTML را استفاده کنید.");
+            }
             QVariantMap singleMethodGroup = group;
             singleMethodGroup.insert("methods", QVariantList{method});
-            sections.append(html ? renderAccountTemplateFragment(singleMethodGroup, body)
+            sections.append(html ? renderGuidedAccount(singleMethodGroup,
+                                    selectedTemplate.value("isSystem").toBool() ? QString() : body)
                                  : renderAccountTextFragment(singleMethodGroup, body));
         }
     }
@@ -394,28 +418,159 @@ QString ExportUiController::templateBodyById(const QString &id) const
     return shareTemplate(id).value("body").toString();
 }
 
+namespace {
+QString shareResource(const QString &name)
+{
+    QFile file(QStringLiteral(":/share/") + name);
+    if (!file.open(QIODevice::ReadOnly)) return {};
+    return QString::fromUtf8(file.readAll());
+}
+QString shareAsset(const QString &path)
+{
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) return {};
+    return QString::fromLatin1(file.readAll().toBase64());
+}
+// Replace tokens in one pass: account text and configuration may themselves contain {{...}}.
+QString shareSubstitute(const QString &source, const QMap<QString, QString> &values)
+{
+    static const QRegularExpression token(QStringLiteral(R"(\{\{([A-Z_]+)\}\})"));
+    QString result;
+    qsizetype offset = 0;
+    auto matches = token.globalMatch(source);
+    while (matches.hasNext()) {
+        const auto match = matches.next();
+        result += source.mid(offset, match.capturedStart() - offset);
+        result += values.value(match.captured(1), match.captured());
+        offset = match.capturedEnd();
+    }
+    return result + source.mid(offset);
+}
+}
+
 QString ExportUiController::wrapAccountsHtml(const QString &sections) const
 {
-    return QStringLiteral(
-        "<!doctype html><html lang=\"fa\" dir=\"rtl\"><head><meta charset=\"utf-8\">"
-        "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>CoCo VPN · اطلاعات اتصال</title>"
-        "<style>"
-        ":root{color-scheme:light;--ink:#18221c;--muted:#64736a;--green:#176b36;--line:#dce8df;--paper:#fff;--wash:#f1f7f2}"
-        "*{box-sizing:border-box}body{margin:0;background:#edf3ee;color:var(--ink);font:16px/1.85 Tahoma,Arial,sans-serif}"
-        ".page{max-width:900px;margin:32px auto;padding:0 18px}.brand{display:flex;align-items:center;gap:12px;margin:0 0 20px;color:var(--green);font-size:14px;font-weight:700}"
-        ".brand-mark{width:12px;height:12px;border-radius:50%;background:var(--green);box-shadow:0 0 0 5px #d8ecdd}"
-        ".account{overflow:hidden;margin:0 0 24px;background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:0 8px 28px #173c2210}"
-        ".account-head{padding:24px 26px;background:linear-gradient(135deg,#f0f8f1,#fff);border-bottom:1px solid var(--line)}"
-        "h1{margin:0;color:var(--green);font-size:24px;line-height:1.4} .server{margin:6px 0 0;color:var(--muted)}"
-        ".account-body{padding:22px 26px}.message{margin-bottom:18px}h2,h3{color:var(--green)}h3{margin:18px 0 8px;font-size:17px}"
-        "pre{margin:0;padding:16px;overflow-wrap:anywhere;white-space:pre-wrap;direction:ltr;text-align:left;background:#f5f8f5;border:1px solid var(--line);border-radius:12px;font:13px/1.65 Consolas,\"Courier New\",monospace}"
-        ".protocols{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.protocol{padding:3px 11px;border-radius:999px;background:#e8f4ea;color:var(--green);font-size:13px;font-weight:700}"
-        ".qr-list{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px}.qr{margin:0;padding:12px;text-align:center;border:1px solid var(--line);border-radius:14px;background:#fff}.qr img{display:block;width:190px;max-width:100%;height:auto;margin:auto}.qr figcaption{margin-top:6px;color:var(--muted);font-size:13px}"
-        ".footer{padding:14px;color:var(--muted);text-align:center;font-size:12px}@media(max-width:600px){.page{margin:14px auto;padding:0 10px}.account-head,.account-body{padding:18px}.qr img{width:160px}}"
-        "@media print{body{background:#fff}.page{max-width:none;margin:0;padding:0}.account{break-inside:avoid;box-shadow:none}.footer{color:#555}}"
-        "</style></head><body><main class=\"page\"><div class=\"brand\"><span class=\"brand-mark\"></span><span>CoCo VPN · راهنمای اتصال</span></div>%1"
-        "<footer class=\"footer\">اطلاعات اتصال محرمانه است؛ این فایل را فقط با کاربر موردنظر به‌اشتراک بگذارید.</footer></main></body></html>")
-        .arg(sections);
+    static const QString document = shareResource(QStringLiteral("document.html"));
+    static const QString regular = shareAsset(QStringLiteral(":/fonts/Shabnam.ttf"));
+    static const QString bold = shareAsset(QStringLiteral(":/fonts/Shabnam-Bold.ttf"));
+    static const QString logo = shareAsset(QStringLiteral(":/images/cocoVpnLogo.png"));
+    QString index;
+    static const QRegularExpression accounts(QStringLiteral("<article class=\"account\" id=\"([^\"]+)\" data-label=\"([^\"]+)\""));
+    auto entries = accounts.globalMatch(sections);
+    while (entries.hasNext()) {
+        const auto entry = entries.next();
+        index += QStringLiteral("<a class=\"button\" href=\"#%1\">%2</a> ").arg(entry.captured(1), entry.captured(2));
+    }
+    return shareSubstitute(document, {{"SECTIONS", sections}, {"INDEX", index}, {"FONT_REGULAR", regular},
+                                    {"FONT_BOLD", bold}, {"LOGO", logo},
+                                    {"FONT_LICENSE", shareResource(QStringLiteral("font-license.txt")).toHtmlEscaped()}});
+}
+
+QString ExportUiController::renderGuidedAccount(const QVariantMap &group, const QString &message, bool sample) const
+{
+    const QVariantList methods = group.value("methods").toList();
+    if (methods.size() != 1) return {};
+    const QVariantMap method = methods.first().toMap();
+    const QString config = method.value("config").toString();
+    const QString protocol = protocolKeyForMethod(method);
+    // Wrapped VPN keys require a compatible client, even when their protocol is OpenVPN or IKEv2.
+    const bool key = config.startsWith(QStringLiteral("vpn://"));
+    const QString guide = key || protocol == "ikev2" ? QStringLiteral("general") : protocol;
+    const QString app = QStringLiteral("CoCo VPN");
+    const QString extension = guide == "awg" || guide == "wireguard" ? QStringLiteral(".conf")
+                            : guide == "openvpn" ? QStringLiteral(".ovpn")
+                            : guide == "xray" ? QStringLiteral(".json") : QStringLiteral(".txt");
+    QString filename = group.value("name").toString();
+    filename.replace(QRegularExpression(QStringLiteral("[^A-Za-z0-9_-]")), QStringLiteral("_"));
+    if (filename.isEmpty()) filename = QStringLiteral("coco-vpn");
+    filename = filename.left(40) + "-" + protocol + extension;
+    const QString id = QUuid::createUuid().toString(QUuid::Id128);
+    QString qrBlock;
+    // OpenVPN Connect cannot import the segmented Amnezia QR series. Prefer its .ovpn file.
+    if (!sample && guide != "openvpn") {
+        QVariantList codes = method.value("qrCodes").toList();
+        if (key) {
+            codes.clear();
+            const QString qr = qrCodeUtils::generatePlainQrCodeImage(config.toUtf8());
+            if (!qr.isEmpty()) codes.append(qr);
+        }
+        for (const auto &value : codes) {
+            QString qr = value.toString();
+            qr.replace("data:image/svg;base64,", "data:image/svg+xml;base64,");
+            if (qr.startsWith("data:image/"))
+                qrBlock += QStringLiteral("<div class=\"qr-box\"><img src=\"%1\" alt=\"کد QR همین حساب\" width=\"186\" height=\"186\"></div>").arg(qr.toHtmlEscaped());
+        }
+    }
+    if (qrBlock.isEmpty()) qrBlock = QStringLiteral("<p class=\"qr-caption\">کد QR برای این حساب موجود نیست؛ از فایل تنظیمات یا متن کلید استفاده کنید.</p>");
+    const bool hasQr = qrBlock.contains(QStringLiteral("<img"));
+    const QString intro = guide == "general"
+        ? QStringLiteral("متن کلید این حساب را کپی کنید و در برنامه وارد کنید. مراحل دقیق در راهنمای کنار صفحه آمده است.")
+        : QStringLiteral("برای اضافه‌کردن این حساب، فایل تنظیمات را دانلود کنید و مراحل راهنما را انجام دهید.");
+    const QString importHelp = guide == "general"
+        ? QStringLiteral("در این حساب باید متن کلید را کامل کپی کنید و در کادر کلید برنامه وارد کنید. فایل TXT برای نگهداری متن کلید است؛ آن را به‌عنوان فایل تنظیمات وارد نکنید.")
+        : QStringLiteral("فایل تنظیمات را از دکمه همین صفحه دانلود کنید و در برنامه %1 وارد کنید. اگر برنامه فایل را قبول نکرد، آن را از لینک رسمی به‌روز کنید و متن خطا را برای ارائه‌دهنده حساب بفرستید.").arg(app.toHtmlEscaped());
+    QString note = QStringLiteral("<div class=\"tip\">برنامه اصلی در ویندوز: %1. راهنمای برنامه جایگزین در بخش جدا آمده است. برای دستگاه‌های دیگر، برنامه معرفی‌شده در راهنمای همان دستگاه را نصب کنید.</div>").arg(app.toHtmlEscaped());
+    const QString source = guide == "awg" ? "https://docs.amnezia.org/documentation/instructions/use-amneziawg-app/"
+                         : guide == "wireguard" ? "https://www.wireguard.com/install/"
+                         : guide == "openvpn" ? "https://openvpn.net/connect-docs/import-profile.html"
+                         : guide == "general" ? "https://docs.amnezia.org/documentation/instructions/connect-via-text-key/"
+                         : "https://docs.amnezia.org/documentation/instructions/connect-via-config/";
+    note += QStringLiteral("<a class=\"source\" href=\"https://iranux.site/cocoVPN/\" target=\"_blank\" rel=\"noopener noreferrer\">دانلود و راهنمای CoCo VPN</a> · ");
+    note += QStringLiteral("<a class=\"source\" href=\"%1\" target=\"_blank\" rel=\"noopener noreferrer\">راهنمای رسمی برنامه جایگزین</a>").arg(source);
+    const QString sampleNote = sample ? QStringLiteral("<p class=\"sample-note\">این صفحه پیش‌نمایش قالب با اطلاعات نمونه است. فایل و متن نمونه برای اتصال قابل استفاده نیستند.</p>") : QString();
+    QString fragment = shareSubstitute(shareResource(QStringLiteral("account.html")),
+        {{"ACCOUNT", group.value("name").toString().toHtmlEscaped()}, {"SERVER", group.value("serverName").toString().toHtmlEscaped()},
+         {"PROTOCOL", method.value("name", protocolDisplayName(protocol)).toString().toHtmlEscaped()},
+         {"EXTENSION", extension}, {"APP", app.toHtmlEscaped()}, {"ID", id}, {"LABEL", (group.value("name").toString() + " · " + method.value("name").toString()).toHtmlEscaped()},
+         {"GUIDES", shareResource(guide + ".html")}, {"GUIDE_NOTE", note}, {"QR_BLOCK", qrBlock},
+         {"SAMPLE_NOTE", sampleNote}, {"CONNECTION_INTRO", intro}, {"IMPORT_HELP", importHelp},
+         {"QR_HINT", hasQr ? QStringLiteral("برای اسکن QR، این صفحه را روی دستگاه دیگری باز کنید و در برنامه گزینه اسکن QR را بزنید.") : QString()}, {"MESSAGE", message.isEmpty() ? QString() : renderAccountTemplateFragment(group, message)},
+         {"CONFIG", config.toHtmlEscaped()}, {"CONFIG_DATA", QString::fromLatin1(config.toUtf8().toBase64())},
+         {"CONF_FILENAME", filename}});
+    if (sample) {
+        fragment.replace(QRegularExpression(QStringLiteral("href=\"data:application/octet-stream;base64,[^\"]*\"")), QStringLiteral("aria-disabled=\"true\""));
+        fragment.replace("download=", "data-sample-download=");
+    }
+    return fragment;
+}
+
+QString ExportUiController::renderShareTemplatePreview(const QString &templateId) const
+{
+    return renderTemplatePreview(shareTemplate(templateId));
+}
+
+QString ExportUiController::renderShareTemplateDraft(const QString &name, const QString &body, const QString &protocol) const
+{
+    return renderTemplatePreview({{"name", name}, {"body", body}, {"protocol", protocol}, {"isSystem", false}});
+}
+
+QString ExportUiController::renderTemplatePreview(const QVariantMap &item) const
+{
+    if (item.isEmpty()) return {};
+    const QString protocol = item.value("protocol").toString();
+    amnezia::DockerContainer container = amnezia::DockerContainer::None;
+    if (protocol == "awg") container = amnezia::DockerContainer::Awg;
+    else if (protocol == "wireguard") container = amnezia::DockerContainer::WireGuard;
+    else if (protocol == "openvpn") container = amnezia::DockerContainer::OpenVpn;
+    else if (protocol == "xray") container = amnezia::DockerContainer::Xray;
+    else if (protocol == "ikev2") container = amnezia::DockerContainer::Ipsec;
+    const QVariantMap method{{"container", static_cast<int>(container)}, {"name", protocolDisplayName(protocol)},
+                             {"config", QStringLiteral("اطلاعات نمونه برای پیش‌نمایش؛ قابل استفاده برای اتصال نیست.")}, {"qrCodes", QVariantList{}}};
+    const QVariantMap group{{"name", QStringLiteral("حساب نمونه")}, {"serverName", QStringLiteral("سرور نمونه")},
+                            {"methods", QVariantList{method}}};
+    return wrapAccountsHtml(renderGuidedAccount(group, item.value("isSystem").toBool() ? QString() : item.value("body").toString(), true));
+}
+
+bool ExportUiController::openHtmlPreview(const QString &html)
+{
+    if (html.isEmpty() || !m_previewDirectory.isValid()) return false;
+    const QString path = m_previewDirectory.filePath(QStringLiteral("CoCoVPN-preview.html"));
+    QFile file(path);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) return false;
+    const QByteArray data = html.toUtf8();
+    if (file.write(data) != data.size()) return false;
+    file.close();
+    return QDesktopServices::openUrl(QUrl::fromLocalFile(path));
 }
 
 QString ExportUiController::renderAccountTemplateFragment(const QVariantMap &group, const QString &templateBody) const
@@ -437,12 +592,12 @@ QString ExportUiController::renderAccountTemplateFragment(const QVariantMap &gro
                            .arg(methodName.toHtmlEscaped(), qr.toHtmlEscaped());
         }
     }
-    QString output = templateBody.toHtmlEscaped().replace("\n", "<br/>");
-    output.replace("{{NAME}}", group.value("name").toString().toHtmlEscaped());
-    output.replace("{{SERVER}}", group.value("serverName").toString().toHtmlEscaped());
-    output.replace("{{PROTOCOLS}}", QString("<div class=\"protocols\">%1</div>").arg(protocolBadges.join(QString())));
-    output.replace("{{CONFIGS}}", configs);
-    output.replace("{{QR}}", qrs.isEmpty() ? "(برای این تنظیمات کد QR در دسترس نیست.)" : QString("<div class=\"qr-list\">%1</div>").arg(qrs));
+    const QString output = shareSubstitute(templateBody.toHtmlEscaped().replace("\n", "<br/>"),
+        {{"NAME", group.value("name").toString().toHtmlEscaped()},
+         {"SERVER", group.value("serverName").toString().toHtmlEscaped()},
+         {"PROTOCOLS", QString("<div class=\"protocols\">%1</div>").arg(protocolBadges.join(QString()))},
+         {"CONFIGS", configs}, {"QR", qrs.isEmpty() ? QStringLiteral("کد QR برای این حساب موجود نیست.")
+                                                    : QString("<div class=\"qr-list\">%1</div>").arg(qrs)}});
     return QString("<article class=\"account\"><div class=\"account-body\"><div class=\"message\">%1</div></div></article>")
         .arg(output);
 }
@@ -458,15 +613,10 @@ QString ExportUiController::renderAccountTextFragment(const QVariantMap &group, 
         configs.append(QString("[%1]\n%2").arg(methodName, method.value("config").toString()));
     }
 
-    QString output = templateBody;
-    output.replace("{{NAME}}", group.value("name").toString());
-    output.replace("{{SERVER}}", group.value("serverName").toString());
-    output.replace("{{PROTOCOLS}}", protocols.join(QStringLiteral(", ")));
-    output.replace("{{CONFIGS}}", configs.join(QStringLiteral("\n\n")));
-    output.replace("{{QR}}", protocols.isEmpty()
-                                   ? QStringLiteral("کد QR برای این حساب موجود نیست.")
-                                   : QStringLiteral("برای مشاهدهٔ QR کدها، خروجی HTML را ذخیره کنید."));
-    return output;
+    return shareSubstitute(templateBody,
+        {{"NAME", group.value("name").toString()}, {"SERVER", group.value("serverName").toString()},
+         {"PROTOCOLS", protocols.join(QStringLiteral(", "))}, {"CONFIGS", configs.join(QStringLiteral("\n\n"))},
+         {"QR", QStringLiteral("برای مشاهده کد QR در صورت موجود بودن، فایل HTML را ذخیره کنید.")}});
 }
 
 void ExportUiController::generateFullAccessConfig(const QString &serverId)

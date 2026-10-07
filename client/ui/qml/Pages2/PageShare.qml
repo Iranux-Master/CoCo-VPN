@@ -1102,8 +1102,25 @@ PageType {
                                     Layout.fillWidth: true
                                     text: qsTr("Preview")
                                 }
+                                BasicButtonType {
+                                    Layout.fillWidth: true
+                                    visible: root.shareFormatIndex === 0
+                                    enabled: root.sharePreview.length > 0
+                                    text: qsTr("Open HTML preview")
+                                    leftImageSource: "qrc:/images/controls/eye.svg"
+                                    clickedFunc: function() {
+                                        if (!ExportController.openHtmlPreview(root.sharePreview))
+                                            PageController.showNotificationMessage(qsTr("Could not open HTML preview"))
+                                    }
+                                }
+                                ParagraphTextType {
+                                    Layout.fillWidth: true
+                                    visible: root.shareFormatIndex === 0
+                                    text: qsTr("The complete sharing page opens in your browser. You can check its guide, QR codes and download buttons before saving.")
+                                }
                                 TextArea {
                                     Layout.fillWidth: true
+                                    visible: root.shareFormatIndex !== 0
                                     Layout.preferredHeight: 240
                                     readOnly: true
                                     wrapMode: TextEdit.Wrap

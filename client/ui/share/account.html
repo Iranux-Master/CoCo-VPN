@@ -1,0 +1,26 @@
+<article class="account" id="account-{{ID}}" data-label="{{LABEL}}">
+{{SAMPLE_NOTE}}<section class="hero"><div><div class="eyebrow"><span class="dot"></span>راهنمای اتصال شما</div><h1>چند قدم تا اتصال.</h1><p>سلام <bdi>{{ACCOUNT}}</bdi>، این صفحه به شما کمک می‌کند VPN را راه‌اندازی کنید. ابتدا گوشی یا کامپیوتر خود را انتخاب کنید. سپس مراحل زیر را به‌ترتیب انجام دهید.</p></div><div class="hero-mark"><svg><use href="#shield"/></svg>تنظیمات حساب شما آماده است</div></section>
+<section class="account-strip" aria-label="مشخصات حساب"><div class="meta"><span>نام حساب</span><strong><bdi>{{ACCOUNT}}</bdi></strong></div><div class="meta"><span>سرور</span><strong><bdi>{{SERVER}}</bdi></strong></div><div class="meta"><span>نوع اتصال</span><strong class="protocol-label"><bdi>{{PROTOCOL}}</bdi><small>نام فایل تنظیمات با <bdi>{{EXTENSION}}</bdi> تمام می‌شود</small></strong></div></section>
+{{MESSAGE}}<div class="workspace">
+<section class="guide" aria-labelledby="guide-{{ID}}"><div class="section-title"><span class="section-number">۰۱</span><h2 id="guide-{{ID}}">از چه گوشی یا کامپیوتری استفاده می‌کنید؟</h2></div><p class="section-description">یکی از گزینه‌های زیر را انتخاب کنید تا راهنمای همان دستگاه نمایش داده شود.</p>
+<div class="os-tabs" role="group" aria-label="انتخاب سیستم‌عامل">
+<button class="os-tab" data-os="windows" aria-pressed="true"><svg><use href="#windows"/></svg><span lang="fa">ویندوز</span></button>
+<button class="os-tab" data-os="android" aria-pressed="false"><svg><use href="#android"/></svg><span lang="fa">اندروید</span></button>
+<button class="os-tab" data-os="ios" aria-pressed="false"><svg><use href="#phone"/></svg><span lang="fa">آیفون / آیپد</span></button>
+<button class="os-tab" data-os="mac" aria-pressed="false"><svg><use href="#laptop"/></svg><span lang="fa">مک</span></button>
+<button class="os-tab" data-os="linux" aria-pressed="false"><svg><use href="#terminal"/></svg><span lang="fa">لینوکس</span></button>
+</div>
+{{GUIDES}}
+
+
+
+
+{{GUIDE_NOTE}}
+</section>
+<aside class="aside"><section class="connection" aria-labelledby="connection-{{ID}}"><div class="kicker" lang="en">حساب شما</div><h2 id="connection-{{ID}}">اطلاعات اتصال شما</h2><p>{{CONNECTION_INTRO}}</p>{{QR_BLOCK}}<p class="qr-caption">{{QR_HINT}}</p><a class="button primary full" download="{{CONF_FILENAME}}" href="data:application/octet-stream;base64,{{CONFIG_DATA}}"><svg><use href="#download"/></svg>دانلود فایل تنظیمات</a><p class="file-caption">{{CONF_FILENAME}}</p><div class="connection-divider"></div><a class="button full" href="#guide-{{ID}}">مشاهده راهنمای اتصال<svg><use href="#arrow"/></svg></a></section><p class="help-note"><svg><use href="#shield"/></svg><span>فایل تنظیمات و کد QR برای همین حساب هستند. آن‌ها را فقط برای کسی بفرستید که قرار است از این حساب استفاده کند.</span></p></aside>
+</div>
+<section class="lower" id="help-{{ID}}" aria-label="راهنما و جزئیات بیشتر">
+<details class="details-card"><summary><span><svg><use href="#info"/></svg>اگر متصل نشدم چه کنم؟</span><svg class="chevron"><use href="#chevron"/></svg></summary><div class="detail-content faq"><p><strong>برنامه فایل را قبول نمی‌کند؟</strong> {{IMPORT_HELP}}</p><p><strong>VPN روشن است اما سایت باز نمی‌شود؟</strong> VPN را خاموش کنید و ببینید اینترنت کار می‌کند یا نه. اگر برنامه VPN دیگری روشن است، آن را هم خاموش کنید. سپس این VPN را دوباره روشن کنید. اگر مشکل حل نشد، متن خطا و مدل گوشی یا نسخه ویندوز خود را برای کسی که حساب را به شما داده است بفرستید.</p><p><strong>این صفحه روی همان گوشی باز است؟</strong> نیازی به اسکن کد نیست. روی «دانلود فایل تنظیمات» بزنید. سپس فایل دانلودشده را با روش توضیح‌داده‌شده در راهنمای بالا به برنامه اضافه کنید.</p></div></details>
+<details class="details-card"><summary><span><svg><use href="#terminal"/></svg>مشاهده متن تنظیمات اتصال</span><svg class="chevron"><use href="#chevron"/></svg></summary><div class="detail-content"><div class="config-toolbar"><span>این بخش برای کسانی است که به متن تنظیمات نیاز دارند. برای اتصال، از دکمه «دانلود فایل تنظیمات» و راهنمای بالا استفاده کنید.</span><button class="button" data-copy><svg><use href="#copy"/></svg>کپی تنظیمات</button></div><pre class="config-text">{{CONFIG}}</pre></div></details>
+</section>
+</article>
