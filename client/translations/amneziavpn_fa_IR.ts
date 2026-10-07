@@ -5589,6 +5589,7 @@ Create one from the current settings.</source>
     <message><source>All statuses</source><translation>همهٔ وضعیت‌ها</translation></message>
     <message><source>Complete</source><translation>کامل</translation></message>
     <message><source>Partially created</source><translation>ساخت ناقص</translation></message>
+    <message><source>Creation failed</source><translation>ساخت ناموفق</translation></message>
     <message><source>In progress</source><translation>در حال انجام</translation></message>
     <message><source>Status filter</source><translation>فیلتر وضعیت</translation></message>
     <message><source>%1 accounts · %2 selected</source><translation>⁨%1⁩ حساب · ⁨%2⁩ انتخاب‌شده</translation></message>
@@ -7340,6 +7341,8 @@ Remove the server from the app to continue.</source>
 </context>
 <context>
     <name>ExportUiController</name>
+    <message><source>Account creation was interrupted. Check the server before trying again.</source><translation>ساخت حساب نیمه‌کاره متوقف شده است. قبل از تلاش دوباره، وضعیت حساب را روی سرور بررسی کنید.</translation></message>
+    <message><source>No connection settings were returned.</source><translation>اطلاعات اتصال از سرور دریافت نشد.</translation></message>
     <message><source>General</source><translation>عمومی</translation></message>
     <message><source>General system template</source><translation>قالب عمومی سیستم</translation></message>
     <message><source>OpenVPN system template</source><translation>قالب سیستم OpenVPN</translation></message>

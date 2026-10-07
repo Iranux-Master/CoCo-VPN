@@ -16,6 +16,7 @@
 
 #include "../systemController.h"
 #include "core/utils/qrCodeUtils.h"
+#include "core/utils/errorStrings.h"
 
 ExportUiController::ExportUiController(ExportController* exportController, SecureQSettings* settings, QObject *parent)
     : QObject(parent),
@@ -26,7 +27,20 @@ ExportUiController::ExportUiController(ExportController* exportController, Secur
     if (m_settings) {
         const auto groups = QJsonDocument::fromJson(m_settings->value("Sharing/accountGroups").toByteArray()).array();
         const auto templates = QJsonDocument::fromJson(m_settings->value("Sharing/templates").toByteArray()).array();
-        for (const auto &v : groups) m_accountGroups.append(v.toObject().toVariantMap());
+        bool recoveredGroups = false;
+        for (const auto &v : groups) {
+            QVariantMap group = v.toObject().toVariantMap();
+            if (group.value("status").toString() == QStringLiteral("inProgress")) {
+                group.insert("status", group.value("methods").toList().isEmpty()
+                    ? QStringLiteral("failed") : QStringLiteral("partial"));
+                QStringList errors = group.value("errors").toStringList();
+                errors.append(tr("Account creation was interrupted. Check the server before trying again."));
+                group.insert("errors", errors);
+                recoveredGroups = true;
+            }
+            m_accountGroups.append(group);
+        }
+        if (recoveredGroups) saveAccountGroups();
         for (const auto &v : templates) {
             QVariantMap item = v.toObject().toVariantMap();
             item.insert("isSystem", false);
@@ -102,6 +116,20 @@ void ExportUiController::startAccountBatch(const QString &serverId, const QStrin
 {
     if (m_batchRunning || serverId.isEmpty() || baseName.trimmed().isEmpty() || containers.isEmpty() || count < 1 || count > 100)
         return;
+    QVariantList validContainers;
+    for (const QVariant &value : containers) {
+        bool valid = false;
+        const int index = value.toInt(&valid);
+        const auto container = static_cast<amnezia::DockerContainer>(index);
+        if (!valid || !amnezia::ContainerUtils::allContainers().contains(container)
+            || !amnezia::ContainerUtils::isShareable(container)
+            || amnezia::ContainerUtils::containerService(container) != amnezia::ServiceType::Vpn
+            || amnezia::ContainerUtils::isUnsupportedContainer(container)) {
+            emit exportErrorOccurred(ErrorCode::InternalError);
+            return;
+        }
+        if (!validContainers.contains(index)) validContainers.append(index);
+    }
     m_batchServerId = serverId;
     m_batchServerName = serverName;
     m_batchBaseName = baseName.trimmed();
@@ -110,7 +138,7 @@ void ExportUiController::startAccountBatch(const QString &serverId, const QStrin
     m_batchProtocolIndex = 0;
     m_batchSucceeded = 0;
     m_batchFailed = 0;
-    m_batchContainers = containers;
+    m_batchContainers = validContainers;
     m_batchRunning = true;
     emit batchProgressChanged();
     QTimer::singleShot(50, this, &ExportUiController::createNextBatchAccount);
@@ -159,7 +187,9 @@ void ExportUiController::createNextBatchAccount()
         m_batchGroup.insert("methods", methods);
     } else {
         QStringList errors = m_batchGroup.value("errors").toStringList();
-        errors.append(QString("%1: %2").arg(amnezia::ContainerUtils::containerHumanNames().value(container)).arg(static_cast<int>(result.errorCode)));
+        const QString reason = result.errorCode == ErrorCode::NoError
+            ? tr("No connection settings were returned.") : errorString(result.errorCode);
+        errors.append(QString("%1: %2").arg(amnezia::ContainerUtils::containerHumanNames().value(container), reason));
         m_batchGroup.insert("errors", errors);
     }
 
@@ -173,6 +203,8 @@ void ExportUiController::createNextBatchAccount()
             persistBatchGroup();
             ++m_batchSucceeded;
         } else {
+            m_batchGroup.insert("status", QStringLiteral("failed"));
+            persistBatchGroup();
             ++m_batchFailed;
         }
         m_batchProtocolIndex = 0;
@@ -184,7 +216,8 @@ void ExportUiController::createNextBatchAccount()
 
 void ExportUiController::persistBatchGroup()
 {
-    if (m_batchGroup.value("methods").toList().isEmpty()) return;
+    if (m_batchGroup.value("methods").toList().isEmpty()
+        && m_batchGroup.value("status").toString() != QStringLiteral("failed")) return;
     const QString id = m_batchGroup.value("id").toString();
     bool updated = false;
     for (qsizetype i = 0; i < m_accountGroups.size(); ++i) {
@@ -230,6 +263,8 @@ void ExportUiController::upsertShareTemplate(const QString &id, const QString &n
 
 void ExportUiController::deleteShareTemplate(const QString &id)
 {
+    const QVariantMap existing = shareTemplate(id);
+    if (existing.isEmpty() || existing.value("isSystem").toBool()) return;
     for (qsizetype i = m_shareTemplates.size() - 1; i >= 0; --i) {
         const QVariantMap item = m_shareTemplates.at(i).toMap();
         if (item.value("id").toString() == id && !item.value("isSystem").toBool()) m_shareTemplates.removeAt(i);
@@ -243,7 +278,9 @@ void ExportUiController::deleteShareTemplate(const QString &id)
 
 void ExportUiController::setDefaultShareTemplate(const QString &protocol, const QString &templateId)
 {
-    if (protocol.isEmpty() || shareTemplate(templateId).isEmpty()) return;
+    const QVariantMap item = shareTemplate(templateId);
+    const QString itemProtocol = item.value("protocol").toString();
+    if (protocol.isEmpty() || item.isEmpty() || (itemProtocol != protocol && itemProtocol != "general")) return;
     m_templateDefaults.insert(protocol, templateId);
     saveTemplateDefaults();
 }
@@ -251,7 +288,9 @@ void ExportUiController::setDefaultShareTemplate(const QString &protocol, const 
 QString ExportUiController::defaultShareTemplateId(const QString &protocol) const
 {
     const QString configured = m_templateDefaults.value(protocol).toString();
-    if (!configured.isEmpty() && !shareTemplate(configured).isEmpty()) return configured;
+    const QVariantMap item = shareTemplate(configured);
+    const QString itemProtocol = item.value("protocol").toString();
+    if (!item.isEmpty() && (itemProtocol == protocol || itemProtocol == "general")) return configured;
     const QString systemId = QStringLiteral("system-") + protocol;
     if (!shareTemplate(systemId).isEmpty()) return systemId;
     return QStringLiteral("system-general");
@@ -290,6 +329,7 @@ QVariantList ExportUiController::shareProtocols(const QVariantList &groupIds) co
         const QVariantMap group = accountGroup(groupId.toString());
         for (const auto &entry : group.value("methods").toList()) {
             const QVariantMap method = entry.toMap();
+            if (method.value("config").toString().trimmed().isEmpty()) continue;
             const QString key = protocolKeyForMethod(method);
             if (seen.contains(key)) continue;
             seen.insert(key);
@@ -481,9 +521,11 @@ QString ExportUiController::renderGuidedAccount(const QVariantMap &group, const 
                             : guide == "openvpn" ? QStringLiteral(".ovpn")
                             : guide == "xray" ? QStringLiteral(".json") : QStringLiteral(".txt");
     QString filename = group.value("name").toString();
-    filename.replace(QRegularExpression(QStringLiteral("[^A-Za-z0-9_-]")), QStringLiteral("_"));
+    filename.replace(QRegularExpression(QStringLiteral("[<>:\"/\\\\|?*\\x{0000}-\\x{001f}]")), QStringLiteral("_"));
+    filename = filename.trimmed();
     if (filename.isEmpty()) filename = QStringLiteral("coco-vpn");
-    filename = filename.left(40) + "-" + protocol + extension;
+    filename = QStringLiteral("CoCoVPN_") + filename.left(60) + "-" + protocol + "-"
+        + QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd_HH-mm-ss")) + extension;
     const QString id = QUuid::createUuid().toString(QUuid::Id128);
     QString qrBlock;
     // OpenVPN Connect cannot import the segmented Amnezia QR series. Prefer its .ovpn file.

@@ -17,6 +17,12 @@ PageType {
     property string editingTemplateName: ""
     property string editingTemplateBody: ""
     property bool editingIsSystem: false
+
+    Connections {
+        target: ExportController
+        enabled: root.visible
+        function onExportErrorOccurred(error) { PageController.showErrorMessage(error) }
+    }
     property var templateTags: ["{{NAME}}", "{{SERVER}}", "{{PROTOCOLS}}", "{{CONFIGS}}", "{{QR}}"]
     property var protocolOptions: [
         {"key": "general", "name": qsTr("General")},
@@ -159,10 +165,12 @@ PageType {
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
                         model: defaultSelector.availableTemplates
-                        currentValue: {
+                        selectedIndex: {
                             var revision = ExportController.shareTemplates
-                            return root.templateDisplayNameById(
-                                        ExportController.defaultShareTemplateId(defaultSelector.protocolKey))
+                            var selectedId = ExportController.defaultShareTemplateId(defaultSelector.protocolKey)
+                            for (var i = 0; i < defaultSelector.availableTemplates.length; ++i)
+                                if (defaultSelector.availableTemplates[i].id === selectedId) return i
+                            return 0
                         }
                         clickedFunction: function() {
                             var item = defaultSelector.availableTemplates[selectedIndex]
@@ -400,11 +408,12 @@ PageType {
                         text: qsTr("Delete template")
                         leftImageSource: "qrc:/images/controls/trash.svg"
                         clickedFunc: function() {
-                            root.showQuestionDrawer(qsTr("Delete this template?"),
+                            var templateIdToDelete = root.editingTemplateId
+                            showQuestionDrawer(qsTr("Delete this template?"),
                                                     qsTr("This action cannot be undone."),
                                                     qsTr("Delete"), qsTr("Cancel"),
                                                     function() {
-                                                        ExportController.deleteShareTemplate(root.editingTemplateId)
+                                                        ExportController.deleteShareTemplate(templateIdToDelete)
                                                         templateEditor.closeTriggered()
                                                     }, function() {})
                         }

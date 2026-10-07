@@ -84,7 +84,11 @@ PageType {
             }
             }
 
+            configFileName += "_" + root.shareFileSuffix(clientNameTextField.textField.text)
+
             PageController.showBusyIndicator(false)
+
+            if (!ExportController.config || ExportController.config.length === 0) return
 
             var headerText = qsTr("Connection to ") + serverSelector.text
             var configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
@@ -99,6 +103,18 @@ PageType {
         function onAccountBatchFinished(succeeded, failed) {
             accountSectionSelector.currentIndex = 1
             PageController.showNotificationMessage(qsTr("Account creation finished: %1 succeeded, %2 failed").arg(succeeded).arg(failed))
+        }
+
+        function onShareTemplatesChanged() {
+            if (templateShareDrawer.isOpened) root.syncShareTemplates()
+        }
+
+        function onAccountGroupsChanged() {
+            root.selectedAccountIds = root.selectedAccountIds.filter(function(id) {
+                var group = ExportController.accountGroup(id)
+                return group && group.id && root.canShareAccount(group)
+            })
+            if (templateShareDrawer.isOpened) root.syncShareTemplates()
         }
     }
 
@@ -145,6 +161,7 @@ PageType {
         {"value": "", "label": qsTr("All statuses"), "name": qsTr("All statuses")},
         {"value": "complete", "label": qsTr("Complete"), "name": qsTr("Complete")},
         {"value": "partial", "label": qsTr("Partially created"), "name": qsTr("Partially created")},
+        {"value": "failed", "label": qsTr("Creation failed"), "name": qsTr("Creation failed")},
         {"value": "inProgress", "label": qsTr("In progress"), "name": qsTr("In progress")}
     ]
     property var filteredAccountGroups: {
@@ -160,6 +177,24 @@ PageType {
             methods.forEach(function(method) { haystack.push(method.name) })
             return haystack.join(" ").toLowerCase().indexOf(query) >= 0
         })
+    }
+
+    function shareFileSuffix(name) {
+        // Keep Persian names, while removing characters Windows forbids in filenames.
+        var safeName = (name || "account").trim().replace(/[<>:"/\\|?*\u0000-\u001f\u007f]/g, "_")
+        safeName = safeName.replace(/[. ]+$/g, "").substring(0, 60).replace(/[. ]+$/g, "") || "account"
+        return safeName + "_" + Qt.formatDateTime(new Date(), "yyyy-MM-dd_HH-mm-ss")
+    }
+
+    function accountShareFileName(extension) {
+        var names = []
+        root.selectedAccountIds.forEach(function(id) {
+            var group = ExportController.accountGroup(id)
+            if (group && group.name) names.push(group.name)
+        })
+        var label = names.length > 0 ? names[0] : "account"
+        if (names.length > 1) label = label.substring(0, 40) + "_and_" + (names.length - 1) + "_more"
+        return "CoCoVPN_" + root.shareFileSuffix(label) + "." + extension
     }
 
     function optionIndex(options, value) {
@@ -197,7 +232,7 @@ PageType {
     }
 
     function selectVisibleAccounts() {
-        root.selectedAccountIds = root.filteredAccountGroups.map(function(group) { return group.id })
+        root.selectedAccountIds = root.filteredAccountGroups.filter(root.canShareAccount).map(function(group) { return group.id })
         root.sharePreview = ""
     }
 
@@ -213,6 +248,25 @@ PageType {
             var protocol = root.shareProtocolOptions[i]
             selections[protocol.key] = protocol.defaultTemplateId
         }
+        root.shareTemplateSelection = selections
+        root.refreshSharePreview()
+    }
+
+    function canShareAccount(group) {
+        return group.status !== "inProgress" && (group.methods || []).some(function(method) {
+            return (method.config || "").trim().length > 0
+        })
+    }
+
+    function syncShareTemplates() {
+        root.shareProtocolOptions = ExportController.shareProtocols(root.selectedAccountIds)
+        var selections = {}
+        root.shareProtocolOptions.forEach(function(protocol) {
+            var selectedId = root.shareTemplateSelection[protocol.key]
+            var available = ExportController.templatesForProtocol(protocol.key)
+            selections[protocol.key] = available.some(function(item) { return item.id === selectedId })
+                    ? selectedId : protocol.defaultTemplateId
+        })
         root.shareTemplateSelection = selections
         root.refreshSharePreview()
     }
@@ -478,6 +532,7 @@ PageType {
 
             DropDownType {
                 id: serverSelector
+                enabled: !ExportController.batchRunning
 
                 signal serverSelectorIndexChanged
                 property int currentIndex: -1
@@ -759,6 +814,7 @@ PageType {
                     }
                     TextFieldWithHeaderType {
                         id: batchNameField
+                        enabled: !ExportController.batchRunning
                         Layout.fillWidth: true
                         headerText: qsTr("Account name")
                         textField.text: qsTr("Client")
@@ -767,6 +823,7 @@ PageType {
                     }
                     TextFieldWithHeaderType {
                         id: batchCountField
+                        enabled: !ExportController.batchRunning
                         Layout.fillWidth: true
                         headerText: qsTr("Number of accounts (1–100)")
                         textField.text: "1"
@@ -781,6 +838,7 @@ PageType {
                     }
                     ListView {
                         id: batchProtocolList
+                        enabled: !ExportController.batchRunning
                         Layout.fillWidth: true
                         Layout.preferredHeight: Math.min(contentHeight, 5 * 64)
                         implicitHeight: Layout.preferredHeight
@@ -815,6 +873,8 @@ PageType {
                               : qsTr("Create accounts")
                         clickedFunc: function() {
                             var countText = batchCountField.textField.text.trim()
+                                    .replace(/[۰-۹]/g, function(digit) { return "۰۱۲۳۴۵۶۷۸۹".indexOf(digit) })
+                                    .replace(/[٠-٩]/g, function(digit) { return "٠١٢٣٤٥٦٧٨٩".indexOf(digit) })
                             var count = Number(countText)
                             if (!/^\d+$/.test(countText) || count < 1 || count > 100) {
                                 batchCountField.errorText = qsTr("Enter a whole number from 1 to 100.")
@@ -870,7 +930,6 @@ PageType {
                             clickedFunction: function() {
                                 var item = root.accountServerOptions[selectedIndex]
                                 root.accountServerFilter = item.value
-                                serverFilter.text = item.label
                                 serverFilter.closeTriggered()
                             }
                         }
@@ -890,7 +949,6 @@ PageType {
                             clickedFunction: function() {
                                 var item = root.accountProtocolOptions[selectedIndex]
                                 root.accountProtocolFilter = item.value
-                                protocolFilter.text = item.label
                                 protocolFilter.closeTriggered()
                             }
                         }
@@ -910,7 +968,6 @@ PageType {
                             clickedFunction: function() {
                                 var item = root.accountStatusOptions[selectedIndex]
                                 root.accountStatusFilter = item.value
-                                statusFilter.text = item.label
                                 statusFilter.closeTriggered()
                             }
                         }
@@ -962,9 +1019,11 @@ PageType {
                     delegate: CheckBoxType {
                         required property var modelData
                         Layout.fillWidth: true
+                        enabled: root.canShareAccount(modelData)
                         text: modelData.name + " · " + modelData.serverName + " · " + modelData.methods.length + " " + qsTr("methods")
                               + (modelData.status === "partial" ? " · " + qsTr("Some methods failed") : "")
-                        descriptionText: modelData.createdAt || ""
+                        descriptionText: (modelData.createdAt || "")
+                                         + ((modelData.errors || []).length > 0 ? "\n" + modelData.errors.join("\n") : "")
                         checked: root.selectedAccountIds.indexOf(modelData.id) >= 0
                         onToggled: {
                             var ids = root.selectedAccountIds.slice()
@@ -1157,8 +1216,8 @@ PageType {
                                         var extension = isHtml ? "html" : "txt"
                                         var filter = isHtml ? qsTr("HTML files (*.html)") : qsTr("Text files (*.txt)")
                                         var fileName = SystemController.getFileName(qsTr("Save sharing message"), filter,
-                                                                                    StandardPaths.standardLocations(StandardPaths.DocumentsLocation)
-                                                                                        + "/cocovpn_accounts." + extension,
+                                                                                    StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
+                                                                                        + "/" + root.accountShareFileName(extension),
                                                                                     true, extension)
                                         if (fileName !== "" && ExportController.setConfigFromString(root.sharePreview, fileName)) {
                                             PageController.showNotificationMessage(qsTr("Sharing message saved"))
