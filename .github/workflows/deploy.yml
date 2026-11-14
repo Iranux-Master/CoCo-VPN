@@ -4,6 +4,20 @@ on:
   push:
     branches-ignore:
       - main
+      - graphify
+    # Documentation, AI tooling and the other workflows cannot change a build: skip the full
+    # multi-platform build (and its self-hosted Android jobs) for pushes that touch only these.
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.claude/**'
+      - 'tools/codemap/**'
+      - 'tools/graphify/**'
+      - '.graphifyignore'
+      - '.github/workflows/graphify.yml'
+      - '.github/workflows/ai-docs.yml'
+      - '.github/workflows/windows-build.yml'
+      - '.github/pull_request_template.md'
 
 env:
   QT_MIRROR: https://mirrors.ocf.berkeley.edu/qt/ # https://download.qt.io/static/mirrorlist/

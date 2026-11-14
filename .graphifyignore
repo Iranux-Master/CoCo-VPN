@@ -1,0 +1,16 @@
+# Paths the Graphify code graph leaves out (gitignore syntax; tools/graphify/README.md).
+# Keep the graph to CoCo VPN's own source: client core, UI controllers/models, QML, service, ipc, common.
+client/3rd/
+client/3rd-prebuilt/
+client/images/
+client/fonts/
+client/translations/
+client/tests/
+client/android/gradle/
+metadata/
+recipes/
+deploy/
+cmake/
+docs/
+tools/
+graphify-out/

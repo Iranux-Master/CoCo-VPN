@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git fetch --depth=1 origin graphify)",
+      "Bash(git branch:*)",
+      "Bash(python3 -I tools/codemap/build_codemap.py:*)",
+      "Bash(bash -n:*)",
+      "Bash(ctest:*)",
+      "Bash(graphify query:*)",
+      "Bash(graphify path:*)",
+      "Bash(graphify explain:*)",
+      "Bash(graphify affected:*)",
+      "Bash(graphify god-nodes:*)"
+    ],
+    "deny": [
+      "Read(./**/*.p12)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.key)",
+      "Read(./.env)",
+      "Read(./.env.*)"
+    ]
+  }
+}

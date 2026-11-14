@@ -1,0 +1,29 @@
+name: AI docs check
+
+# Keeps the generated code map (docs/ai/CODE_MAP.md) in step with the source: a PR that changes QML,
+# a controller or CoreController's registrations must commit the regenerated file
+# (python3 -I tools/codemap/build_codemap.py). Standard library only, seconds to run.
+
+on:
+  pull_request:
+    paths:
+      - "client/**"
+      - "docs/ai/CODE_MAP.md"
+      - "tools/codemap/**"
+      - ".github/workflows/ai-docs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  code-map:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Code map is current
+        run: python3 -I tools/codemap/build_codemap.py --check
