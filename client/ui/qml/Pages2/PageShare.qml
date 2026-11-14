@@ -100,9 +100,11 @@ PageType {
             PageController.showErrorMessage(error)
         }
 
-        function onAccountBatchFinished(succeeded, failed) {
+        function onAccountBatchFinished(succeeded, failed, cancelled) {
             accountSectionSelector.currentIndex = 1
-            PageController.showNotificationMessage(qsTr("Account creation finished: %1 succeeded, %2 failed").arg(succeeded).arg(failed))
+            PageController.showNotificationMessage(cancelled
+                ? qsTr("Account creation stopped: %1 succeeded, %2 failed").arg(succeeded).arg(failed)
+                : qsTr("Account creation finished: %1 succeeded, %2 failed").arg(succeeded).arg(failed))
         }
 
         function onShareTemplatesChanged() {
@@ -358,7 +360,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: 24 + PageController.safeAreaTopMargin
 
-                headerText: Qt.platform.os === "windows" && accessTypeSelector.currentIndex === 1
+                headerText: GC.hasCocoAccountTools() && accessTypeSelector.currentIndex === 1
                             ? qsTr("User management")
                             : qsTr("Share VPN Access")
 
@@ -457,7 +459,7 @@ PageType {
 
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
-                            if (Qt.platform.os !== "windows" || userManagementSelector.currentIndex === 0) {
+                            if (!GC.hasCocoAccountTools() || userManagementSelector.currentIndex === 0) {
                                 PageController.showBusyIndicator(true)
                                 ExportController.updateClientManagementModel(ServersUiController.processedServerId,
                                                                              ServersUiController.processedContainerIndex)
@@ -476,7 +478,7 @@ PageType {
                 property int currentIndex: 1
                 Layout.fillWidth: true
                 Layout.topMargin: 16
-                visible: Qt.platform.os === "windows" && accessTypeSelector.currentIndex === 1
+                visible: GC.hasCocoAccountTools() && accessTypeSelector.currentIndex === 1
                 implicitHeight: userManagementRow.implicitHeight
                 radius: 16
                 color: AmneziaStyle.color.onyxBlack
@@ -604,7 +606,7 @@ PageType {
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
-                visible: accessTypeSelector.currentIndex === 0 || (accessTypeSelector.currentIndex === 1 && (Qt.platform.os !== "windows" || userManagementSelector.currentIndex === 0))
+                visible: accessTypeSelector.currentIndex === 0 || (accessTypeSelector.currentIndex === 1 && (!GC.hasCocoAccountTools() || userManagementSelector.currentIndex === 0))
 
                 drawerHeight: 0.5
                 drawerParent: root
@@ -661,7 +663,7 @@ PageType {
 
                         fillConnectionTypeModel()
 
-                        if (accessTypeSelector.currentIndex === 1 && (Qt.platform.os !== "windows" || userManagementSelector.currentIndex === 0)) {
+                        if (accessTypeSelector.currentIndex === 1 && (!GC.hasCocoAccountTools() || userManagementSelector.currentIndex === 0)) {
                             PageController.showBusyIndicator(true)
                             ExportController.updateClientManagementModel(ServersUiController.processedServerId,
                                                                          ServersUiController.processedContainerIndex)
@@ -768,7 +770,7 @@ PageType {
 
             ColumnLayout {
                 id: accountsPane
-                visible: Qt.platform.os === "windows" && accessTypeSelector.currentIndex === 1 && userManagementSelector.currentIndex === 1
+                visible: GC.hasCocoAccountTools() && accessTypeSelector.currentIndex === 1 && userManagementSelector.currentIndex === 1
                 Layout.fillWidth: true
                 Layout.topMargin: 24
                 spacing: 12
@@ -887,6 +889,28 @@ PageType {
                             ExportController.startAccountBatch(ServersUiController.processedServerId, serverSelector.text,
                                                                batchNameField.textField.text, count, root.selectedBatchProtocols)
                         }
+                    }
+                    BasicButtonType {
+                        Layout.fillWidth: true
+                        visible: ExportController.batchRunning
+                        enabled: !ExportController.batchCancelRequested
+                        defaultColor: AmneziaStyle.color.transparent
+                        hoveredColor: AmneziaStyle.color.translucentWhite
+                        pressedColor: AmneziaStyle.color.sheerWhite
+                        textColor: AmneziaStyle.color.paleGray
+                        borderWidth: 1
+                        text: ExportController.batchCancelRequested
+                              ? qsTr("Stopping after the current account...")
+                              : qsTr("Stop creating accounts")
+                        clickedFunc: function() {
+                            ExportController.cancelAccountBatch()
+                        }
+                    }
+                    ParagraphTextType {
+                        Layout.fillWidth: true
+                        visible: ExportController.batchRunning
+                        text: qsTr("You can keep using the app while accounts are created. Stopping finishes the step already sent to the server.")
+                        color: AmneziaStyle.color.mutedGray
                     }
                 }
 
@@ -1215,6 +1239,12 @@ PageType {
                                         var isHtml = root.shareFormatIndex === 0
                                         var extension = isHtml ? "html" : "txt"
                                         var filter = isHtml ? qsTr("HTML files (*.html)") : qsTr("Text files (*.txt)")
+                                        if (GC.usesSystemSavePicker()) {
+                                            // Android shows its own save dialog and does not report the result back.
+                                            ExportController.setConfigFromString(root.sharePreview, root.accountShareFileName(extension))
+                                            templateShareDrawer.closeTriggered()
+                                            return
+                                        }
                                         var fileName = SystemController.getFileName(qsTr("Save sharing message"), filter,
                                                                                     StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
                                                                                         + "/" + root.accountShareFileName(extension),
@@ -1244,7 +1274,8 @@ PageType {
                 Layout.topMargin: 40
                 Layout.bottomMargin: 32
 
-                enabled: shareButtonEnabled
+                // A single export during a batch would edit the same server user list at the same time.
+                enabled: shareButtonEnabled && !ExportController.batchRunning
                 visible: accessTypeSelector.currentIndex === 0
 
                 text: qsTr("Share")
@@ -1263,7 +1294,7 @@ PageType {
                 Layout.topMargin: 24
                 Layout.bottomMargin: 16
 
-                visible: accessTypeSelector.currentIndex === 1 && (Qt.platform.os !== "windows" || userManagementSelector.currentIndex === 0) && !root.isSearchBarVisible
+                visible: accessTypeSelector.currentIndex === 1 && (!GC.hasCocoAccountTools() || userManagementSelector.currentIndex === 0) && !root.isSearchBarVisible
 
                 headerText: qsTr("Users")
                 actionButtonImage: "qrc:/images/controls/search.svg"
@@ -1275,7 +1306,7 @@ PageType {
             RowLayout {
                 Layout.topMargin: 24
                 Layout.bottomMargin: 16
-                visible: accessTypeSelector.currentIndex === 1 && (Qt.platform.os !== "windows" || userManagementSelector.currentIndex === 0) && root.isSearchBarVisible
+                visible: accessTypeSelector.currentIndex === 1 && (!GC.hasCocoAccountTools() || userManagementSelector.currentIndex === 0) && root.isSearchBarVisible
 
                 TextFieldWithHeaderType {
                     id: searchTextField
@@ -1320,7 +1351,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.preferredHeight: contentHeight
 
-                visible: accessTypeSelector.currentIndex === 1 && (Qt.platform.os !== "windows" || userManagementSelector.currentIndex === 0)
+                visible: accessTypeSelector.currentIndex === 1 && (!GC.hasCocoAccountTools() || userManagementSelector.currentIndex === 0)
 
                 function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') }
 

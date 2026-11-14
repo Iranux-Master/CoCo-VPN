@@ -13,15 +13,26 @@
 #include <QUrl>
 #include <QRegularExpression>
 #include <QMap>
+#include <QFutureWatcher>
+#include <QtConcurrent>
+#include <QDir>
+#include <QStandardPaths>
 
 #include "../systemController.h"
 #include "core/utils/qrCodeUtils.h"
 #include "core/utils/errorStrings.h"
+#include "core/controllers/selfhosted/usersController.h"
 
-ExportUiController::ExportUiController(ExportController* exportController, SecureQSettings* settings, QObject *parent)
+#ifdef Q_OS_ANDROID
+    #include "platforms/android/android_controller.h"
+#endif
+
+ExportUiController::ExportUiController(ExportController* exportController, SecureQSettings* settings,
+                                       SecureServersRepository* serversRepository, QObject *parent)
     : QObject(parent),
       m_exportController(exportController),
-      m_settings(settings)
+      m_settings(settings),
+      m_serversRepository(serversRepository)
 {
     addSystemShareTemplates();
     if (m_settings) {
@@ -64,6 +75,15 @@ QVariantList ExportUiController::shareTemplates() const { return m_shareTemplate
 int ExportUiController::batchProgress() const { return m_batchIndex * m_batchContainers.size() + m_batchProtocolIndex; }
 int ExportUiController::batchTotal() const { return m_batchCount * m_batchContainers.size(); }
 bool ExportUiController::batchRunning() const { return m_batchRunning; }
+bool ExportUiController::batchCancelRequested() const { return m_batchCancelRequested; }
+
+void ExportUiController::cancelAccountBatch()
+{
+    if (!m_batchRunning || m_batchCancelRequested) return;
+    // The step in progress (one account and protocol) finishes on the server first; no new step starts.
+    m_batchCancelRequested = true;
+    emit batchProgressChanged();
+}
 
 void ExportUiController::saveAccountGroups()
 {
@@ -140,17 +160,25 @@ void ExportUiController::startAccountBatch(const QString &serverId, const QStrin
     m_batchFailed = 0;
     m_batchContainers = validContainers;
     m_batchRunning = true;
+    m_batchCancelRequested = false;
     emit batchProgressChanged();
-    QTimer::singleShot(50, this, &ExportUiController::createNextBatchAccount);
+    QTimer::singleShot(0, this, &ExportUiController::createNextBatchAccount);
+}
+
+void ExportUiController::finishAccountBatch()
+{
+    const bool cancelled = m_batchCancelRequested;
+    m_batchRunning = false;
+    m_batchCancelRequested = false;
+    emit batchProgressChanged();
+    emit accountBatchFinished(m_batchSucceeded, m_batchFailed, cancelled);
 }
 
 void ExportUiController::createNextBatchAccount()
 {
     if (!m_batchRunning) return;
-    if (m_batchIndex >= m_batchCount) {
-        m_batchRunning = false;
-        emit batchProgressChanged();
-        emit accountBatchFinished(m_batchSucceeded, m_batchFailed);
+    if (m_batchIndex >= m_batchCount || (m_batchCancelRequested && m_batchProtocolIndex == 0)) {
+        finishAccountBatch();
         return;
     }
 
@@ -165,19 +193,50 @@ void ExportUiController::createNextBatchAccount()
     }
 
     const int containerIndex = m_batchContainers.at(m_batchProtocolIndex).toInt();
-    const auto container = static_cast<amnezia::DockerContainer>(containerIndex);
-    ExportController::ExportResult result;
-    if (container == amnezia::DockerContainer::OpenVpn)
-        result = m_exportController->generateOpenVpnConfig(m_batchServerId, name);
-    else if (container == amnezia::DockerContainer::WireGuard)
-        result = m_exportController->generateWireGuardConfig(m_batchServerId, name);
-    else if (container == amnezia::DockerContainer::Awg || container == amnezia::DockerContainer::Awg2)
-        result = m_exportController->generateAwgConfig(m_batchServerId, containerIndex, name);
-    else if (container == amnezia::DockerContainer::Xray)
-        result = m_exportController->generateXrayConfig(m_batchServerId, name);
-    else
-        result = m_exportController->generateConnectionConfig(m_batchServerId, containerIndex, name);
 
+    // KI-03: every step is several SSH round trips, so it runs in a worker thread and the window
+    // stays responsive. Steps run one at a time; the server's clientsTable is updated by a private
+    // UsersController in the same thread, so the shared one behind the users list is not touched.
+    ExportController *exportController = m_exportController;
+    SecureServersRepository *serversRepository = m_serversRepository;
+    const QString serverId = m_batchServerId;
+    auto *watcher = new QFutureWatcher<ExportController::ExportResult>(this);
+    connect(watcher, &QFutureWatcher<ExportController::ExportResult>::finished, this, [this, watcher, containerIndex]() {
+        const ExportController::ExportResult result = watcher->result();
+        watcher->deleteLater();
+        handleBatchResult(containerIndex, result);
+    });
+    watcher->setFuture(QtConcurrent::run([exportController, serversRepository, serverId, containerIndex, name]() {
+        const auto container = static_cast<amnezia::DockerContainer>(containerIndex);
+        ExportController::ExportResult result;
+        {
+            ExportController::ClientAppendDeferral deferral;
+            if (container == amnezia::DockerContainer::OpenVpn)
+                result = exportController->generateOpenVpnConfig(serverId, name);
+            else if (container == amnezia::DockerContainer::WireGuard)
+                result = exportController->generateWireGuardConfig(serverId, name);
+            else if (container == amnezia::DockerContainer::Awg || container == amnezia::DockerContainer::Awg2)
+                result = exportController->generateAwgConfig(serverId, containerIndex, name);
+            else if (container == amnezia::DockerContainer::Xray)
+                result = exportController->generateXrayConfig(serverId, name);
+            else
+                result = exportController->generateConnectionConfig(serverId, containerIndex, name);
+        }
+        if (result.errorCode == ErrorCode::NoError && !result.clientId.isEmpty() && serversRepository) {
+            UsersController users(serversRepository);
+            const ErrorCode appendError = users.appendClient(serverId, result.clientId, name, container);
+            if (appendError != ErrorCode::NoError)
+                qWarning() << "ExportUiController: the account works, but its name was not saved in the server user list:"
+                           << static_cast<int>(appendError);
+        }
+        return result;
+    }));
+}
+
+void ExportUiController::handleBatchResult(int containerIndex, const ExportController::ExportResult &result)
+{
+    if (!m_batchRunning) return;
+    const auto container = static_cast<amnezia::DockerContainer>(containerIndex);
     if (result.errorCode == ErrorCode::NoError && !result.config.isEmpty()) {
         QVariantList methods = m_batchGroup.value("methods").toList();
         QVariantList qrs;
@@ -196,6 +255,12 @@ void ExportUiController::createNextBatchAccount()
     ++m_batchProtocolIndex;
     emit batchProgressChanged();
     persistBatchGroup();
+    if (m_batchCancelRequested && m_batchProtocolIndex < m_batchContainers.size()) {
+        QStringList errors = m_batchGroup.value("errors").toStringList();
+        errors.append(tr("Account creation was stopped before all connection methods were created."));
+        m_batchGroup.insert("errors", errors);
+        m_batchProtocolIndex = m_batchContainers.size();
+    }
     if (m_batchProtocolIndex >= m_batchContainers.size()) {
         if (!m_batchGroup.value("methods").toList().isEmpty()) {
             m_batchGroup.insert("status", m_batchGroup.value("errors").toStringList().isEmpty()
@@ -211,7 +276,7 @@ void ExportUiController::createNextBatchAccount()
         ++m_batchIndex;
         emit batchProgressChanged();
     }
-    QTimer::singleShot(50, this, &ExportUiController::createNextBatchAccount);
+    QTimer::singleShot(0, this, &ExportUiController::createNextBatchAccount);
 }
 
 void ExportUiController::persistBatchGroup()
@@ -605,14 +670,28 @@ QString ExportUiController::renderTemplatePreview(const QVariantMap &item) const
 
 bool ExportUiController::openHtmlPreview(const QString &html)
 {
-    if (html.isEmpty() || !m_previewDirectory.isValid()) return false;
+    if (html.isEmpty()) return false;
+#ifdef Q_OS_ANDROID
+    // The FileProvider (qtprovider_paths.xml) shares only the app's files dir, not the cache dir
+    // where QTemporaryDir lives, and a browser cannot read a file:// path inside the app sandbox.
+    const QString directory = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)
+        + QStringLiteral("/share-preview");
+    if (!QDir().mkpath(directory)) return false;
+    const QString path = directory + QStringLiteral("/CoCoVPN-preview.html");
+#else
+    if (!m_previewDirectory.isValid()) return false;
     const QString path = m_previewDirectory.filePath(QStringLiteral("CoCoVPN-preview.html"));
+#endif
     QFile file(path);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) return false;
     const QByteArray data = html.toUtf8();
     if (file.write(data) != data.size()) return false;
     file.close();
+#ifdef Q_OS_ANDROID
+    return AndroidController::instance()->openHtmlFile(path);
+#else
     return QDesktopServices::openUrl(QUrl::fromLocalFile(path));
+#endif
 }
 
 QString ExportUiController::renderAccountTemplateFragment(const QVariantMap &group, const QString &templateBody) const

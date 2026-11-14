@@ -8,6 +8,7 @@
 #include <QTemporaryDir>
 
 #include "core/controllers/selfhosted/exportController.h"
+#include "core/repositories/secureServersRepository.h"
 #include "core/utils/errorCodes.h"
 #include "secureQSettings.h"
 
@@ -15,7 +16,8 @@ class ExportUiController : public QObject
 {
     Q_OBJECT
 public:
-    explicit ExportUiController(ExportController* exportController, SecureQSettings* settings, QObject *parent = nullptr);
+    explicit ExportUiController(ExportController* exportController, SecureQSettings* settings,
+                                SecureServersRepository* serversRepository, QObject *parent = nullptr);
 
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY exportConfigChanged)
     Q_PROPERTY(int qrCodesCount READ getQrCodesCount NOTIFY exportConfigChanged)
@@ -26,6 +28,7 @@ public:
     Q_PROPERTY(int batchProgress READ batchProgress NOTIFY batchProgressChanged)
     Q_PROPERTY(int batchTotal READ batchTotal NOTIFY batchProgressChanged)
     Q_PROPERTY(bool batchRunning READ batchRunning NOTIFY batchProgressChanged)
+    Q_PROPERTY(bool batchCancelRequested READ batchCancelRequested NOTIFY batchProgressChanged)
 
 public slots:
     void generateFullAccessConfig(const QString &serverId);
@@ -56,6 +59,8 @@ public slots:
     int batchProgress() const;
     int batchTotal() const;
     bool batchRunning() const;
+    bool batchCancelRequested() const;
+    Q_INVOKABLE void cancelAccountBatch();
     Q_INVOKABLE void startAccountBatch(const QString &serverId, const QString &serverName,
                                        const QString &baseName, int count, const QVariantList &containers);
     Q_INVOKABLE void saveShareTemplate(const QString &name, const QString &body);
@@ -89,7 +94,7 @@ signals:
     void exportConfigChanged();
 
     void saveFile(const QString &fileName, const QString &data);
-    void accountBatchFinished(int succeeded, int failed);
+    void accountBatchFinished(int succeeded, int failed, bool cancelled);
     void accountGroupsChanged();
     void shareTemplatesChanged();
     void batchProgressChanged();
@@ -99,6 +104,8 @@ private:
     void clearPreviousConfig();
     void applyExportResult(const ExportController::ExportResult &result);
     void createNextBatchAccount();
+    void handleBatchResult(int containerIndex, const ExportController::ExportResult &result);
+    void finishAccountBatch();
     void saveAccountGroups();
     void saveShareTemplates();
     void saveTemplateDefaults();
@@ -115,6 +122,7 @@ private:
 
     ExportController* m_exportController;
     SecureQSettings* m_settings;
+    SecureServersRepository* m_serversRepository;
     QVariantList m_accountGroups;
     QVariantList m_shareTemplates;
     QVariantMap m_templateDefaults;
@@ -129,6 +137,7 @@ private:
     int m_batchSucceeded = 0;
     int m_batchFailed = 0;
     bool m_batchRunning = false;
+    bool m_batchCancelRequested = false;
 
     QString m_config;
     QString m_nativeConfigString;

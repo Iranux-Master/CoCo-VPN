@@ -33,6 +33,8 @@ public:
     void stop();
     void resetLastServer(int serverIndex);
     void saveFile(const QString &fileName, const QString &data);
+    // CoCo: open a local HTML file (under the app's files dir) in a browser through the FileProvider.
+    bool openHtmlFile(const QString &path);
     QString openFile(const QString &filter);
     int getFd(const QString &fileName);
     void closeFd();

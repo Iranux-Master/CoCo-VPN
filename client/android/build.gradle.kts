@@ -37,11 +37,13 @@ android {
     val abiList = qtTargetAbiList.split(",")
 
     defaultConfig {
-        applicationId = "org.amnezia.vpn"
+        // CoCo: own application id, so CoCo installs next to Amnezia VPN and is not taken for an Amnezia update.
+        // The Kotlin namespace stays org.amnezia.vpn (class names are unchanged).
+        applicationId = "site.iranux.cocovpn"
         targetSdk = qtTargetSdkVersion.toInt()
 
         // keeps language resources for only the locales specified below
-        resourceConfigurations += listOf("en", "ru", "b+zh+Hans")
+        resourceConfigurations += listOf("en", "fa", "ru", "b+zh+Hans")
         // ndk.abiFilters is only used for single-ABI builds; multi-ABI uses splits below
         if (abiList.size == 1) {
             ndk.abiFilters += abiList

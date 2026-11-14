@@ -288,7 +288,9 @@ PageType {
                                      ? "qrc:/images/controls/server.svg"
                                      : "qrc:/images/cocoVpnIcon.png"
         property bool featuredAmneziaConnection: true
-        property bool isVisible: true
+        // CoCo (KI-01): this card lists Amnezia's own paid and free services from the Amnezia gateway,
+        // which would sell Amnezia subscriptions under the CoCo name. Hidden; webpackVpn below replaces it.
+        property bool isVisible: false
         property var handler: function() {
             PageController.showBusyIndicator(true)
             var result = SubscriptionUiController.fillAvailableServices()
@@ -394,7 +396,8 @@ PageType {
         property string title: qsTr("Restore purchases")
         property string description: qsTr("")
         property string imageSource: "qrc:/images/controls/refresh-cw.svg"
-        property bool isVisible: Qt.platform.os === "ios" || IsMacOsNeBuild || IsPlayBuild
+        // CoCo (KI-01): restores Amnezia store purchases; CoCo sells nothing through the stores.
+        property bool isVisible: false
         property var handler: function() {
             PageController.showBusyIndicator(true)
             SubscriptionUiController.restoreServiceFromStore()

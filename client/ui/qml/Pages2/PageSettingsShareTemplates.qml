@@ -8,6 +8,7 @@ import Style 1.0
 import "./"
 import "../Controls2"
 import "../Controls2/TextTypes"
+import "../Config"
 
 PageType {
     id: root
@@ -84,6 +85,11 @@ PageType {
     function downloadPreview(id) {
         var html = ExportController.renderShareTemplatePreview(id)
         if (html.length === 0) return
+        if (GC.usesSystemSavePicker()) {
+            // Android shows its own save dialog; the result is not reported back.
+            ExportController.setConfigFromString(html, "CoCoVPN-template-preview.html")
+            return
+        }
         var fileName = SystemController.getFileName(qsTr("Save HTML preview"), qsTr("HTML files (*.html)"),
                 StandardPaths.writableLocation(StandardPaths.DocumentsLocation) + "/CoCoVPN-template-preview.html",
                 true, "html")
@@ -92,7 +98,7 @@ PageType {
     }
 
     function openTemplate(item) {
-        if (item.isSystem && Qt.platform.os === "windows") {
+        if (item.isSystem && GC.hasCocoAccountTools()) {
             root.previewTemplate(item.id)
             return
         }
@@ -227,7 +233,7 @@ PageType {
                         Layout.rightMargin: 16
                         Layout.bottomMargin: 12
                         implicitHeight: 44
-                        visible: Qt.platform.os === "windows"
+                        visible: GC.hasCocoAccountTools()
                         text: qsTr("Save HTML preview")
                         clickedFunc: function() { root.downloadPreview(modelData.id) }
                     }
@@ -386,7 +392,7 @@ PageType {
 
                     BasicButtonType {
                         Layout.fillWidth: true
-                        visible: Qt.platform.os === "windows"
+                        visible: GC.hasCocoAccountTools()
                         text: qsTr("Open HTML preview")
                         clickedFunc: function() {
                             var html = ExportController.renderShareTemplateDraft(templateNameField.textField.text,

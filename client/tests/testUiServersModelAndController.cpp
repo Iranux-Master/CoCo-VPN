@@ -192,7 +192,7 @@ private slots:
             QString hostName = "test.example.com";
             
             QString collapsedDescription = m_coreController->m_serversUiController->getDefaultServerDescriptionCollapsed();
-            QString expectedCollapsed = "AmneziaWG (version 2) | " + hostName;
+            QString expectedCollapsed = "AWG (version 2) | " + hostName;
             QVERIFY2(collapsedDescription == expectedCollapsed, 
                      QString("Collapsed description should be '%1', got '%2'").arg(expectedCollapsed, collapsedDescription).toUtf8().constData());
             
@@ -305,8 +305,8 @@ private slots:
 
         QString descWithDns = m_coreController->m_serversModel->data(
             m_coreController->m_serversModel->index(0, 0), ServersModel::ServerDescriptionRole).toString();
-        QVERIFY2(descWithDns == "Amnezia DNS | test.example.com",
-                 QString("With Amnezia DNS expected 'Amnezia DNS | test.example.com', got '%1'").arg(descWithDns).toUtf8().constData());
+        QVERIFY2(descWithDns == "VPN DNS | test.example.com",
+                 QString("With Amnezia DNS expected 'VPN DNS | test.example.com', got '%1'").arg(descWithDns).toUtf8().constData());
     }
 };
 

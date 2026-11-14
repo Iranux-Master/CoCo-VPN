@@ -6,7 +6,7 @@
 |---|---|---|
 | Windows installer | `deploy\build.bat --installer ifw` | What CI runs. Needs MSVC 2022 x64 (`ilammy/msvc-dev-cmd`), Qt 6.10.1 `win64_msvc2022_64` with `qtremoteobjects qt5compat qtshadertools` and `tools_ifw`, Conan 2.28 (`pip install "conan==2.28.0"`), `QT_INSTALL_DIR` set. Output `deploy/build/CoCoVPN_*_windows_x64.exe`. |
 | Linux / macOS | `deploy/build.sh` | `-b <dir>` build folder (default `deploy/build`), `-t <target>`, `-f` clean, `--installer <name>` |
-| Android | `deploy/build.sh` with the Android Qt kit, `--abi`, `--apk` / `--aab` | Inherited from upstream; not exercised by CoCo yet. |
+| Android APK | `deploy/build.sh -t android --sign --abi arm64-v8a` | What `android-build.yml` runs on `ubuntu-latest`: Qt 6.10.1 `linux_gcc_64` + `android_arm64_v8a`, NDK 27.0.11718014, Java 17, Conan 2.28, `QT_ANDROID_KEYSTORE_*` set. Output `deploy/build/client/android-build/*.apk`, uploaded as `CoCoVPN_<version>_android_arm64-v8a_<release|test>-signed.apk`. |
 | iOS / macOS NE | upstream scripts (`deploy.yml` jobs) | Not exercised by CoCo yet. |
 
 The first build compiles the Conan recipes in `recipes/` (OpenSSL, libssh, OpenVPN, awg, xray
@@ -43,6 +43,7 @@ and is the first candidate for a test once it moves out of the UI controller (KN
 | Workflow | Trigger | What it does |
 |---|---|---|
 | `windows-build.yml` | push to `main`, manual | Builds the Windows IFW installer and uploads it as an artifact (1 day). Tests are off (`AMNEZIA_BUILD_TESTS: OFF`). |
+| `android-build.yml` | push to `main` and pull requests touching Android, UI or core code; manual | Builds a signed arm64-v8a APK (7 days). Signs with `ANDROID_RELEASE_KEYSTORE_BASE64` / `_KEY_ALIAS` / `_KEY_PASS` when set, otherwise with a throwaway key made in the run. |
 | `deploy.yml` | push to any branch except `main` / `graphify`, unless only docs or AI tooling changed | Upstream's full multi-platform build and test matrix. Fails on CoCo branches today (missing secrets and self-hosted runners such as `android-runner`); see KNOWN_ISSUES KI-06. |
 | `tag-deploy.yml`, `tag-upload.yml` | tags / manual | Upstream release jobs, not adapted to CoCo. |
 | `ai-docs.yml` | pull requests touching `client/` or the code map | `tools/codemap/build_codemap.py --check` |

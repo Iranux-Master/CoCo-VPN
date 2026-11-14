@@ -37,6 +37,7 @@ import android.widget.Toast
 import androidx.annotation.MainThread
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.graphics.Insets
 import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
@@ -736,7 +737,13 @@ class AmneziaActivity : QtActivity() {
         mainScope.launch {
             Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
-                type = "text/*"
+                // CoCo: HTML share pages must keep their type, or file managers and browsers on the
+                // receiving phone do not open them as a web page.
+                type = when (fileName.substringAfterLast('.', "").lowercase()) {
+                    "html", "htm" -> "text/html"
+                    "txt" -> "text/plain"
+                    else -> "text/*"
+                }
                 putExtra(Intent.EXTRA_TITLE, fileName)
             }.also {
                 try {
@@ -759,6 +766,31 @@ class AmneziaActivity : QtActivity() {
                     Toast.makeText(this@AmneziaActivity, "Unsupported", Toast.LENGTH_LONG).show()
                 }
             }
+        }
+    }
+
+    // CoCo: opens a generated HTML share page (written under filesDir) in the user's browser.
+    @Suppress("unused")
+    fun openHtmlFile(path: String): Boolean {
+        Log.v(TAG, "Open HTML file")
+        return try {
+            val uri = FileProvider.getUriForFile(this, "$packageName.qtprovider", File(path))
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "text/html")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            mainScope.launch {
+                try {
+                    startActivity(intent)
+                } catch (e: ActivityNotFoundException) {
+                    Log.e(TAG, "No app can open HTML: $e")
+                    Toast.makeText(this@AmneziaActivity, "No browser found", Toast.LENGTH_LONG).show()
+                }
+            }
+            true
+        } catch (e: IllegalArgumentException) {
+            Log.e(TAG, "HTML file is outside the shared folders: $e")
+            false
         }
     }
 

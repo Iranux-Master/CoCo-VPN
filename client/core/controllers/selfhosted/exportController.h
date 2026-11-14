@@ -45,6 +45,22 @@ public:
     ExportResult generateAwgConfig(const QString &serverId, int containerIndex, const QString &clientName);
     ExportResult generateXrayConfig(const QString &serverId, const QString &clientName);
 
+    // CoCo: batch account creation runs the generate* calls in a worker thread and appends the
+    // client to the server's clientsTable itself. While a ClientAppendDeferral lives on a thread,
+    // generate* on that thread skip appendClientRequested (whose handler would do SSH on the GUI
+    // thread). See ExportUiController::createNextBatchAccount (KI-03).
+    class ClientAppendDeferral
+    {
+    public:
+        ClientAppendDeferral();
+        ~ClientAppendDeferral();
+        ClientAppendDeferral(const ClientAppendDeferral &) = delete;
+        ClientAppendDeferral &operator=(const ClientAppendDeferral &) = delete;
+
+    private:
+        bool m_previous;
+    };
+
 signals:
     void appendClientRequested(const QString &serverId, const QString &clientId, const QString &clientName, DockerContainer container);
     void updateClientsRequested(const QString &serverId, DockerContainer container);

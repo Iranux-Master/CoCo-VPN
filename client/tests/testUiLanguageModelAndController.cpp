@@ -83,8 +83,10 @@ private slots:
 
     void testLineHeight()
     {
-        m_coreController->m_languageUiController->changeLanguage(LanguageSettings::AvailableLanguageEnum::Burmese);
-        QVERIFY2(m_coreController->m_languageUiController->getLineHeightAppend() == 10, "line height should be 10");
+        // CoCo offers only Persian and English, and neither needs the extra line height upstream
+        // adds for Burmese, so LanguageUiController::getLineHeightAppend always returns 0.
+        m_coreController->m_languageUiController->changeLanguage(LanguageSettings::AvailableLanguageEnum::Persian);
+        QVERIFY2(m_coreController->m_languageUiController->getLineHeightAppend() == 0, "line height should be 0 for Persian");
 
         m_coreController->m_languageUiController->changeLanguage(LanguageSettings::AvailableLanguageEnum::English);
         QVERIFY2(m_coreController->m_languageUiController->getLineHeightAppend() == 0, "line height should be 0");

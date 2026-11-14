@@ -17,7 +17,7 @@ next product step, P2 later. Owner decisions are listed in §4 and block the ite
 | # | Item | Why | Docs |
 |---|---|---|---|
 | S1 | Windows hands-on test of batch accounts, templates and sharing; fix what it finds | Every CoCo feature is untested in the app | `CHANGELOG.md` |
-| S2 | Move the batch off the GUI thread, with progress and Cancel | KI-03 | plan: `docs/plans/S2-batch-off-gui-thread.md` |
+| S2 | ~~Move the batch off the GUI thread, with progress and Cancel~~ Done (Android port PR); the runner stays inside `ExportUiController` until S3 | KI-03 (fixed), KI-13 | plan: `docs/plans/S2-batch-off-gui-thread.md` |
 | S3 | Extract account groups, template rendering and batch orchestration from `ExportUiController` into `client/core/`, with Qt tests for rendering and file names | KI-04, first CoCo tests | `ARCHITECTURE.md` §7 |
 | S4 | Decide and apply the Amnezia Premium / Free policy: hide those pages and the gateway calls in CoCo builds (a CMake option such as `COCO_DISABLE_AMNEZIA_API`), until webpack replaces them | KI-01, decision O1 | |
 | S5 | CoCo update feed: a signed manifest and the update controller reading it | KI-02, request 3 in `docs/integration/WEBPACK.md` §7 | |
@@ -70,7 +70,7 @@ CoCo's users share accounts with other people, so the account tools are the prod
 
 | # | Feature | Notes |
 |---|---|---|
-| C1 | Android build with the CoCo identity (package id, icons, store listing) | KI-09 |
+| C1 | Android build with the CoCo identity: package id, icons, account tools and CI APK done; release key, phone test and store listing open | KI-09 |
 | C2 | macOS and Linux builds with the CoCo identity | KI-09 |
 | C3 | Persian onboarding and in-app help that matches the share-page guides | |
 | C4 | Diagnostics bundle (logs without secrets) to send to support | logger already exists |
