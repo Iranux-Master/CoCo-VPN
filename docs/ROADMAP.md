@@ -80,6 +80,6 @@ CoCo's users share accounts with other people, so the account tools are the prod
 |---|---|---|
 | O1 | Hide Amnezia Premium / Free in CoCo, or keep it as an option? | S4, W6 |
 | O2 | Where is the CoCo update manifest hosted (`iranux.site` or webpack.ir), and who signs it? | S5 |
-| O3 | Does CoCo ask for the server's login (sudo) password on webpack servers, or does webpack add a device sudo rule? | W3 |
+| O3 | Does CoCo ask for the server's login (sudo) password on webpack servers, or does webpack add a device sudo rule? Proposed: CoCo sets the password at purchase and installs a NOPASSWD sudoers file (`docs/plans/W5-buy-vps-in-app.md`) | W3, W5 |
 | O4 | Which platforms ship after Windows, and in which order? | C1, C2, S6 |
 | O5 | Is "account" in CoCo a local record only, or should it become a webpack entity (synced, with expiry and billing)? | A2, A6, A7, H1 |

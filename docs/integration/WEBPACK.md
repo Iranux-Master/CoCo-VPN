@@ -111,18 +111,23 @@ flowchart LR
    and hand it to the existing setup wizard (`InstallController`), which installs AWG / XRay /
    WireGuard / OpenVPN containers exactly as today. Batch accounts and share templates then work on
    that server unchanged.
-5. Open question: CoCo's installer runs `sudo`. The platform's sudo password never reaches devices
+5. CoCo's installer needs passwordless sudo (`check_user_in_sudo.sh` runs `sudo -n`). For servers
+   bought in CoCo, CoCo chose the password and installs a `NOPASSWD` sudoers file on first Config
+   (plan `W5-buy-vps-in-app.md`). For servers bought on the website: CoCo's installer runs `sudo`. The platform's sudo password never reaches devices
    (webpack `docs/modules/Servers.md`); the login password the person chose or saw at purchase is the
    sudo password. CoCo asks for it once per install (not stored, or stored only with consent), unless
    webpack adds a request in §7.
 
 ### F3. Buy a server from CoCo
 
-Phase 1: a "Buy a server" button that opens the website's server page (`https://webpack.ir/servers`; confirm the exact purchase route in webpack `docs/ai/API_REFERENCE.md` §4) in the browser, then
-refreshes the list. Phase 2: native, as the webpack desktop app does: plans with a quote in the
-wallet currency, location and system, review with balance and renewal terms, `POST /vps/orders` with
-an idempotency key that is kept until a definite answer (never double-charge on retry), poll the order
-every 4 s, then continue with F2. Top-up always on the website.
+Planned in detail in `docs/plans/W5-buy-vps-in-app.md`. In short: plans and review in the app; the
+order is paid from the wallet (`POST /vps/orders` has no other way to pay); when the wallet is short,
+CoCo opens `POST /wallet/payment-checkouts` for the exact shortfall in the **system browser** (never an
+embedded web view) and polls `GET /wallet/balance` until it covers the price, then orders by itself.
+The order carries this device's `sshKeyPublicId` and a CoCo-generated `loginUsername` /
+`loginPassword`, so the key is installed at build time and CoCo knows the sudo password. The idempotency
+key is kept until a definite answer (port of webpack's `OrderAttempt.cs`). CoCo then polls the order and
+`/access` until the server is ready, and continues with F2 (sudo bootstrap, pinned host key, install).
 
 ### F4. Server health in CoCo
 
@@ -174,7 +179,7 @@ wizard can prepare a server that CoCo then manages; or a one-time secret result 
 | W2 | "Servers bought from webpack" list, state, metrics, power actions | W1 |
 | W3 | "Set up access" + hand-off to the install wizard (F2) | W2, the sudo answer in F2 step 5 |
 | W4 | Notices and renewal (F5) | W1 |
-| W5 | Buy a server: phase 1 link, phase 2 native order (F3) | W2 |
+| W5 | Buy a server natively (F3; plan `docs/plans/W5-buy-vps-in-app.md`) | W1, device key + host-key pin |
 | W6 | Replace or hide the Amnezia Premium / Free flows (KNOWN_ISSUES KI-01) with webpack offers | owner decision |
 
 ## 7. Requests for the webpack project (do not implement from CoCo)
@@ -191,3 +196,14 @@ wizard can prepare a server that CoCo then manages; or a one-time secret result 
 5. **VPN-ready plans**: a plan or region flag that says traffic allowance and whether UDP ports are
    open, so CoCo can recommend a plan for VPN use.
 6. **Staging base URL** for CoCo development with fake payments.
+7. **Payment intent status (R7):** `GET /wallet/payment-intents/{id}` with `pending`, `verified`,
+   `credited`, `failed`, `cancelled` or `expired`, so a device stops waiting exactly (today: balance polling).
+8. **Device return page (R8):** `returnTo: "app"` on `POST /wallet/payment-checkouts`, so the gateway
+   return lands on a sign-in-free "payment received, return to CoCo" page (or a loopback port) instead
+   of `/wallet`, which may ask the browser to sign in.
+9. **Gateways for the caller (R9):** `GET /wallet/payment-gateways` with the live gateways for the
+   wallet currency and their minimum and maximum amounts.
+10. **Sudo facts in `/access` (R10):** a `sudoMode` (`password` or `nopasswd`) field, or a documented
+    guarantee of how a purchased login's sudo behaves.
+11. **VPN suitability per plan and system (R11, extends 5):** traffic allowance, UDP open, Docker
+    support per operating system.

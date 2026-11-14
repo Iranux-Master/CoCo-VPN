@@ -72,7 +72,7 @@ they are large and rarely relevant.
   triggers the Windows installer build.
 - **webpack.ir repository (`Iranux-Master/Iranux-Bash-Runner`) is read-only from this project.**
   Read its `AGENTS.md`, `docs/ai/API_REFERENCE.md` and module docs; never push to it from a CoCo task.
-  Anything CoCo needs from webpack goes into `docs/integration/WEBPACK.md` §6 as a request.
+  Anything CoCo needs from webpack goes into `docs/integration/WEBPACK.md` §7 as a request.
 
 ## Commands
 
