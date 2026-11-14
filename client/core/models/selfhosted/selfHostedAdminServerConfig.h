@@ -30,6 +30,8 @@ struct SelfHostedAdminServerConfig {
     QString userName;
     QString password;
     int port = 0;
+    // CoCo: pinned SSH host key fingerprint (servers bought from webpack.ir); empty means no pin.
+    QString hostKeySha256;
 
     bool hasCredentials() const;
     bool isReadOnly() const;

@@ -398,6 +398,7 @@ void InstallController::addEmptyServer(const ServerCredentials &credentials)
     serverConfig.userName = credentials.userName;
     serverConfig.password = credentials.secretData;
     serverConfig.port = credentials.port;
+    serverConfig.hostKeySha256 = credentials.hostKeySha256;
     serverConfig.description = m_serversRepository->nextAvailableServerName();
     serverConfig.displayName = serverConfig.description.isEmpty() ? serverConfig.hostName : serverConfig.description;
     serverConfig.defaultContainer = DockerContainer::None;
@@ -1272,6 +1273,7 @@ ErrorCode InstallController::installServer(const ServerCredentials &credentials,
     serverConfig.userName = credentials.userName;
     serverConfig.password = credentials.secretData;
     serverConfig.port = credentials.port;
+    serverConfig.hostKeySha256 = credentials.hostKeySha256;
     serverConfig.description = m_serversRepository->nextAvailableServerName();
 
     for (auto iterator = preparedContainers.begin(); iterator != preparedContainers.end(); iterator++) {

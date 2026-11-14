@@ -14,6 +14,7 @@
         <file>check_connection.sh</file>
         <file>check_server_is_busy.sh</file>
         <file>check_user_in_sudo.sh</file>
+        <file>webpack_grant_sudo.sh</file>
         <file>dns/configure_container.sh</file>
         <file>dns/Dockerfile</file>
         <file>dns/run_container.sh</file>
