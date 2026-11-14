@@ -1,6 +1,8 @@
 # Integration with webpack.ir (Iranux-Bash-Runner)
 
-Status: design, nothing implemented. Written 2026-11-14 from a read-only review of
+Status: W0, W1 (password and Google sign-in, without the account chip in settings) and W5 (buy a
+server, configure it) are implemented in `client/core/controllers/webpack/` and
+`Pages2/PageWebpack{Shop,Servers}.qml`, not yet run on Windows. W2 to W4 and W6 are open. Written 2026-11-14 from a read-only review of
 `Iranux-Master/Iranux-Bash-Runner` at `a7f6911` (branch `Develop`). That repository is read-only
 from CoCo work: when its behaviour matters, read its documents (paths below), and put anything CoCo
 needs from it in §7 as a request for that project.
@@ -53,18 +55,27 @@ Endpoints CoCo would use (all exist today):
 ```mermaid
 flowchart LR
   QML[Pages2/PageWebpack*.qml] --> UI[ui/controllers/webpack/WebpackUiController]
-  UI --> AUTH[core/controllers/webpack/WebpackSession]
-  UI --> SRV[core/controllers/webpack/WebpackServersController]
-  UI --> SHOP[core/controllers/webpack/WebpackShopController]
-  AUTH --> API[core/controllers/webpack/WebpackApiClient]
+  UI --> INT[webpack::Integration]
+  INT --> AUTH[webpack::Session]
+  INT --> SRV[webpack::Servers]
+  INT --> SHOP[webpack::Shop]
+  INT --> BUY[webpack::Purchases]
+  BUY --> KEY[webpack::DeviceKey]
+  SRV --> KEY
+  AUTH --> API[webpack::ApiClient]
   SRV --> API
   SHOP --> API
+  BUY --> API
   API -->|HTTPS + Bearer| WP[(webpack.ir /api/v1)]
   SRV -->|existing InstallController + SSH key| VPS[(Server bought from webpack)]
   AUTH --> KC[(SecureQSettings / keychain<br/>refresh token only)]
 ```
 
-- **`WebpackApiClient`** (new, `client/core/controllers/webpack/`): one `QNetworkAccessManager`,
+Class names as built (namespace `webpack`, files `webpack<Name>.{h,cpp}`): `ApiClient`, `Session`,
+`DeviceKey`, `Shop`, `Purchases`, `Servers`, `SudoSetup` (a function), `Integration` (owns them).
+The bullets below keep the design names.
+
+- **`WebpackApiClient`** (`client/core/controllers/webpack/`): one `QNetworkAccessManager`,
   base URL from settings (`Webpack/baseUrl`, default `https://webpack.ir/`), JSON envelope parsing
   into `{ ok, data, errorCode, message, httpStatus, correlationId }`, `X-Correlation-ID` per call,
   bearer header, one automatic refresh and retry on 401, `Retry-After` on 429, a timeout per call

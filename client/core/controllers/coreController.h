@@ -29,6 +29,8 @@
 #include "ui/controllers/updateUiController.h"
 #include "ui/controllers/api/servicesCatalogUiController.h"
 #include "ui/controllers/networkReachabilityController.h"
+#include "ui/controllers/webpack/webpackUiController.h"
+#include "core/controllers/webpack/webpackIntegration.h"
 
 #include "core/controllers/serversController.h"
 #include "core/controllers/selfhosted/usersController.h"
@@ -169,6 +171,8 @@ private:
     ImportUiController* m_importController;
     ImportController* m_importCoreController;
     ExportUiController* m_exportUiController;
+    webpack::Integration* m_webpackIntegration;
+    WebpackUiController* m_webpackUiController;
     SettingsUiController* m_settingsUiController;
     ServersUiController* m_serversUiController;
     IpSplitTunnelingUiController* m_ipSplitTunnelingUiController;

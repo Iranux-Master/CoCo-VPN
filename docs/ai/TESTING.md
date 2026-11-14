@@ -31,9 +31,10 @@ ctest --test-dir deploy/build -R XraySerializationTest       # one
 | `Ui*ModelAndControllerTest` (servers, language, IP and app split tunnelling, allowed DNS, API services, news) | UI controller + model pairs |
 | `ConnectionTest`, `OpenSSLLibraryTest` | Connection state machine, OpenSSL linkage |
 | `AdminSelfHostedExportTest`, `SelfHostedServerSetupTest`, `MultipleExportsTest` (`client/tests/selfHostedAdmin/`) | Real SSH install and export against a live VPS. Need `SELF_HOSTED_SERVER_HOST_NAME`, `SELF_HOSTED_SERVER_SSH_PORT`, `SELF_HOSTED_SERVER_USER_NAME`, `SELF_HOSTED_SERVER_PASSWORD` (and `SELF_HOSTED_ADMIN_EXPORT_ROUND_TRIP_VPN_KEY` for the round trip). Never put these values in the repository. |
+| `WebpackApiTest`, `WebpackKeysTest`, `WebpackShopTest` (`client/tests/webpack/`) | webpack.ir client without network (`fakeNetwork.h`): envelope parsing, base-URL rules, token refresh, PKCE and the loopback parser, the device key (compared with `ssh-keygen` when installed), plans, shortfall rounding, checkout, balance polling, the order key kept until a definite answer, build tracking. The sudo setup and host-key pin need a real sshd and are not in CTest. |
 | Android (`run_android_tests.sh`) | OpenSSL and backup restore on a device or emulator; not registered with CTest |
 
-**Blind spots.** No test covers CoCo's own code: batch account creation, account groups, share
+**Blind spots.** No test covers the webpack pages and `WebpackUiController`, or the share code: batch account creation, account groups, share
 templates and their rendering (`ExportUiController`). The tag-replacement and file-name logic is pure
 and is the first candidate for a test once it moves out of the UI controller (KNOWN_ISSUES KI-04).
 

@@ -30,7 +30,8 @@ next product step, P2 later. Owner decisions are listed in §4 and block the ite
 
 Phases W0 to W6 in `docs/integration/WEBPACK.md` §6: API client, sign-in (password, Google),
 servers bought from webpack with metrics and power actions, "Set up access" into the existing install
-wizard, notices and renewal, buying a server, and replacing the Amnezia service pages.
+wizard, notices and renewal, buying a server, and replacing the Amnezia service pages. W0, W1 and W5
+(buying and configuring a server) are implemented, not yet run on Windows.
 
 ### 3.2 Account management for VPN resellers (P1)
 

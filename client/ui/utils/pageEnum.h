@@ -63,6 +63,9 @@ namespace PageLoader
         PageSetupWizardApiServicesList,
         PageSetupWizardApiFreeInfo,
 
+        PageWebpackShop,
+        PageWebpackServers,
+
         PageProtocolOpenVpnSettings,
         PageProtocolXraySettings,
         PageProtocolWireGuardSettings,

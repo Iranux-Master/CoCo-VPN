@@ -235,13 +235,21 @@ file(GLOB UI_CONTROLLERS_H CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/controllers/api/*.h
     ${CLIENT_ROOT_DIR}/ui/controllers/qml/*.h
     ${CLIENT_ROOT_DIR}/ui/controllers/selfhosted/*.h
+    ${CLIENT_ROOT_DIR}/ui/controllers/webpack/*.h
 )
 file(GLOB UI_CONTROLLERS_CPP CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/controllers/*.cpp
     ${CLIENT_ROOT_DIR}/ui/controllers/api/*.cpp
     ${CLIENT_ROOT_DIR}/ui/controllers/qml/*.cpp
     ${CLIENT_ROOT_DIR}/ui/controllers/selfhosted/*.cpp
+    ${CLIENT_ROOT_DIR}/ui/controllers/webpack/*.cpp
 )
+
+# CoCo: webpack.ir integration (docs/integration/WEBPACK.md)
+file(GLOB WEBPACK_H CONFIGURE_DEPENDS ${CLIENT_ROOT_DIR}/core/controllers/webpack/*.h)
+file(GLOB WEBPACK_CPP CONFIGURE_DEPENDS ${CLIENT_ROOT_DIR}/core/controllers/webpack/*.cpp)
+set(HEADERS ${HEADERS} ${WEBPACK_H} ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshHostKey.h)
+set(SOURCES ${SOURCES} ${WEBPACK_CPP} ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshHostKey.cpp)
 
 set(HEADERS ${HEADERS}
     ${COMMON_FILES_H}

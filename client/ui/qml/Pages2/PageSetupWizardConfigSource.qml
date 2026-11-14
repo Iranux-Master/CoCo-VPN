@@ -270,6 +270,7 @@ PageType {
 
     property list<QtObject> variants: [
         amneziaVpn,
+        webpackVpn,
         selfHostVpn,
         backupRestore,
         fileOpen,
@@ -295,6 +296,20 @@ PageType {
             if (result) {
                 PageController.goToPage(PageEnum.PageSetupWizardApiServicesList)
             }
+        }
+    }
+
+    // CoCo: buy a server from webpack.ir and let CoCo set it up (docs/plans/W5-buy-vps-in-app.md).
+    QtObject {
+        id: webpackVpn
+
+        property bool featuredAmneziaConnection: false
+        property string title: qsTr("Buy a server from webpack")
+        property string description: qsTr("Buy a VPS inside the app; CoCo adds it and sets up the VPN")
+        property string imageSource: "qrc:/images/controls/server.svg"
+        property bool isVisible: true
+        property var handler: function() {
+            PageController.goToPage(PageEnum.PageWebpackShop)
         }
     }
 

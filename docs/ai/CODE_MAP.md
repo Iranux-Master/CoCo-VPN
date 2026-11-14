@@ -42,10 +42,10 @@ for example `ExportController` in QML is `ExportUiController` in C++.
 | `NetworkReachabilityController` | `NetworkReachabilityController` | `client/ui/controllers/networkReachabilityController.h` | 3 |
 | `NewsModel` | `NewsModel` | `client/ui/models/newsModel.h` | 4 |
 | `OpenVpnConfigModel` | `OpenVpnConfigModel` | `client/ui/models/protocols/openvpnConfigModel.h` | 1 |
-| `PageController` | `PageController` | `client/ui/controllers/qml/pageController.h` | 85 |
+| `PageController` | `PageController` | `client/ui/controllers/qml/pageController.h` | 87 |
 | `ProtocolsModel` | `ProtocolsModel` | `client/ui/models/protocolsModel.h` | 2 |
 | `ServersModel` | `ServersModel` | `client/ui/models/serversModel.h` | 11 |
-| `ServersUiController` | `ServersUiController` | `client/ui/controllers/serversUiController.h` | 52 |
+| `ServersUiController` | `ServersUiController` | `client/ui/controllers/serversUiController.h` | 53 |
 | `ServicesCatalogUiController` | `ServicesCatalogUiController` | `client/ui/controllers/api/servicesCatalogUiController.h` | 0 |
 | `SettingsController` | `SettingsUiController` | `client/ui/controllers/settingsUiController.h` | 19 |
 | `SftpConfigModel` | `SftpConfigModel` | `client/ui/models/services/sftpConfigModel.h` | 1 |
@@ -56,6 +56,7 @@ for example `ExportController` in QML is `ExportUiController` in C++.
 | `TelemtConfigModel` | `TelemtConfigModel` | `client/ui/models/services/telemtConfigModel.h` | 2 |
 | `TorConfigModel` | `TorConfigModel` | `client/ui/models/services/torConfigModel.h` | 1 |
 | `UpdateController` | `UpdateUiController` | `client/ui/controllers/updateUiController.h` | 2 |
+| `WebpackController` | `WebpackUiController` | `client/ui/controllers/webpack/webpackUiController.h` | 2 |
 | `WireGuardConfigModel` | `WireGuardConfigModel` | `client/ui/models/protocols/wireguardConfigModel.h` | 2 |
 | `XrayConfigModel` | `XrayConfigModel` | `client/ui/models/protocols/xrayConfigModel.h` | 7 |
 | `XrayConfigSnapshotsModel` | `XrayConfigSnapshotsModel` | `client/ui/models/protocols/xrayConfigSnapshotsModel.h` | 1 |
@@ -260,6 +261,12 @@ their roles through `roleNames()`; read the header for those.
 - Callable: checkForUpdates, install, retry, update
 - Signals: isCheckRunningChanged, updateCheckFailed, updateFound, updateNotFound, updateStateChanged
 
+### `WebpackUiController` (QML: `WebpackController`)
+
+- Properties: accountEmail, busy, gateways, hasPendingOrder, offline, paymentText, plans, purchases, servers, signedIn, waitingForPayment, walletCurrency, walletText
+- Callable: buy, cancelGoogleSignIn, checkPaymentNow, configureServer, dismissPurchase, loadShop, openAccountOnWebsite, refreshServers, signIn, signInWithGoogle, signOut, stopWaitingForPayment
+- Signals: accountChanged, busyChanged, configReady, errorOccurred, notificationShown, orderPlaced, passwordNeeded, paymentChanged, plansChanged, purchasesChanged, serversChanged, signInFinished, walletChanged
+
 ### `WireGuardConfigModel` (QML: `WireGuardConfigModel`)
 
 - Callable: getProtocolConfig, isServerSettingsEqual, updateModel
@@ -351,6 +358,8 @@ their roles through `roleNames()`; read the header for those.
 | `Pages2/PageShareFullAccess.qml` | ExportController, PageController, ServersModel, ServersUiController, SystemController |
 | `Pages2/PageStart.qml` | ConnectionController, FocusController, ImportController, InstallController, NewsModel, PageController, ServersModel, ServersUiController, SettingsController, SubscriptionUiController |
 | `Pages2/PageUpdate.qml` | PageController, UpdateController |
+| `Pages2/PageWebpackServers.qml` | PageController, ServersUiController, WebpackController |
+| `Pages2/PageWebpackShop.qml` | PageController, WebpackController |
 
 ### Components
 
@@ -473,10 +482,10 @@ their roles through `roleNames()`; read the header for those.
 - **NetworkReachabilityController**: `Pages2/PageServiceMtProxySettings.qml`, `Pages2/PageServiceTProxySettings.qml`, `Pages2/PageServiceTelemtSettings.qml`
 - **NewsModel**: `Pages2/PageSettings.qml`, `Pages2/PageSettingsNewsDetail.qml`, `Pages2/PageSettingsNewsNotifications.qml`, `Pages2/PageStart.qml`
 - **OpenVpnConfigModel**: `Pages2/PageProtocolOpenVpnSettings.qml`
-- **PageController**: `Components/ConnectButton.qml`, `Components/ConnectionTypeSelectionDrawer.qml`, `Components/HomeContainersListView.qml`, `Components/HomeSplitTunnelingDrawer.qml`, `Components/InstalledAppsDrawer.qml`, `Components/QuestionDrawer.qml`, `Components/ServersListView.qml`, `Components/SettingsContainersListView.qml`, `Components/SmartScroll.qml`, `Components/SubscriptionExpiredDrawer.qml`, `Components/UpdateSupportDrawer.qml`, `Controls2/BackButtonType.qml`, `Controls2/CaptchaDialogType.qml`, `Controls2/DrawerType2.qml`, `Controls2/PopupType.qml`, `Controls2/TopCloseButtonType.qml`, `Pages2/PageDeinstalling.qml`, `Pages2/PageDevMenu.qml`, `Pages2/PageHome.qml`, `Pages2/PageProtocolAwgClientSettings.qml`, `Pages2/PageProtocolAwgSettings.qml`, `Pages2/PageProtocolOpenVpnSettings.qml`, `Pages2/PageProtocolRaw.qml`, `Pages2/PageProtocolWireGuardClientSettings.qml`, `Pages2/PageProtocolWireGuardSettings.qml`, `Pages2/PageProtocolXrayFlowSettings.qml`, `Pages2/PageProtocolXraySecuritySettings.qml`, `Pages2/PageProtocolXraySettings.qml`, `Pages2/PageProtocolXraySnapshots.qml`, `Pages2/PageProtocolXrayTransportSettings.qml`, `Pages2/PageProtocolXrayXPaddingBytesSettings.qml`, `Pages2/PageProtocolXrayXPaddingSettings.qml`, `Pages2/PageProtocolXrayXmuxSettings.qml`, `Pages2/PageServiceDnsSettings.qml`, `Pages2/PageServiceMtProxySettings.qml`, `Pages2/PageServiceSftpSettings.qml`, `Pages2/PageServiceSocksProxySettings.qml`, `Pages2/PageServiceTProxySettings.qml`, `Pages2/PageServiceTelemtSettings.qml`, `Pages2/PageServiceTorWebsiteSettings.qml`, `Pages2/PageSettings.qml`, `Pages2/PageSettingsAbout.qml`, `Pages2/PageSettingsApiAvailableCountries.qml`, `Pages2/PageSettingsApiDevices.qml`, `Pages2/PageSettingsApiInstructions.qml`, `Pages2/PageSettingsApiNativeConfigs.qml`, `Pages2/PageSettingsApiServerInfo.qml`, `Pages2/PageSettingsApiSubscriptionKey.qml`, `Pages2/PageSettingsApiSupport.qml`, `Pages2/PageSettingsAppSplitTunneling.qml`, `Pages2/PageSettingsApplication.qml`, `Pages2/PageSettingsBackup.qml`, `Pages2/PageSettingsConnection.qml`, `Pages2/PageSettingsDns.qml`, `Pages2/PageSettingsKillSwitch.qml`, `Pages2/PageSettingsKillSwitchExceptions.qml`, `Pages2/PageSettingsLogging.qml`, `Pages2/PageSettingsNewsDetail.qml`, `Pages2/PageSettingsNewsNotifications.qml`, `Pages2/PageSettingsServerData.qml`, `Pages2/PageSettingsServerInfo.qml`, `Pages2/PageSettingsServerProtocol.qml`, `Pages2/PageSettingsServersList.qml`, `Pages2/PageSettingsShareTemplates.qml`, `Pages2/PageSettingsSplitTunneling.qml`, `Pages2/PageSetupWizardApiFreeInfo.qml`, `Pages2/PageSetupWizardApiPremiumInfo.qml`, `Pages2/PageSetupWizardApiServicesList.qml`, `Pages2/PageSetupWizardApiTrialEmail.qml`, `Pages2/PageSetupWizardConfigSource.qml`, `Pages2/PageSetupWizardCredentials.qml`, `Pages2/PageSetupWizardEasy.qml`, `Pages2/PageSetupWizardInstalling.qml`, `Pages2/PageSetupWizardProtocolSettings.qml`, `Pages2/PageSetupWizardProtocols.qml`, `Pages2/PageSetupWizardQrReader.qml`, `Pages2/PageSetupWizardStart.qml`, `Pages2/PageSetupWizardTextKey.qml`, `Pages2/PageSetupWizardViewConfig.qml`, `Pages2/PageShare.qml`, `Pages2/PageShareConnection.qml`, `Pages2/PageShareFullAccess.qml`, `Pages2/PageStart.qml`, `Pages2/PageUpdate.qml`, `main2.qml`
+- **PageController**: `Components/ConnectButton.qml`, `Components/ConnectionTypeSelectionDrawer.qml`, `Components/HomeContainersListView.qml`, `Components/HomeSplitTunnelingDrawer.qml`, `Components/InstalledAppsDrawer.qml`, `Components/QuestionDrawer.qml`, `Components/ServersListView.qml`, `Components/SettingsContainersListView.qml`, `Components/SmartScroll.qml`, `Components/SubscriptionExpiredDrawer.qml`, `Components/UpdateSupportDrawer.qml`, `Controls2/BackButtonType.qml`, `Controls2/CaptchaDialogType.qml`, `Controls2/DrawerType2.qml`, `Controls2/PopupType.qml`, `Controls2/TopCloseButtonType.qml`, `Pages2/PageDeinstalling.qml`, `Pages2/PageDevMenu.qml`, `Pages2/PageHome.qml`, `Pages2/PageProtocolAwgClientSettings.qml`, `Pages2/PageProtocolAwgSettings.qml`, `Pages2/PageProtocolOpenVpnSettings.qml`, `Pages2/PageProtocolRaw.qml`, `Pages2/PageProtocolWireGuardClientSettings.qml`, `Pages2/PageProtocolWireGuardSettings.qml`, `Pages2/PageProtocolXrayFlowSettings.qml`, `Pages2/PageProtocolXraySecuritySettings.qml`, `Pages2/PageProtocolXraySettings.qml`, `Pages2/PageProtocolXraySnapshots.qml`, `Pages2/PageProtocolXrayTransportSettings.qml`, `Pages2/PageProtocolXrayXPaddingBytesSettings.qml`, `Pages2/PageProtocolXrayXPaddingSettings.qml`, `Pages2/PageProtocolXrayXmuxSettings.qml`, `Pages2/PageServiceDnsSettings.qml`, `Pages2/PageServiceMtProxySettings.qml`, `Pages2/PageServiceSftpSettings.qml`, `Pages2/PageServiceSocksProxySettings.qml`, `Pages2/PageServiceTProxySettings.qml`, `Pages2/PageServiceTelemtSettings.qml`, `Pages2/PageServiceTorWebsiteSettings.qml`, `Pages2/PageSettings.qml`, `Pages2/PageSettingsAbout.qml`, `Pages2/PageSettingsApiAvailableCountries.qml`, `Pages2/PageSettingsApiDevices.qml`, `Pages2/PageSettingsApiInstructions.qml`, `Pages2/PageSettingsApiNativeConfigs.qml`, `Pages2/PageSettingsApiServerInfo.qml`, `Pages2/PageSettingsApiSubscriptionKey.qml`, `Pages2/PageSettingsApiSupport.qml`, `Pages2/PageSettingsAppSplitTunneling.qml`, `Pages2/PageSettingsApplication.qml`, `Pages2/PageSettingsBackup.qml`, `Pages2/PageSettingsConnection.qml`, `Pages2/PageSettingsDns.qml`, `Pages2/PageSettingsKillSwitch.qml`, `Pages2/PageSettingsKillSwitchExceptions.qml`, `Pages2/PageSettingsLogging.qml`, `Pages2/PageSettingsNewsDetail.qml`, `Pages2/PageSettingsNewsNotifications.qml`, `Pages2/PageSettingsServerData.qml`, `Pages2/PageSettingsServerInfo.qml`, `Pages2/PageSettingsServerProtocol.qml`, `Pages2/PageSettingsServersList.qml`, `Pages2/PageSettingsShareTemplates.qml`, `Pages2/PageSettingsSplitTunneling.qml`, `Pages2/PageSetupWizardApiFreeInfo.qml`, `Pages2/PageSetupWizardApiPremiumInfo.qml`, `Pages2/PageSetupWizardApiServicesList.qml`, `Pages2/PageSetupWizardApiTrialEmail.qml`, `Pages2/PageSetupWizardConfigSource.qml`, `Pages2/PageSetupWizardCredentials.qml`, `Pages2/PageSetupWizardEasy.qml`, `Pages2/PageSetupWizardInstalling.qml`, `Pages2/PageSetupWizardProtocolSettings.qml`, `Pages2/PageSetupWizardProtocols.qml`, `Pages2/PageSetupWizardQrReader.qml`, `Pages2/PageSetupWizardStart.qml`, `Pages2/PageSetupWizardTextKey.qml`, `Pages2/PageSetupWizardViewConfig.qml`, `Pages2/PageShare.qml`, `Pages2/PageShareConnection.qml`, `Pages2/PageShareFullAccess.qml`, `Pages2/PageStart.qml`, `Pages2/PageUpdate.qml`, `Pages2/PageWebpackServers.qml`, `Pages2/PageWebpackShop.qml`, `main2.qml`
 - **ProtocolsModel**: `Pages2/PageProtocolRaw.qml`, `Pages2/PageSettingsServerProtocol.qml`
 - **ServersModel**: `Components/ServersListView.qml`, `Pages2/PageDeinstalling.qml`, `Pages2/PageSettingsApiAvailableCountries.qml`, `Pages2/PageSettingsApiServerInfo.qml`, `Pages2/PageSettingsApiSubscriptionKey.qml`, `Pages2/PageSettingsServerInfo.qml`, `Pages2/PageSettingsServersList.qml`, `Pages2/PageShare.qml`, `Pages2/PageShareConnection.qml`, `Pages2/PageShareFullAccess.qml`, `Pages2/PageStart.qml`
-- **ServersUiController**: `Components/AdLabel.qml`, `Components/HomeContainersListView.qml`, `Components/HomeSplitTunnelingDrawer.qml`, `Components/RenameServerDrawer.qml`, `Components/ServersListView.qml`, `Components/SettingsContainersListView.qml`, `Components/SubscriptionExpiredDrawer.qml`, `Pages2/PageDeinstalling.qml`, `Pages2/PageHome.qml`, `Pages2/PageProtocolAwgClientSettings.qml`, `Pages2/PageProtocolAwgSettings.qml`, `Pages2/PageProtocolOpenVpnSettings.qml`, `Pages2/PageProtocolRaw.qml`, `Pages2/PageProtocolWireGuardClientSettings.qml`, `Pages2/PageProtocolWireGuardSettings.qml`, `Pages2/PageProtocolXrayFlowSettings.qml`, `Pages2/PageProtocolXraySecuritySettings.qml`, `Pages2/PageProtocolXraySettings.qml`, `Pages2/PageProtocolXrayTransportSettings.qml`, `Pages2/PageProtocolXrayXPaddingBytesSettings.qml`, `Pages2/PageProtocolXrayXPaddingSettings.qml`, `Pages2/PageProtocolXrayXmuxSettings.qml`, `Pages2/PageServiceDnsSettings.qml`, `Pages2/PageServiceMtProxySettings.qml`, `Pages2/PageServiceSftpSettings.qml`, `Pages2/PageServiceSocksProxySettings.qml`, `Pages2/PageServiceTProxySettings.qml`, `Pages2/PageServiceTelemtSettings.qml`, `Pages2/PageSettings.qml`, `Pages2/PageSettingsApiAvailableCountries.qml`, `Pages2/PageSettingsApiDevices.qml`, `Pages2/PageSettingsApiNativeConfigs.qml`, `Pages2/PageSettingsApiServerInfo.qml`, `Pages2/PageSettingsApiSubscriptionKey.qml`, `Pages2/PageSettingsApplication.qml`, `Pages2/PageSettingsDns.qml`, `Pages2/PageSettingsServerData.qml`, `Pages2/PageSettingsServerInfo.qml`, `Pages2/PageSettingsServerProtocol.qml`, `Pages2/PageSettingsServerProtocols.qml`, `Pages2/PageSettingsServerServices.qml`, `Pages2/PageSettingsServersList.qml`, `Pages2/PageSettingsSplitTunneling.qml`, `Pages2/PageSetupWizardCredentials.qml`, `Pages2/PageSetupWizardEasy.qml`, `Pages2/PageSetupWizardInstalling.qml`, `Pages2/PageSetupWizardProtocolSettings.qml`, `Pages2/PageSetupWizardProtocols.qml`, `Pages2/PageShare.qml`, `Pages2/PageShareFullAccess.qml`, `Pages2/PageStart.qml`, `main2.qml`
+- **ServersUiController**: `Components/AdLabel.qml`, `Components/HomeContainersListView.qml`, `Components/HomeSplitTunnelingDrawer.qml`, `Components/RenameServerDrawer.qml`, `Components/ServersListView.qml`, `Components/SettingsContainersListView.qml`, `Components/SubscriptionExpiredDrawer.qml`, `Pages2/PageDeinstalling.qml`, `Pages2/PageHome.qml`, `Pages2/PageProtocolAwgClientSettings.qml`, `Pages2/PageProtocolAwgSettings.qml`, `Pages2/PageProtocolOpenVpnSettings.qml`, `Pages2/PageProtocolRaw.qml`, `Pages2/PageProtocolWireGuardClientSettings.qml`, `Pages2/PageProtocolWireGuardSettings.qml`, `Pages2/PageProtocolXrayFlowSettings.qml`, `Pages2/PageProtocolXraySecuritySettings.qml`, `Pages2/PageProtocolXraySettings.qml`, `Pages2/PageProtocolXrayTransportSettings.qml`, `Pages2/PageProtocolXrayXPaddingBytesSettings.qml`, `Pages2/PageProtocolXrayXPaddingSettings.qml`, `Pages2/PageProtocolXrayXmuxSettings.qml`, `Pages2/PageServiceDnsSettings.qml`, `Pages2/PageServiceMtProxySettings.qml`, `Pages2/PageServiceSftpSettings.qml`, `Pages2/PageServiceSocksProxySettings.qml`, `Pages2/PageServiceTProxySettings.qml`, `Pages2/PageServiceTelemtSettings.qml`, `Pages2/PageSettings.qml`, `Pages2/PageSettingsApiAvailableCountries.qml`, `Pages2/PageSettingsApiDevices.qml`, `Pages2/PageSettingsApiNativeConfigs.qml`, `Pages2/PageSettingsApiServerInfo.qml`, `Pages2/PageSettingsApiSubscriptionKey.qml`, `Pages2/PageSettingsApplication.qml`, `Pages2/PageSettingsDns.qml`, `Pages2/PageSettingsServerData.qml`, `Pages2/PageSettingsServerInfo.qml`, `Pages2/PageSettingsServerProtocol.qml`, `Pages2/PageSettingsServerProtocols.qml`, `Pages2/PageSettingsServerServices.qml`, `Pages2/PageSettingsServersList.qml`, `Pages2/PageSettingsSplitTunneling.qml`, `Pages2/PageSetupWizardCredentials.qml`, `Pages2/PageSetupWizardEasy.qml`, `Pages2/PageSetupWizardInstalling.qml`, `Pages2/PageSetupWizardProtocolSettings.qml`, `Pages2/PageSetupWizardProtocols.qml`, `Pages2/PageShare.qml`, `Pages2/PageShareFullAccess.qml`, `Pages2/PageStart.qml`, `Pages2/PageWebpackServers.qml`, `main2.qml`
 - **SettingsController**: `Components/ConnectButton.qml`, `Controls2/CaptchaDialogType.qml`, `Pages2/PageDevMenu.qml`, `Pages2/PageHome.qml`, `Pages2/PageServiceDnsSettings.qml`, `Pages2/PageSettings.qml`, `Pages2/PageSettingsAbout.qml`, `Pages2/PageSettingsApiSupport.qml`, `Pages2/PageSettingsApplication.qml`, `Pages2/PageSettingsBackup.qml`, `Pages2/PageSettingsConnection.qml`, `Pages2/PageSettingsDns.qml`, `Pages2/PageSettingsKillSwitch.qml`, `Pages2/PageSettingsLogging.qml`, `Pages2/PageSettingsServerData.qml`, `Pages2/PageSetupWizardConfigSource.qml`, `Pages2/PageSetupWizardStart.qml`, `Pages2/PageStart.qml`, `main2.qml`
 - **SftpConfigModel**: `Pages2/PageServiceSftpSettings.qml`
 - **Socks5ProxyConfigModel**: `Pages2/PageServiceSocksProxySettings.qml`
@@ -486,6 +495,7 @@ their roles through `roleNames()`; read the header for those.
 - **TelemtConfigModel**: `Components/SettingsContainersListView.qml`, `Pages2/PageServiceTelemtSettings.qml`
 - **TorConfigModel**: `Pages2/PageServiceTorWebsiteSettings.qml`
 - **UpdateController**: `Pages2/PageSettingsAbout.qml`, `Pages2/PageUpdate.qml`
+- **WebpackController**: `Pages2/PageWebpackServers.qml`, `Pages2/PageWebpackShop.qml`
 - **WireGuardConfigModel**: `Pages2/PageProtocolWireGuardClientSettings.qml`, `Pages2/PageProtocolWireGuardSettings.qml`
 - **XrayConfigModel**: `Pages2/PageProtocolXrayFlowSettings.qml`, `Pages2/PageProtocolXraySecuritySettings.qml`, `Pages2/PageProtocolXraySettings.qml`, `Pages2/PageProtocolXrayTransportSettings.qml`, `Pages2/PageProtocolXrayXPaddingBytesSettings.qml`, `Pages2/PageProtocolXrayXPaddingSettings.qml`, `Pages2/PageProtocolXrayXmuxSettings.qml`
 - **XrayConfigSnapshotsModel**: `Pages2/PageProtocolXraySnapshots.qml`
@@ -495,7 +505,7 @@ their roles through `roleNames()`; read the header for those.
 `PageController.goToPage(PageEnum.X)` loads `client/ui/qml/Pages2/X.qml`. A page needs an enum entry,
 a QML file and a line in `client/ui/qml/qml.qrc`.
 
-`PageStart`, `PageHome`, `PageShare`, `PageDeinstalling`, `PageAbout`, `PageSettingsServersList`, `PageSettings`, `PageSettingsServerData`, `PageSettingsServerInfo`, `PageSettingsServerProtocols`, `PageSettingsServerServices`, `PageSettingsServerProtocol`, `PageSettingsConnection`, `PageSettingsDns`, `PageSettingsApplication`, `PageSettingsNewsNotifications`, `PageSettingsNewsDetail`, `PageSettingsBackup`, `PageSettingsShareTemplates`, `PageSettingsAbout`, `PageSettingsLogging`, `PageSettingsSplitTunneling`, `PageSettingsAppSplitTunneling`, `PageSettingsKillSwitch`, `PageSettingsApiServerInfo`, `PageSettingsApiAvailableCountries`, `PageSettingsApiSupport`, `PageSettingsApiInstructions`, `PageSettingsApiNativeConfigs`, `PageSettingsApiDevices`, `PageSettingsApiSubscriptionKey`, `PageSettingsKillSwitchExceptions`, `PageServiceSftpSettings`, `PageServiceTorWebsiteSettings`, `PageServiceDnsSettings`, `PageServiceSocksProxySettings`, `PageServiceMtProxySettings`, `PageServiceTelemtSettings`, `PageServiceTProxySettings`, `PageSetupWizardStart`, `PageSetupWizardCredentials`, `PageSetupWizardProtocols`, `PageSetupWizardEasy`, `PageSetupWizardProtocolSettings`, `PageSetupWizardInstalling`, `PageSetupWizardConfigSource`, `PageSetupWizardTextKey`, `PageSetupWizardViewConfig`, `PageSetupWizardQrReader`, `PageSetupWizardApiServicesList`, `PageSetupWizardApiFreeInfo`, `PageProtocolOpenVpnSettings`, `PageProtocolXraySettings`, `PageProtocolWireGuardSettings`, `PageProtocolAwgSettings`, `PageProtocolIKev2Settings`, `PageProtocolRaw`, `PageProtocolWireGuardClientSettings`, `PageProtocolAwgClientSettings`, `PageShareFullAccess`, `PageShareConnection`, `PageSetupWizardApiPremiumInfo`, `PageSetupWizardApiTrialEmail`, `PageDevMenu`, `PageProtocolXraySnapshots`, `PageProtocolXrayTransportSettings`, `PageProtocolXrayXmuxSettings`, `PageProtocolXrayXPaddingSettings`, `PageProtocolXrayFlowSettings`, `PageProtocolXraySecuritySettings`, `PageProtocolXrayXPaddingBytesSettings`, `PageSettingsLanguage`, `PageUpdate`
+`PageStart`, `PageHome`, `PageShare`, `PageDeinstalling`, `PageAbout`, `PageSettingsServersList`, `PageSettings`, `PageSettingsServerData`, `PageSettingsServerInfo`, `PageSettingsServerProtocols`, `PageSettingsServerServices`, `PageSettingsServerProtocol`, `PageSettingsConnection`, `PageSettingsDns`, `PageSettingsApplication`, `PageSettingsNewsNotifications`, `PageSettingsNewsDetail`, `PageSettingsBackup`, `PageSettingsShareTemplates`, `PageSettingsAbout`, `PageSettingsLogging`, `PageSettingsSplitTunneling`, `PageSettingsAppSplitTunneling`, `PageSettingsKillSwitch`, `PageSettingsApiServerInfo`, `PageSettingsApiAvailableCountries`, `PageSettingsApiSupport`, `PageSettingsApiInstructions`, `PageSettingsApiNativeConfigs`, `PageSettingsApiDevices`, `PageSettingsApiSubscriptionKey`, `PageSettingsKillSwitchExceptions`, `PageServiceSftpSettings`, `PageServiceTorWebsiteSettings`, `PageServiceDnsSettings`, `PageServiceSocksProxySettings`, `PageServiceMtProxySettings`, `PageServiceTelemtSettings`, `PageServiceTProxySettings`, `PageSetupWizardStart`, `PageSetupWizardCredentials`, `PageSetupWizardProtocols`, `PageSetupWizardEasy`, `PageSetupWizardProtocolSettings`, `PageSetupWizardInstalling`, `PageSetupWizardConfigSource`, `PageSetupWizardTextKey`, `PageSetupWizardViewConfig`, `PageSetupWizardQrReader`, `PageSetupWizardApiServicesList`, `PageSetupWizardApiFreeInfo`, `PageWebpackShop`, `PageWebpackServers`, `PageProtocolOpenVpnSettings`, `PageProtocolXraySettings`, `PageProtocolWireGuardSettings`, `PageProtocolAwgSettings`, `PageProtocolIKev2Settings`, `PageProtocolRaw`, `PageProtocolWireGuardClientSettings`, `PageProtocolAwgClientSettings`, `PageShareFullAccess`, `PageShareConnection`, `PageSetupWizardApiPremiumInfo`, `PageSetupWizardApiTrialEmail`, `PageDevMenu`, `PageProtocolXraySnapshots`, `PageProtocolXrayTransportSettings`, `PageProtocolXrayXmuxSettings`, `PageProtocolXrayXPaddingSettings`, `PageProtocolXrayFlowSettings`, `PageProtocolXraySecuritySettings`, `PageProtocolXrayXPaddingBytesSettings`, `PageSettingsLanguage`, `PageUpdate`
 
 Enum entries without a QML file: `PageAbout`, `PageProtocolIKev2Settings`, `PageSettingsLanguage`
 
@@ -508,6 +518,7 @@ Enum entries without a QML file: `PageAbout`, `PageProtocolIKev2Settings`, `Page
 | `client/core/controllers` | 20 | 8 |
 | `client/core/controllers/api` | 8 | 0 |
 | `client/core/controllers/selfhosted` | 8 | 4 |
+| `client/core/controllers/webpack` | 24 | 0 |
 | `client/core/diagnostics` | 3 | 0 |
 | `client/core/installers` | 22 | 11 |
 | `client/core/models` | 6 | 0 |
@@ -520,7 +531,7 @@ Enum entries without a QML file: `PageAbout`, `PageProtocolIKev2Settings`, `Page
 | `client/core/utils/api` | 4 | 0 |
 | `client/core/utils/constants` | 4 | 0 |
 | `client/core/utils/containers` | 2 | 0 |
-| `client/core/utils/selfhosted` | 6 | 1 |
+| `client/core/utils/selfhosted` | 8 | 1 |
 | `client/core/utils/serialization` | 10 | 0 |
 | `client/daemon` | 12 | 6 |
 | `client/ios/networkextension` | 1 | 0 |
@@ -540,7 +551,7 @@ Enum entries without a QML file: `PageAbout`, `PageProtocolIKev2Settings`, `Page
 | `client/platforms/macos/daemon` | 12 | 5 |
 | `client/platforms/windows` | 10 | 3 |
 | `client/platforms/windows/daemon` | 18 | 7 |
-| `client/server_scripts` | 11 | 0 |
+| `client/server_scripts` | 12 | 0 |
 | `client/server_scripts/awg` | 3 | 0 |
 | `client/server_scripts/awg_legacy` | 3 | 0 |
 | `client/server_scripts/dns` | 2 | 0 |
@@ -558,10 +569,12 @@ Enum entries without a QML file: `PageAbout`, `PageProtocolIKev2Settings`, `Page
 | `client/tests/api` | 2 | 0 |
 | `client/tests/selfHostedAdmin` | 3 | 0 |
 | `client/tests/utils` | 3 | 1 |
+| `client/tests/webpack` | 4 | 2 |
 | `client/ui/controllers` | 22 | 11 |
 | `client/ui/controllers/api` | 6 | 3 |
 | `client/ui/controllers/qml` | 6 | 3 |
 | `client/ui/controllers/selfhosted` | 4 | 2 |
+| `client/ui/controllers/webpack` | 2 | 1 |
 | `client/ui/models` | 22 | 12 |
 | `client/ui/models/api` | 12 | 6 |
 | `client/ui/models/protocols` | 12 | 6 |
@@ -571,5 +584,5 @@ Enum entries without a QML file: `PageAbout`, `PageProtocolIKev2Settings`, `Page
 | `client/ui/qml/Config` | 1 | 0 |
 | `client/ui/qml/Controls2` | 41 | 0 |
 | `client/ui/qml/Filters` | 1 | 0 |
-| `client/ui/qml/Pages2` | 70 | 0 |
+| `client/ui/qml/Pages2` | 72 | 0 |
 | `client/ui/utils` | 15 | 4 |
