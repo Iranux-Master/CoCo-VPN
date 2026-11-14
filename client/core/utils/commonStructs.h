@@ -12,6 +12,10 @@ namespace amnezia
         QString userName;
         QString secretData;
         int port = 22;
+        // CoCo: SHA-256 fingerprint of the server's SSH host key (OpenSSH format, with or without the
+        // "SHA256:" prefix). When set, the SSH client refuses a server that presents another key.
+        // Empty keeps the upstream behaviour (no check), for servers added by hand.
+        QString hostKeySha256;
 
         bool isValid() const
         {
