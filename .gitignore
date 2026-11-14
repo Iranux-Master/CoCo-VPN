@@ -146,3 +146,6 @@ macos-with-sign-build.sh
 DeveloperIdApplicationCertificate.p12
 DeveloperIdInstallerCertificate.p12
 
+
+# Graphify code graph (tools/graphify/README.md): published to the graphify branch by CI, never committed here
+graphify-out/

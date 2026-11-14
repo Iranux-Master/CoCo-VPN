@@ -1,0 +1,89 @@
+name: Graphify graph
+
+# Rebuilds the Graphify code knowledge graph (tools/graphify/README.md) after every push to main that
+# changes source, and publishes graphify-out/graph.json.gz and GRAPH_REPORT.md as the single parentless
+# commit of the `graphify` branch (replaced each run; main never carries the graph). AST extraction only:
+# no LLM, no secrets. The package set is pinned with hashes and installed wheels-only, and the write
+# token reaches only the final push step, which runs git and nothing else.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "client/**"
+      - "service/**"
+      - "ipc/**"
+      - "common/**"
+      - ".graphifyignore"
+      - "tools/graphify/**"
+      - ".github/workflows/graphify.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  graph:
+    name: Rebuild code graph
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Install Graphify (pinned, hashes checked, wheels only)
+        run: |
+          python3 --version
+          python3 -m venv "$RUNNER_TEMP/graphify-venv"
+          for wait in 20 40 0; do
+            "$RUNNER_TEMP/graphify-venv/bin/pip" install --quiet --disable-pip-version-check \
+              --require-hashes --only-binary=:all: -r tools/graphify/requirements.txt && break
+            [ "$wait" -gt 0 ] || { echo "pip install failed"; exit 1; }
+            echo "pip install failed; retrying in ${wait}s"; sleep "$wait"
+          done
+
+      - name: Rebuild the graph
+        env:
+          GRAPHIFY_NO_TIPS: "1"
+          PYTHONIOENCODING: utf-8
+        run: |
+          "$RUNNER_TEMP/graphify-venv/bin/graphify" update . --force
+          test -f graphify-out/graph.json && test -f graphify-out/GRAPH_REPORT.md
+          gzip -9 -k graphify-out/graph.json
+          size=$(du -m graphify-out/graph.json.gz | cut -f1)
+          echo "graph.json.gz: ${size} MB" | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "$size" -gt 95 ]; then echo "graph.json.gz is above 95 MB: trim .graphifyignore"; exit 1; fi
+          head -n 40 graphify-out/GRAPH_REPORT.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish the graph to the graphify branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1 GIT_TERMINAL_PROMPT=0
+          export GIT_AUTHOR_NAME='github-actions[bot]'
+          export GIT_AUTHOR_EMAIL='41898282+github-actions[bot]@users.noreply.github.com'
+          export GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME" GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
+          work="$RUNNER_TEMP/graphify-publish"
+          rm -rf "$work"; mkdir -p "$work/graphify-out"
+          cp graphify-out/graph.json.gz graphify-out/GRAPH_REPORT.md "$work/graphify-out/"
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          printf 'Graphify code knowledge graph of main at %s (tools/graphify/README.md on main).\nBuilt by %s. This branch holds one generated commit, replaced by every run; never push to it by hand.\n' \
+            "$GITHUB_SHA" "$run_url" > "$work/SOURCE.txt"
+          g() { git -C "$work" -c core.hooksPath=/dev/null "$@"; }
+          g init --quiet --initial-branch=graphify
+          g add -A
+          g commit --quiet -m "Graphify graph of main at ${GITHUB_SHA::7}" -m "Built by $run_url"
+          basic=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
+          echo "::add-mask::$basic"
+          g -c http.extraheader="AUTHORIZATION: basic $basic" push --force --quiet \
+            "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git" HEAD:refs/heads/graphify
+          echo "Graph published to the graphify branch."
