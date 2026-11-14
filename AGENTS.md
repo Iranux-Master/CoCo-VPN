@@ -23,6 +23,7 @@ Then only what the task needs:
 | Build, test, CI | `docs/ai/TESTING.md` |
 | Connecting to webpack.ir (Iranux-Bash-Runner) services | `docs/integration/WEBPACK.md` |
 | What comes next | `docs/ROADMAP.md` |
+| How to plan a change before coding (method and plan format, usable by any agent) | `.claude/agents/planner.md`; saved plans in `docs/plans/` |
 | What changed in CoCo (Persian, for the owner) | `CHANGELOG.md` |
 | Product summary for users (Persian) | `README.md` |
 
