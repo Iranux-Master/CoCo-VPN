@@ -5244,6 +5244,8 @@ Create one from the current settings.</source>
         <source>I have nothing</source>
         <translation>هنوز سرور یا کلید اتصال ندارم</translation>
     </message>
+    <message><source>Buy a server from webpack</source><translation>خرید سرور از وب‌پک</translation></message>
+    <message><source>Buy a VPS inside the app; CoCo adds it and sets up the VPN</source><translation>VPS را داخل برنامه بخرید؛ CoCo آن را اضافه و VPN را راه‌اندازی می‌کند</translation></message>
 </context>
 <context>
     <name>PageSetupWizardCredentials</name>
@@ -7350,5 +7352,111 @@ Remove the server from the app to continue.</source>
     <message><source>AWG system template</source><translation>قالب سیستم AWG</translation></message>
     <message><source>XRay system template</source><translation>قالب سیستم XRay</translation></message>
     <message><source>IKEv2 system template</source><translation>قالب سیستم IKEv2</translation></message>
+</context>
+<context>
+    <name>PageWebpackShop</name>
+    <message><source>Buy a server from webpack</source><translation>خرید سرور از وب‌پک</translation></message>
+    <message><source>Pick a plan and pay. CoCo adds the server and sets up the VPN with one press.</source><translation>یک پلن انتخاب و پرداخت کنید. CoCo سرور را اضافه می‌کند و VPN را با یک کلیک راه‌اندازی می‌کند.</translation></message>
+    <message><source>Sign in to your webpack.ir account. CoCo keeps only a renewable sign-in on this device, never your password.</source><translation>وارد حساب webpack.ir خود شوید. CoCo فقط یک ورود قابل تمدید را روی این دستگاه نگه می‌دارد، نه رمز عبور شما را.</translation></message>
+    <message><source>Email</source><translation>ایمیل</translation></message>
+    <message><source>Password</source><translation>رمز عبور</translation></message>
+    <message><source>Sign in</source><translation>ورود</translation></message>
+    <message><source>Sign in with Google</source><translation>ورود با گوگل</translation></message>
+    <message><source>No account? Create one on &lt;a href=&quot;https://webpack.ir&quot;&gt;webpack.ir&lt;/a&gt;.</source><translation>حساب ندارید؟ در &lt;a href=&quot;https://webpack.ir&quot;&gt;webpack.ir&lt;/a&gt; بسازید.</translation></message>
+    <message><source>Offline: webpack.ir cannot be reached</source><translation>آفلاین: webpack.ir در دسترس نیست</translation></message>
+    <message><source>Wallet: %1</source><translation>کیف پول: %1</translation></message>
+    <message><source>I paid, check now</source><translation>پرداخت کردم، الان بررسی کن</translation></message>
+    <message><source>Stop waiting</source><translation>توقف انتظار</translation></message>
+    <message><source>Loading plans...</source><translation>در حال دریافت پلن‌ها...</translation></message>
+    <message><source>Plan</source><translation>پلن</translation></message>
+    <message><source>Location</source><translation>موقعیت</translation></message>
+    <message><source>Operating system</source><translation>سیستم‌عامل</translation></message>
+    <message><source>If your wallet is short, pay with</source><translation>اگر موجودی کیف پول کم بود، پرداخت با</translation></message>
+    <message><source>Payment method</source><translation>روش پرداخت</translation></message>
+    <message><source>An earlier order did not get a clear answer. Buy sends that same order again, so you are never charged twice.</source><translation>سفارش قبلی پاسخ روشنی نگرفت. «خرید» همان سفارش را دوباره می‌فرستد، پس هرگز دو بار از شما کسر نمی‌شود.</translation></message>
+    <message><source>Buy</source><translation>خرید</translation></message>
+    <message><source>Servers bought from webpack</source><translation>سرورهای خریده‌شده از وب‌پک</translation></message>
+    <message><source>Sign out of webpack</source><translation>خروج از حساب وب‌پک</translation></message>
+</context>
+<context>
+    <name>PageWebpackServers</name>
+    <message><source>Servers bought from webpack</source><translation>سرورهای خریده‌شده از وب‌پک</translation></message>
+    <message><source>Pick a server and press Config. CoCo connects with this device's key and sets up the VPN.</source><translation>یک سرور انتخاب کنید و «پیکربندی» را بزنید. CoCo با کلید این دستگاه وصل می‌شود و VPN را راه‌اندازی می‌کند.</translation></message>
+    <message><source>Sign in to webpack first.</source><translation>ابتدا وارد وب‌پک شوید.</translation></message>
+    <message><source>Config</source><translation>پیکربندی</translation></message>
+    <message><source>No servers on this account yet.</source><translation>هنوز سروری در این حساب نیست.</translation></message>
+    <message><source>Refresh</source><translation>به‌روزرسانی</translation></message>
+    <message><source>Buy a server from webpack</source><translation>خرید سرور از وب‌پک</translation></message>
+    <message><source>Server password</source><translation>رمز عبور سرور</translation></message>
+    <message><source>Enter the login password of %1 once. CoCo uses it only to allow the VPN setup and does not keep it.</source><translation>رمز ورود %1 را یک بار وارد کنید. CoCo فقط برای اجازهٔ راه‌اندازی VPN از آن استفاده می‌کند و آن را نگه نمی‌دارد.</translation></message>
+    <message><source>Password</source><translation>رمز عبور</translation></message>
+    <message><source>Continue</source><translation>ادامه</translation></message>
+</context>
+<context>
+    <name>WebpackUiController</name>
+    <message><source>Your server &quot;%1&quot; is ready. Open &quot;Servers bought from webpack&quot; and press Config.</source><translation>سرور «%1» شما آماده است. «سرورهای خریده‌شده از وب‌پک» را باز کنید و «پیکربندی» را بزنید.</translation></message>
+    <message><source>Payment received. Placing your order...</source><translation>پرداخت دریافت شد. در حال ثبت سفارش...</translation></message>
+    <message><source>CoCo stopped waiting for the payment. If you paid, the money is in your webpack wallet: press Buy again.</source><translation>CoCo دیگر منتظر پرداخت نیست. اگر پرداخت کرده‌اید، مبلغ در کیف پول وب‌پک شماست: دوباره «خرید» را بزنید.</translation></message>
+    <message><source>ZarinPal (Iranian bank cards)</source><translation>زرین‌پال (کارت‌های بانکی ایران)</translation></message>
+    <message><source>Card (Stripe)</source><translation>کارت (Stripe)</translation></message>
+    <message><source>Cryptocurrency (NOWPayments)</source><translation>ارز دیجیتال (NOWPayments)</translation></message>
+    <message><source>%1 Toman</source><translation>%1 تومان</translation></message>
+    <message><source>Default system</source><translation>سیستم پیش‌فرض</translation></message>
+    <message><source>%1 per month</source><translation>ماهانه %1</translation></message>
+    <message><source>Not sold in your wallet currency</source><translation>با واحد پول کیف پول شما فروخته نمی‌شود</translation></message>
+    <message><source>Renews monthly from your wallet. If unpaid, the server is powered off after %1 days and deleted %2 days later.</source><translation>هر ماه از کیف پول شما تمدید می‌شود. اگر پرداخت نشود، سرور پس از %1 روز خاموش و %2 روز بعد حذف می‌شود.</translation></message>
+    <message><source>Placing the order...</source><translation>در حال ثبت سفارش...</translation></message>
+    <message><source>The answer was unclear. Press Buy again: the same order is sent, you are not charged twice.</source><translation>پاسخ روشن نبود. دوباره «خرید» را بزنید: همان سفارش فرستاده می‌شود و دو بار کسر نمی‌شود.</translation></message>
+    <message><source>webpack is checking this order. Nothing more will be charged.</source><translation>وب‌پک در حال بررسی این سفارش است. مبلغ دیگری کسر نمی‌شود.</translation></message>
+    <message><source>Building the server...</source><translation>در حال ساخت سرور...</translation></message>
+    <message><source>Installing this device's access...</source><translation>در حال نصب دسترسی این دستگاه...</translation></message>
+    <message><source>Ready to configure</source><translation>آمادهٔ پیکربندی</translation></message>
+    <message><source>webpack could not set up access. Contact webpack support.</source><translation>وب‌پک نتوانست دسترسی را راه‌اندازی کند. با پشتیبانی وب‌پک تماس بگیرید.</translation></message>
+    <message><source>The order failed and was refunded.</source><translation>سفارش ناموفق بود و مبلغ بازگردانده شد.</translation></message>
+    <message><source>On hold: contact webpack support</source><translation>معلق: با پشتیبانی وب‌پک تماس بگیرید</translation></message>
+    <message><source>Installing access...</source><translation>در حال نصب دسترسی...</translation></message>
+    <message><source>webpack is still confirming the server's identity</source><translation>وب‌پک هنوز در حال تأیید هویت سرور است</translation></message>
+    <message><source>Access setup failed: contact webpack support</source><translation>راه‌اندازی دسترسی ناموفق بود: با پشتیبانی وب‌پک تماس بگیرید</translation></message>
+    <message><source>This device has no access yet: press Config to add it</source><translation>این دستگاه هنوز دسترسی ندارد: برای افزودن آن «پیکربندی» را بزنید</translation></message>
+    <message><source>Enter your webpack email and password.</source><translation>ایمیل و رمز عبور وب‌پک خود را وارد کنید.</translation></message>
+    <message><source>Continue the sign-in in your browser, then come back to CoCo VPN.</source><translation>ورود را در مرورگر ادامه دهید، سپس به CoCo VPN برگردید.</translation></message>
+    <message><source>Choose a plan and a location first.</source><translation>ابتدا یک پلن و یک موقعیت انتخاب کنید.</translation></message>
+    <message><source>The price changed. Review the new price and try again.</source><translation>قیمت تغییر کرد. قیمت جدید را ببینید و دوباره تلاش کنید.</translation></message>
+    <message><source>CoCo could not open your browser for the payment.</source><translation>CoCo نتوانست مرورگر را برای پرداخت باز کند.</translation></message>
+    <message><source>Pay %1 in your browser. CoCo places the order as soon as the money reaches your wallet.</source><translation>%1 را در مرورگر پرداخت کنید. CoCo به محض رسیدن مبلغ به کیف پول، سفارش را ثبت می‌کند.</translation></message>
+    <message><source>Order placed. CoCo is following the build; it usually takes a few minutes.</source><translation>سفارش ثبت شد. CoCo ساخت سرور را دنبال می‌کند؛ معمولاً چند دقیقه طول می‌کشد.</translation></message>
+    <message><source>webpack is still confirming this server's identity. Try again in a few minutes.</source><translation>وب‌پک هنوز در حال تأیید هویت این سرور است. چند دقیقه دیگر دوباره تلاش کنید.</translation></message>
+    <message><source>webpack is installing this device's access. Try again in a few minutes.</source><translation>وب‌پک در حال نصب دسترسی این دستگاه است. چند دقیقه دیگر دوباره تلاش کنید.</translation></message>
+    <message><source>This device's key is being added to the server. Press Config again in a few minutes.</source><translation>کلید این دستگاه در حال افزوده شدن به سرور است. چند دقیقه دیگر دوباره «پیکربندی» را بزنید.</translation></message>
+    <message><source>The server's details are not complete yet. Refresh the list and try again.</source><translation>مشخصات سرور هنوز کامل نیست. فهرست را به‌روزرسانی کنید و دوباره تلاش کنید.</translation></message>
+    <message><source>Internal error</source><translation>خطای داخلی</translation></message>
+    <message><source>That password was not accepted by the server.</source><translation>سرور این رمز عبور را نپذیرفت.</translation></message>
+    <message><source>The server's identity (SSH host key) does not match the one webpack.ir confirmed. The connection was stopped to protect you. Contact webpack support.</source><translation>هویت سرور (کلید میزبان SSH) با آنچه webpack.ir تأیید کرده یکسان نیست. برای حفاظت از شما اتصال متوقف شد. با پشتیبانی وب‌پک تماس بگیرید.</translation></message>
+    <message><source>The server refused this device's key. Press Config again after a few minutes, or contact webpack support.</source><translation>سرور کلید این دستگاه را نپذیرفت. چند دقیقه بعد دوباره «پیکربندی» را بزنید یا با پشتیبانی وب‌پک تماس بگیرید.</translation></message>
+    <message><source>The server cannot be reached. Check that it is running and try again.</source><translation>سرور در دسترس نیست. مطمئن شوید روشن است و دوباره تلاش کنید.</translation></message>
+    <message><source>CoCo could not prepare administrator access on the server.</source><translation>CoCo نتوانست دسترسی مدیر را روی سرور آماده کند.</translation></message>
+    <message><source>webpack.ir cannot be reached. Check your internet connection and try again.</source><translation>webpack.ir در دسترس نیست. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید.</translation></message>
+    <message><source>Too many requests. Wait a minute and try again.</source><translation>درخواست‌ها زیاد است. یک دقیقه صبر کنید و دوباره تلاش کنید.</translation></message>
+    <message><source>Your webpack sign-in has ended. Sign in again.</source><translation>ورود شما به وب‌پک پایان یافته است. دوباره وارد شوید.</translation></message>
+    <message><source>webpack.ir had a problem. Try again later.</source><translation>webpack.ir با مشکل روبه‌رو شد. بعداً دوباره تلاش کنید.</translation></message>
+    <message><source>The email or password is not correct.</source><translation>ایمیل یا رمز عبور درست نیست.</translation></message>
+    <message><source>This account uses two-step sign-in. Sign in with Google, or on the website.</source><translation>این حساب از ورود دومرحله‌ای استفاده می‌کند. با گوگل یا در وب‌سایت وارد شوید.</translation></message>
+    <message><source>Change your password on the webpack website first.</source><translation>ابتدا رمز عبور خود را در وب‌سایت وب‌پک تغییر دهید.</translation></message>
+    <message><source>Confirm your email address first (see the email from webpack).</source><translation>ابتدا نشانی ایمیل خود را تأیید کنید (ایمیل وب‌پک را ببینید).</translation></message>
+    <message><source>This webpack account is not active yet.</source><translation>این حساب وب‌پک هنوز فعال نیست.</translation></message>
+    <message><source>Google sign-in is not available right now.</source><translation>ورود با گوگل اکنون در دسترس نیست.</translation></message>
+    <message><source>The Google sign-in took too long. Try again.</source><translation>ورود با گوگل بیش از حد طول کشید. دوباره تلاش کنید.</translation></message>
+    <message><source>The Google sign-in did not finish. Try again.</source><translation>ورود با گوگل کامل نشد. دوباره تلاش کنید.</translation></message>
+    <message><source>CoCo could not open your browser.</source><translation>CoCo نتوانست مرورگر شما را باز کند.</translation></message>
+    <message><source>Your wallet balance is not enough for this server.</source><translation>موجودی کیف پول شما برای این سرور کافی نیست.</translation></message>
+    <message><source>This plan or location is not available now. Choose another one.</source><translation>این پلن یا موقعیت اکنون در دسترس نیست. مورد دیگری انتخاب کنید.</translation></message>
+    <message><source>The order failed and the money was returned to your wallet.</source><translation>سفارش ناموفق بود و مبلغ به کیف پول شما بازگشت.</translation></message>
+    <message><source>webpack refused the order details. Nothing was charged.</source><translation>وب‌پک مشخصات سفارش را نپذیرفت. مبلغی کسر نشد.</translation></message>
+    <message><source>An earlier order with other details is still open. Check your servers on the webpack website.</source><translation>سفارش قبلی با مشخصات دیگر هنوز باز است. سرورهای خود را در وب‌سایت وب‌پک بررسی کنید.</translation></message>
+    <message><source>CoCo could not create this device's SSH key.</source><translation>CoCo نتوانست کلید SSH این دستگاه را بسازد.</translation></message>
+    <message><source>Your webpack account has too many SSH keys. Remove one on the website.</source><translation>حساب وب‌پک شما کلید SSH زیادی دارد. یکی را در وب‌سایت حذف کنید.</translation></message>
+    <message><source>The payment could not be started (%1). Try another gateway or top up on the website.</source><translation>پرداخت آغاز نشد (%1). درگاه دیگری را امتحان کنید یا در وب‌سایت کیف پول را شارژ کنید.</translation></message>
+    <message><source>Something went wrong (%1).</source><translation>مشکلی پیش آمد (%1).</translation></message>
+    <message><source>Support code: %1</source><translation>کد پشتیبانی: %1</translation></message>
 </context>
 </TS>

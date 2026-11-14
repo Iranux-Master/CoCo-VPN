@@ -33,6 +33,7 @@ ServerCredentials SelfHostedAdminServerConfig::credentials() const
     creds.userName = userName;
     creds.secretData = password;
     creds.port = port;
+    creds.hostKeySha256 = hostKeySha256;
     return creds;
 }
 
@@ -122,6 +123,9 @@ QJsonObject SelfHostedAdminServerConfig::toJson() const
     if (port > 0) {
         obj[configKey::port] = port;
     }
+    if (!hostKeySha256.isEmpty()) {
+        obj[QLatin1String("cocoHostKeySha256")] = hostKeySha256;
+    }
 
     return obj;
 }
@@ -157,6 +161,7 @@ SelfHostedAdminServerConfig SelfHostedAdminServerConfig::fromJson(const QJsonObj
     } else {
         config.port = 0;
     }
+    config.hostKeySha256 = json.value(QLatin1String("cocoHostKeySha256")).toString();
 
     if (config.displayName.isEmpty()) {
         config.displayName = config.description.isEmpty() ? config.hostName : config.description;

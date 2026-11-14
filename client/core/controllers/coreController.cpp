@@ -197,6 +197,11 @@ void CoreController::initControllers()
     m_exportUiController = new ExportUiController(m_exportController, m_settings, this);
     setQmlContextProperty("ExportController", m_exportUiController);
 
+    // CoCo: buying and configuring servers from webpack.ir (docs/integration/WEBPACK.md).
+    m_webpackIntegration = new webpack::Integration(m_settings, this);
+    m_webpackUiController = new WebpackUiController(m_webpackIntegration, m_installUiController, this);
+    setQmlContextProperty("WebpackController", m_webpackUiController);
+
     m_languageUiController = new LanguageUiController(m_settingsController, m_languageModel, this);
     setQmlContextProperty("LanguageUiController", m_languageUiController);
 

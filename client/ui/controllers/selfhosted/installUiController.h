@@ -59,6 +59,9 @@ public:
                                QObject *parent = nullptr);
     ~InstallUiController();
 
+    // CoCo: full credentials, with port and pinned host key (servers bought from webpack.ir).
+    void setProcessedServerCredentials(const ServerCredentials &credentials);
+
 public slots:
     void install(DockerContainer container, int port, TransportProto transportProto, const QString &serverId);
     void setProcessedServerCredentials(const QString &hostName, const QString &userName, const QString &secretData);

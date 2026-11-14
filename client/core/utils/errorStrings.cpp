@@ -49,6 +49,7 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::SshPrivateKeyError): errorMessage = QObject::tr("Invalid private key or invalid passphrase entered"); break;
     case(ErrorCode::SshPrivateKeyFormatError): errorMessage = QObject::tr("The selected private key format is not supported, use openssh ED25519 key types or PEM key types"); break;
     case(ErrorCode::SshTimeoutError): errorMessage = QObject::tr("Timeout connecting to server"); break;
+    case(ErrorCode::SshHostKeyMismatchError): errorMessage = QObject::tr("The server's identity (SSH host key) does not match the one webpack.ir confirmed. The connection was stopped to protect you. Contact webpack support."); break;
 
     // Ssh scp errors
     case(ErrorCode::SshScpFailureError): errorMessage = QObject::tr("SCP error: Generic failure"); break;

@@ -592,6 +592,11 @@ void InstallUiController::setProcessedServerCredentials(const QString &hostName,
     m_processedServerCredentials.secretData = secretData;
 }
 
+void InstallUiController::setProcessedServerCredentials(const ServerCredentials &credentials)
+{
+    m_processedServerCredentials = credentials;
+}
+
 void InstallUiController::mountSftpDrive(const QString &serverId, const QString &port, const QString &password, const QString &username)
 {
     ServerCredentials serverCredentials = m_serversController->getServerCredentials(serverId);

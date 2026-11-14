@@ -48,6 +48,7 @@ namespace amnezia
         SshPrivateKeyError = 303,
         SshPrivateKeyFormatError = 304,
         SshTimeoutError = 305,
+        SshHostKeyMismatchError = 306,
 
         // Ssh scp errors
         SshScpFailureError = 400,

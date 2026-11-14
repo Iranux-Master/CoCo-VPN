@@ -1,4 +1,5 @@
 #include "sshClient.h"
+#include "sshHostKey.h"
 
 #include <QEventLoop>
 #include <QtConcurrent>
@@ -62,6 +63,15 @@ namespace libssh {
 
             if (connectionResult != SSH_OK) {
                 return fromLibsshErrorCode();
+            }
+
+            // CoCo: refuse a server whose host key differs from the pinned one (webpack.ir servers).
+            if (!sshHostKey::matchesPin(m_session, credentials.hostKeySha256)) {
+                qCritical() << "SSH host key does not match the pinned fingerprint";
+                ssh_disconnect(m_session);
+                ssh_free(m_session);
+                m_session = nullptr;
+                return ErrorCode::SshHostKeyMismatchError;
             }
 
             std::string authUsername = credentials.userName.toStdString();

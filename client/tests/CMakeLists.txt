@@ -393,6 +393,20 @@ endif()
 enable_testing()
 
 if(NOT ANDROID)
+    # CoCo: webpack.ir integration (client/core/controllers/webpack). No network: fakeNetwork.h.
+    foreach(_webpack_test Api Keys Shop)
+        string(TOLOWER "${_webpack_test}" _webpack_lower)
+        add_executable(test_webpack_${_webpack_lower}
+            webpack/testWebpack${_webpack_test}.cpp
+            webpack/fakeNetwork.h
+        )
+        target_link_libraries(test_webpack_${_webpack_lower} PRIVATE
+            Qt6::Test
+            test_common
+        )
+        add_test(NAME Webpack${_webpack_test}Test COMMAND test_webpack_${_webpack_lower})
+    endforeach()
+
     add_test(NAME MultipleImportsTest              COMMAND test_multiple_imports)
     add_test(NAME ServerEditTest                   COMMAND test_server_edit)
     add_test(NAME DefaultServerChangeTest          COMMAND test_default_server_change)

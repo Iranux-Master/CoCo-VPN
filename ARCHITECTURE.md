@@ -28,6 +28,7 @@ the CoCo brand, and a Windows-only CI build. The primary test platform is Window
 | `client/core/controllers/` | Business controllers (no QML). `coreController.*` is the composition root that builds every repository, controller and model and registers them as QML context properties. |
 | `client/core/controllers/selfhosted/` | Self-hosted server management: `installController` (install / remove containers over SSH), `exportController` (create client configs), `importController` (parse configs, keys, links), `usersController` (the server's `clientsTable`). |
 | `client/core/controllers/api/` | Amnezia commercial service ("Amnezia Premium / Free"): subscriptions, store purchase, services catalog, news. Talks to `gatewayController`. |
+| `client/core/controllers/webpack/` | CoCo's webpack.ir client (`docs/integration/WEBPACK.md`): `webpackApiClient` (`/api/v1` envelope, token refresh), `webpackSession` (device sign-in, PKCE loopback for Google), `webpackDeviceKey` (this device's Ed25519 key), `webpackShop` (plans, wallet, top-up checkout, balance polling), `webpackPurchases` (order with an idempotency key kept until a definite answer, build tracking), `webpackServers` (account servers and their SSH access), `webpackSudoSetup` (one-time passwordless sudo), `webpackIntegration` (owns them all). QML sees them through `WebpackUiController` (`WebpackController`). |
 | `client/core/controllers/gatewayController.*` | Encrypted HTTP client for the Amnezia API gateway (RSA + AES, proxy fallback through S3 lists). |
 | `client/core/configurators/` | Build a client config per protocol (`awgConfigurator`, `xrayConfigurator`, ...). |
 | `client/core/installers/` | Per-container install steps (`awgInstaller`, `xrayInstaller`, `sftpInstaller`, ...). |
@@ -69,6 +70,7 @@ flowchart LR
   end
   CC -->|SSH libssh| VPS[(User VPS<br/>Docker containers per protocol)]
   CC -->|HTTPS, encrypted| AGW[(Amnezia API gateway<br/>gw.amnezia.org)]
+  CC -->|HTTPS /api/v1| WP[(webpack.ir<br/>plans, wallet, orders, servers)]
 ```
 
 - **Composition root.** `CoreController` (`client/core/controllers/coreController.cpp`) creates the
@@ -91,7 +93,10 @@ flowchart LR
 - **Persistence.** All state is local: `SecureQSettings` (`client/secureQSettings.*`) encrypts values;
   the key lives in the OS keychain (qtkeychain submodule). Keys of note: servers (`Servers/...` via
   `SecureServersRepository`), `Conf/gatewayEndpoint`, and CoCo's `Sharing/accountGroups`,
-  `Sharing/templates`, `Sharing/templateDefaults` (JSON, written by `ExportUiController`). Settings
+  `Sharing/templates`, `Sharing/templateDefaults` (JSON, written by `ExportUiController`), and the
+  encrypted `Webpack/*` keys (`session` holds only the refresh token and profile, `deviceKey`,
+  `purchases`, `servers`; `Webpack/baseUrl` is plain). `Webpack/*` is not part of backups. A server
+  may carry `cocoHostKeySha256`: `sshClient` then refuses a host key that does not match. Settings
   migrations: `client/core/utils/migrations.cpp`.
 
 ## 4. Main flows
@@ -103,6 +108,7 @@ flowchart LR
 | Create one client config | `PageShare.qml` -> `ExportController` (QML) = `ExportUiController` -> `core/.../exportController` -> the protocol's configurator adds the peer / user on the server over SSH and `usersController` updates the server's `clientsTable`. |
 | Batch accounts (CoCo) | `PageShare.qml` -> `ExportUiController::startAccountBatch` -> `createNextBatchAccount` (one account and protocol per `QTimer` tick, synchronous `ExportController` calls) -> group saved to `Sharing/accountGroups`. |
 | Share templates (CoCo) | `PageSettingsShareTemplates.qml` and `PageShare.qml` -> `ExportUiController` (`upsertShareTemplate`, `renderAccountsWithTemplates`, `openHtmlPreview`); the parts come from `client/ui/share/*.html`; tags are replaced in one pass. |
+| Buy a server (CoCo, webpack.ir) | `PageSetupWizardConfigSource.qml` -> `PageWebpackShop.qml` -> `WebpackController` = `WebpackUiController` -> `webpack::Shop` (plans, wallet; for a shortfall a checkout opened in the system browser and the balance polled) -> `webpack::Purchases::placeOrder` (wallet payment with this device's key and a CoCo-made login) -> order and `/access` polled until installed -> `PageWebpackServers.qml` Config -> `webpackSudoSetup` (host key pinned, `webpack_grant_sudo.sh`) -> `InstallUiController::setProcessedServerCredentials` -> `PageSetupWizardEasy` (the normal install). |
 | Import | Text key, file, QR or `vpn://` link -> `ImportController` (QML) = `ImportUiController` -> `core/.../importController` (also parses vless/vmess/ss/trojan through `utils/serialization`). |
 | Amnezia Premium / Free | `PageSetupWizardApiServicesList.qml` and the `PageSettingsApi*` pages -> `SubscriptionUiController` / `ServicesCatalogUiController` -> `core/controllers/api/*` -> `GatewayController` -> `gw.amnezia.org` (default in `secureAppSettingsRepository.cpp`). Update checks use the same gateway (`updateController.cpp`). |
 
