@@ -51,7 +51,7 @@ for example `ExportController` in QML is `ExportUiController` in C++.
 | `SftpConfigModel` | `SftpConfigModel` | `client/ui/models/services/sftpConfigModel.h` | 1 |
 | `Socks5ProxyConfigModel` | `Socks5ProxyConfigModel` | `client/ui/models/services/socks5ProxyConfigModel.h` | 1 |
 | `SubscriptionUiController` | `SubscriptionUiController` | `client/ui/controllers/api/subscriptionUiController.h` | 17 |
-| `SystemController` | `SystemController` | `client/ui/controllers/systemController.h` | 14 |
+| `SystemController` | `SystemController` | `client/ui/controllers/systemController.h` | 15 |
 | `TProxyConfigModel` | `TProxyConfigModel` | `client/ui/models/services/tProxyConfigModel.h` | 3 |
 | `TelemtConfigModel` | `TelemtConfigModel` | `client/ui/models/services/telemtConfigModel.h` | 2 |
 | `TorConfigModel` | `TorConfigModel` | `client/ui/models/services/torConfigModel.h` | 1 |
@@ -134,8 +134,8 @@ their roles through `roleNames()`; read the header for those.
 
 ### `ExportUiController` (QML: `ExportController`)
 
-- Properties: accountGroups, batchProgress, batchRunning, batchTotal, config, nativeConfigString, qrCodes, qrCodesCount, shareTemplates
-- Callable: accountGroup, accountGroups, batchProgress, batchRunning, batchTotal, defaultShareTemplateId, deleteAccountGroup, deleteShareTemplate, exportConfig, generateAwgConfig, generateConnectionConfig, generateFullAccessConfig, generateOpenVpnConfig, generateQrFromString, generateQrFromStringRaw, generateWireGuardConfig, generateXrayConfig, getConfig, getNativeConfigString, getQrCodes, openHtmlPreview, renameClient, renderAccountTemplate, renderAccountsTemplate, renderAccountsText, renderAccountsWithTemplates, renderShareTemplateDraft, renderShareTemplatePreview, revokeConfig, saveShareTemplate, setConfigFromString, setDefaultShareTemplate, shareProtocols, shareTemplate, shareTemplateName, shareTemplates, startAccountBatch, templatesForProtocol, updateClientManagementModel, upsertShareTemplate
+- Properties: accountGroups, batchCancelRequested, batchProgress, batchRunning, batchTotal, config, nativeConfigString, qrCodes, qrCodesCount, shareTemplates
+- Callable: accountGroup, accountGroups, batchCancelRequested, batchProgress, batchRunning, batchTotal, cancelAccountBatch, defaultShareTemplateId, deleteAccountGroup, deleteShareTemplate, exportConfig, generateAwgConfig, generateConnectionConfig, generateFullAccessConfig, generateOpenVpnConfig, generateQrFromString, generateQrFromStringRaw, generateWireGuardConfig, generateXrayConfig, getConfig, getNativeConfigString, getQrCodes, openHtmlPreview, renameClient, renderAccountTemplate, renderAccountsTemplate, renderAccountsText, renderAccountsWithTemplates, renderShareTemplateDraft, renderShareTemplatePreview, revokeConfig, saveShareTemplate, setConfigFromString, setDefaultShareTemplate, shareProtocols, shareTemplate, shareTemplateName, shareTemplates, startAccountBatch, templatesForProtocol, updateClientManagementModel, upsertShareTemplate
 - Signals: accountBatchFinished, accountGroupsChanged, batchProgressChanged, exportConfigChanged, exportErrorOccurred, generateConfig, revokeConfigFinished, saveFile, shareTemplatesChanged
 
 ### `FocusController` (QML: `FocusController`)
@@ -438,7 +438,7 @@ their roles through `roleNames()`; read the header for those.
 
 | File | Uses |
 |---|---|
-| `Config/GlobalConfig.qml` | - |
+| `Config/GlobalConfig.qml` | SystemController |
 
 ### Filters
 
@@ -490,7 +490,7 @@ their roles through `roleNames()`; read the header for those.
 - **SftpConfigModel**: `Pages2/PageServiceSftpSettings.qml`
 - **Socks5ProxyConfigModel**: `Pages2/PageServiceSocksProxySettings.qml`
 - **SubscriptionUiController**: `Components/ServersListView.qml`, `Components/SubscriptionExpiredDrawer.qml`, `Pages2/PageHome.qml`, `Pages2/PageSettingsApiAvailableCountries.qml`, `Pages2/PageSettingsApiDevices.qml`, `Pages2/PageSettingsApiNativeConfigs.qml`, `Pages2/PageSettingsApiServerInfo.qml`, `Pages2/PageSettingsApiSubscriptionKey.qml`, `Pages2/PageSettingsServerData.qml`, `Pages2/PageSettingsServersList.qml`, `Pages2/PageSetupWizardApiFreeInfo.qml`, `Pages2/PageSetupWizardApiPremiumInfo.qml`, `Pages2/PageSetupWizardApiTrialEmail.qml`, `Pages2/PageSetupWizardConfigSource.qml`, `Pages2/PageShareConnection.qml`, `Pages2/PageStart.qml`, `main2.qml`
-- **SystemController**: `Pages2/PageProtocolXraySnapshots.qml`, `Pages2/PageSettingsApiNativeConfigs.qml`, `Pages2/PageSettingsApiSubscriptionKey.qml`, `Pages2/PageSettingsAppSplitTunneling.qml`, `Pages2/PageSettingsBackup.qml`, `Pages2/PageSettingsKillSwitchExceptions.qml`, `Pages2/PageSettingsLogging.qml`, `Pages2/PageSettingsShareTemplates.qml`, `Pages2/PageSettingsSplitTunneling.qml`, `Pages2/PageSetupWizardConfigSource.qml`, `Pages2/PageShare.qml`, `Pages2/PageShareConnection.qml`, `Pages2/PageShareFullAccess.qml`, `main2.qml`
+- **SystemController**: `Config/GlobalConfig.qml`, `Pages2/PageProtocolXraySnapshots.qml`, `Pages2/PageSettingsApiNativeConfigs.qml`, `Pages2/PageSettingsApiSubscriptionKey.qml`, `Pages2/PageSettingsAppSplitTunneling.qml`, `Pages2/PageSettingsBackup.qml`, `Pages2/PageSettingsKillSwitchExceptions.qml`, `Pages2/PageSettingsLogging.qml`, `Pages2/PageSettingsShareTemplates.qml`, `Pages2/PageSettingsSplitTunneling.qml`, `Pages2/PageSetupWizardConfigSource.qml`, `Pages2/PageShare.qml`, `Pages2/PageShareConnection.qml`, `Pages2/PageShareFullAccess.qml`, `main2.qml`
 - **TProxyConfigModel**: `Components/SettingsContainersListView.qml`, `Pages2/PageServiceTProxySettings.qml`, `Pages2/PageSetupWizardProtocolSettings.qml`
 - **TelemtConfigModel**: `Components/SettingsContainersListView.qml`, `Pages2/PageServiceTelemtSettings.qml`
 - **TorConfigModel**: `Pages2/PageServiceTorWebsiteSettings.qml`

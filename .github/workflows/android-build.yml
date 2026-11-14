@@ -1,0 +1,162 @@
+name: Android build
+
+# CoCo VPN Android test build: one arm64-v8a APK (most phones since 2017), Android 9+.
+# Signed with the CoCo release key when the ANDROID_RELEASE_KEYSTORE_* secrets exist; otherwise with
+# a throwaway key made in this run, which installs fine for testing but cannot update an APK
+# signed with another key (uninstall first).
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'client/**'
+      - 'common/**'
+      - 'cmake/**'
+      - 'recipes/**'
+      - 'conanfile.py'
+      - 'CMakeLists.txt'
+      - 'deploy/build.sh'
+      - '.github/workflows/android-build.yml'
+  pull_request:
+    paths:
+      - 'client/android/**'
+      - 'client/platforms/android/**'
+      - 'client/cmake/**'
+      - 'client/ui/**'
+      - 'client/core/**'
+      - '.github/workflows/android-build.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  QT_MIRROR: https://mirrors.ocf.berkeley.edu/qt/
+
+jobs:
+  Build-Android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      QT_VERSION: 6.10.1
+      QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+      ANDROID_PLATFORM: android-28
+      NDK_VERSION: 27.0.11718014
+      APP_ANDROID_MIN_SDK: 28
+      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
+      FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
+      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
+      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
+      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+          fetch-depth: 1
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          df -h /
+
+      - name: Install desktop Qt (host tools)
+        uses: jurplel/install-qt-action@v4.3.1
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: 'linux'
+          target: 'desktop'
+          arch: 'linux_gcc_64'
+          modules: ${{ env.QT_MODULES }}
+          dir: ${{ runner.temp }}
+          py7zrversion: '==0.22.*'
+          extra: '--base ${{ env.QT_MIRROR }}'
+
+      - name: Install Android arm64-v8a Qt
+        uses: jurplel/install-qt-action@v4.3.1
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: 'all_os'
+          target: 'android'
+          arch: 'android_arm64_v8a'
+          modules: ${{ env.QT_MODULES }}
+          dir: ${{ runner.temp }}
+          py7zrversion: '==0.22.*'
+          extra: '--base ${{ env.QT_MIRROR }}'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: "platforms;${{ env.ANDROID_PLATFORM }} ndk;${{ env.NDK_VERSION }}"
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install Conan
+        run: pip install "conan==2.28.0"
+
+      - name: Prepare signing key
+        id: keystore
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+          KEYSTORE_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
+          KEYSTORE_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
+        run: |
+          if [[ -n "$KEYSTORE_BASE64" && -n "$KEYSTORE_ALIAS" && -n "$KEYSTORE_PASS" ]]; then
+            echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/android.keystore"
+            echo "alias=$KEYSTORE_ALIAS" >> "$GITHUB_OUTPUT"
+            echo "::add-mask::$KEYSTORE_PASS"
+            echo "pass=$KEYSTORE_PASS" >> "$GITHUB_OUTPUT"
+            echo "kind=release" >> "$GITHUB_OUTPUT"
+          else
+            PASS=$(openssl rand -hex 16)
+            echo "::add-mask::$PASS"
+            keytool -genkeypair -keystore "$RUNNER_TEMP/android.keystore" -storepass "$PASS" -keypass "$PASS" \
+              -alias cocovpn-test -keyalg RSA -keysize 2048 -validity 3650 -dname "CN=CoCo VPN test build"
+            echo "alias=cocovpn-test" >> "$GITHUB_OUTPUT"
+            echo "pass=$PASS" >> "$GITHUB_OUTPUT"
+            echo "kind=test" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build APK
+        shell: bash
+        env:
+          QT_INSTALL_DIR: ${{ runner.temp }}
+          QT_ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/android.keystore
+          QT_ANDROID_KEYSTORE_ALIAS: ${{ steps.keystore.outputs.alias }}
+          QT_ANDROID_KEYSTORE_STORE_PASS: ${{ steps.keystore.outputs.pass }}
+          AMNEZIA_BUILD_TESTS: OFF
+        run: |
+          deploy/build.sh -t android --sign --abi arm64-v8a
+          VERSION=$(grep CMAKE_PROJECT_VERSION:STATIC deploy/build/CMakeCache.txt | cut -d= -f2)
+          mkdir -p deploy/artifacts
+          APK=$(ls deploy/build/client/android-build/*.apk | head -1)
+          cp "$APK" "deploy/artifacts/CoCoVPN_${VERSION}_android_arm64-v8a_${{ steps.keystore.outputs.kind }}-signed.apk"
+          ls -l deploy/artifacts
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-apk
+          path: deploy/artifacts/*.apk
+          archive: false
+          if-no-files-found: error
+          retention-days: 7

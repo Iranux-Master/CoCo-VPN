@@ -27,6 +27,20 @@ ExportController::ExportController(SecureServersRepository* serversRepository,
 {
 }
 
+namespace {
+thread_local bool g_deferClientAppend = false;
+}
+
+ExportController::ClientAppendDeferral::ClientAppendDeferral() : m_previous(g_deferClientAppend)
+{
+    g_deferClientAppend = true;
+}
+
+ExportController::ClientAppendDeferral::~ClientAppendDeferral()
+{
+    g_deferClientAppend = m_previous;
+}
+
 ExportController::ExportResult ExportController::generateFullAccessConfig(const QString &serverId)
 {
     ExportResult result;
@@ -85,7 +99,7 @@ ExportController::ExportResult ExportController::generateConnectionConfig(const 
         
         QString clientId = newProtocolConfig.clientId();
         result.clientId = clientId;
-        if (!clientId.isEmpty()) {
+        if (!clientId.isEmpty() && !g_deferClientAppend) {
             emit appendClientRequested(serverId, clientId, clientName, container);
         }
     }
@@ -167,7 +181,7 @@ ExportController::NativeConfigResult ExportController::generateNativeConfig(cons
 
     if (protocol == Proto::OpenVpn || protocol == Proto::WireGuard || protocol == Proto::Awg || protocol == Proto::Xray) {
         QString clientId = newProtocolConfig.clientId();
-        if (!clientId.isEmpty()) {
+        if (!clientId.isEmpty() && !g_deferClientAppend) {
             emit appendClientRequested(serverId, clientId, clientName, container);
         }
     }

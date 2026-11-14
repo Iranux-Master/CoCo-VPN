@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- CoCo: Persian strings for the Android notification, quick tile and system dialogs. -->
+<resources>
+    <string name="disconnected">متصل نیست</string>
+    <string name="connected">متصل</string>
+    <string name="connecting">در حال اتصال…</string>
+    <string name="disconnecting">در حال قطع اتصال…</string>
+    <string name="reconnecting">در حال اتصال دوباره…</string>
+    <string name="connect">اتصال</string>
+    <string name="disconnect">قطع اتصال</string>
+    <string name="ok">تأیید</string>
+    <string name="cancel">انصراف</string>
+    <string name="yes">بله</string>
+    <string name="no">خیر</string>
+
+    <string name="vpnGranted">اجازه VPN داده شد</string>
+    <string name="vpnSetupFailed">خطا در راه‌اندازی VPN</string>
+    <string name="vpnSetupFailedMessage">برای اتصال به CoCo VPN این کارها را انجام دهید:\n\n- به برنامه اجازه ساخت اتصال VPN بدهید\n- در تنظیمات VPN گوشی، گزینه «VPN همیشه روشن» را برای برنامه‌های VPN دیگر خاموش کنید</string>
+    <string name="openVpnSettings">باز کردن تنظیمات VPN</string>
+
+    <string name="notificationChannelDescription">اعلان سرویس CoCo VPN</string>
+    <string name="notificationDialogTitle">سرویس CoCo VPN</string>
+    <string name="notificationDialogMessage">وضعیت VPN در نوار اعلان نشان داده شود؟</string>
+    <string name="notificationSettingsDialogTitle">تنظیمات اعلان</string>
+    <string name="notificationSettingsDialogMessage">برای نمایش اعلان، اعلان‌های برنامه را در تنظیمات گوشی روشن کنید</string>
+    <string name="openNotificationSettings">باز کردن تنظیمات اعلان</string>
+
+    <string name="tvNoFileBrowser">برای انتخاب فایل، یک برنامه مدیریت فایل نصب کنید</string>
+</resources>

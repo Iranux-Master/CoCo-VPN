@@ -5621,6 +5621,10 @@ Create one from the current settings.</source>
     <message><source>The {{QR}} tag embeds QR codes in HTML. TXT includes a note to use HTML for QR codes. Share these private connection details only with their intended users.</source><translation>برچسب {{QR}} کدهای QR را در فایل HTML قرار می‌دهد. فایل TXT برای کد QR استفاده از HTML را پیشنهاد می‌کند. این اطلاعات خصوصی اتصال را فقط برای کاربران مربوط ارسال کنید.</translation></message>
     <message><source>Accounts</source><translation>حساب‌ها</translation></message>
     <message><source>Account creation finished: %1 succeeded, %2 failed</source><translation>ساخت حساب‌ها تمام شد: ⁨%1⁩ موفق و ⁨%2⁩ ناموفق.</translation></message>
+    <message><source>Account creation stopped: %1 succeeded, %2 failed</source><translation>ساخت حساب‌ها متوقف شد: ⁨%1⁩ موفق و ⁨%2⁩ ناموفق.</translation></message>
+    <message><source>Stopping after the current account...</source><translation>توقف پس از پایان مرحله فعلی...</translation></message>
+    <message><source>Stop creating accounts</source><translation>توقف ساخت حساب‌ها</translation></message>
+    <message><source>You can keep using the app while accounts are created. Stopping finishes the step already sent to the server.</source><translation>در زمان ساخت حساب‌ها می‌توانید از برنامه استفاده کنید. با توقف، مرحله‌ای که به سرور فرستاده شده کامل می‌شود و مرحله تازه‌ای شروع نمی‌شود.</translation></message>
     <message><source>Create account groups</source><translation>ساخت گروهی حساب‌ها</translation></message>
     <message><source>Each account gets separate credentials for every selected connection method.</source><translation>برای هر حساب و هر روش اتصال انتخاب‌شده، اطلاعات ورود جداگانه ساخته می‌شود.</translation></message>
     <message><source>Account name</source><translation>نام حساب</translation></message>
@@ -7343,6 +7347,7 @@ Remove the server from the app to continue.</source>
 </context>
 <context>
     <name>ExportUiController</name>
+    <message><source>Account creation was stopped before all connection methods were created.</source><translation>ساخت حساب پیش از ساخته‌شدن همه روش‌های اتصال متوقف شد.</translation></message>
     <message><source>Account creation was interrupted. Check the server before trying again.</source><translation>ساخت حساب نیمه‌کاره متوقف شده است. قبل از تلاش دوباره، وضعیت حساب را روی سرور بررسی کنید.</translation></message>
     <message><source>No connection settings were returned.</source><translation>اطلاعات اتصال از سرور دریافت نشد.</translation></message>
     <message><source>General</source><translation>عمومی</translation></message>

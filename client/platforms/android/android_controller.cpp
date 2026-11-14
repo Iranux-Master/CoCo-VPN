@@ -161,6 +161,12 @@ void AndroidController::saveFile(const QString &fileName, const QString &data)
                        QJniObject::fromString(data).object<jstring>());
 }
 
+bool AndroidController::openHtmlFile(const QString &path)
+{
+    return callActivityMethod<jboolean>("openHtmlFile", "(Ljava/lang/String;)Z",
+                                        QJniObject::fromString(path).object<jstring>());
+}
+
 QString AndroidController::openFile(const QString &filter)
 {
     QEventLoop wait;

@@ -27,6 +27,18 @@ Item {
         return false
     }
 
+    // CoCo: platforms with account management, batch accounts and sharing templates.
+    // Other platforms keep the upstream share page until they are built and tested.
+    function hasCocoAccountTools() {
+        return Qt.platform.os === "windows" || Qt.platform.os === "android"
+    }
+
+    // CoCo: Android saves through the system "create document" picker (SystemController::saveFile),
+    // which needs a bare file name; desktop asks for a path in the Qt file dialog first.
+    function usesSystemSavePicker() {
+        return Qt.platform.os === "android"
+    }
+
     TextEdit{
         id: clipboard
         visible: false

@@ -177,7 +177,7 @@ PageType {
 
         property string title: qsTr("Sharing templates")
         readonly property string leftImagePath: "qrc:/images/controls/file-cog-2.svg"
-        property bool isVisible: Qt.platform.os === "windows"
+        property bool isVisible: GC.hasCocoAccountTools()
         readonly property var clickedHandler: function() {
             PageController.goToPage(PageEnum.PageSettingsShareTemplates)
         }

@@ -194,7 +194,7 @@ void CoreController::initControllers()
     m_importController = new ImportUiController(m_importCoreController, this);
     setQmlContextProperty("ImportController", m_importController);
 
-    m_exportUiController = new ExportUiController(m_exportController, m_settings, this);
+    m_exportUiController = new ExportUiController(m_exportController, m_settings, m_serversRepository, this);
     setQmlContextProperty("ExportController", m_exportUiController);
 
     // CoCo: buying and configuring servers from webpack.ir (docs/integration/WEBPACK.md).
