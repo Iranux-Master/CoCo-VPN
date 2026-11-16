@@ -40,6 +40,7 @@ namespace amnezia
         XrayRealityKeysReadFailed = 217,
         ServerContainerRuntimeNotSupported = 218,
         ContainerRuntimeServiceNotRunning = 219,
+        DnsttPublicKeyReadFailed = 220, // CoCo DNS tunnel
 
         // Ssh connection errors
         SshRequestDeniedError = 300,
@@ -63,6 +64,7 @@ namespace amnezia
         ExecutableMissing = 604,
         XrayExecutableMissing = 605,
         Tun2SockExecutableMissing = 606,
+        DnsttClientExecutableMissing = 607, // CoCo DNS tunnel
 
         // VPN errors
         OpenVpnAdaptersInUseError = 700,
@@ -74,6 +76,8 @@ namespace amnezia
         OpenSslFailed = 800,
         XrayExecutableCrashed = 803,
         Tun2SockExecutableCrashed = 804,
+        DnsttClientFailed = 805, // CoCo DNS tunnel: dnstt-client exited or never listened
+        DnsttResolverUnreachable = 806, // CoCo DNS tunnel: no resolver address could be used
 
         // import and install errors
         ImportInvalidConfigError = 900,

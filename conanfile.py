@@ -23,6 +23,8 @@ class AmneziaVPN(ConanFile):
                 self.requires("tap-windows6/9.27.0")
                 self.requires("win-split-tunnel/1.2.5.0")
                 self.requires("wintun/0.14.1")
+                # CoCo DNS tunnel client (docs/plans/D1-dns-tunnel.md); Windows first
+                self.requires("dnstt/1.20260501.0")
             else:
                 self.requires("awg-go/3.1.20260814")
 

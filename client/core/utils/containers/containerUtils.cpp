@@ -72,6 +72,7 @@ QMap<DockerContainer, QString> ContainerUtils::containerHumanNames()
              { DockerContainer::Xray, "XRay" },
              { DockerContainer::Ipsec, QObject::tr("IPsec") },
              { DockerContainer::SSXray, "Shadowsocks"},
+             { DockerContainer::Dnstt, QObject::tr("DNS tunnel") },
 
              { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
              { DockerContainer::Dns, QObject::tr("VPN DNS") },
@@ -104,6 +105,9 @@ QMap<DockerContainer, QString> ContainerUtils::containerDescriptions()
              { DockerContainer::Xray,
                QObject::tr("XRay with REALITY masks VPN traffic as web traffic and protects against active probing. "
                            "It is highly resistant to detection and offers high speed.") },
+             { DockerContainer::Dnstt,
+               QObject::tr("Emergency protocol for days when only DNS works. It carries traffic inside DNS queries, "
+                           "so it is slow, but it can connect when every other protocol is blocked. Needs a domain.") },
              { DockerContainer::Ipsec,
                QObject::tr("IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after "
                            "signal loss. It has native support on the latest versions of Android and iOS.") },
@@ -172,6 +176,19 @@ QMap<DockerContainer, QString> ContainerUtils::containerDetailedDescriptions()
                       "* Highly effective in heavily censored regions\n"
                       "* Minimal battery consumption on devices\n"
                       "* Operates over TCP protocol") },
+        { DockerContainer::Dnstt,
+          QObject::tr("The DNS tunnel (dnstt) carries VPN traffic inside ordinary DNS queries and answers. "
+                      "Your device sends the queries to a DNS resolver (your internet provider's or a public one), "
+                      "and the resolver passes them to this server, which is the name server of a tunnel subdomain. "
+                      "When international connections are cut but DNS still resolves foreign names, it is often the only way out.\n"
+                      "\nYou need a domain: after installation, add the two DNS records the app shows "
+                      "(an NS record for the tunnel subdomain and an A record for its name server).\n"
+                      "\nFeatures:\n"
+                      "* Works when only DNS is open\n"
+                      "* Encrypted end to end (Noise inside the tunnel, a separate key for each account)\n"
+                      "* Slow: tens to a few hundred kilobits per second, for messaging and light browsing\n"
+                      "* Available in CoCo VPN on Windows for now\n"
+                      "* Operates over UDP port 53") },
         { DockerContainer::Ipsec,
           QObject::tr("IKEv2, combined with IPSec encryption, is a modern and reliable VPN protocol. "
                       "It reconnects quickly when switching networks or devices, making it ideal for dynamic network environments. "
@@ -227,6 +244,7 @@ Proto ContainerUtils::defaultProtocol(DockerContainer c)
     case DockerContainer::Xray: return Proto::Xray;
     case DockerContainer::Ipsec: return Proto::Ikev2;
     case DockerContainer::SSXray: return Proto::SSXray;
+    case DockerContainer::Dnstt: return Proto::Dnstt;
 
     case DockerContainer::TorWebSite: return Proto::TorWebSite;
     case DockerContainer::Dns: return Proto::Dns;
@@ -290,6 +308,7 @@ bool ContainerUtils::isSupportedByCurrentPlatform(DockerContainer c)
     switch (c) {
     case DockerContainer::WireGuard: return true;
     case DockerContainer::Ipsec: return false;
+    case DockerContainer::Dnstt: return false; // CoCo: DNS tunnel client is Windows-only for now
     default: return true;
     }
 
@@ -310,6 +329,7 @@ bool ContainerUtils::isSupportedByCurrentPlatform(DockerContainer c)
 #elif defined(Q_OS_LINUX)
     switch (c) {
     case DockerContainer::Ipsec: return false;
+    case DockerContainer::Dnstt: return false; // CoCo: DNS tunnel client is Windows-only for now
     default: return true;
     }
 
@@ -373,6 +393,7 @@ bool ContainerUtils::isShareable(DockerContainer container)
     case DockerContainer::MtProxy: return false;
     case DockerContainer::Telemt: return false;
     case DockerContainer::TProxy: return false;
+    case DockerContainer::Dnstt: return false; // CoCo: sharing comes with D1 slice 4
     default: return true;
     }
 }
@@ -406,6 +427,7 @@ int ContainerUtils::installPageOrder(DockerContainer container)
     case DockerContainer::Xray: return 3;
     case DockerContainer::Ipsec: return 7;
     case DockerContainer::SSXray: return 8;
+    case DockerContainer::Dnstt: return 9;
     case DockerContainer::MtProxy:
     case DockerContainer::Telemt:
     case DockerContainer::TProxy:

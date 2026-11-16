@@ -305,6 +305,9 @@ QJsonObject XrayServerConfig::toJson() const
     if (!mkcpObj.isEmpty()) {
         obj[QStringLiteral("mkcp")] = mkcpObj;
     }
+    if (!dnstt.isEmpty()) {
+        obj[QLatin1String(protocols::dnstt::block)] = dnstt.toJson();
+    }
 
     return obj;
 }
@@ -353,7 +356,28 @@ XrayServerConfig XrayServerConfig::fromJson(const QJsonObject &json)
             c.mkcp = XrayMkcpConfig::fromJson(mkcpJson);
         }
     }
+    if (json.contains(QLatin1String(protocols::dnstt::block))) {
+        c.dnstt = XrayDnsttConfig::fromJson(json.value(QLatin1String(protocols::dnstt::block)).toObject());
+    }
 
+    return c;
+}
+
+QJsonObject XrayDnsttConfig::toJson() const
+{
+    QJsonObject obj;
+    if (!domain.isEmpty()) obj[QLatin1String(protocols::dnstt::domain)] = domain;
+    if (!mtu.isEmpty()) obj[QLatin1String(protocols::dnstt::mtu)] = mtu;
+    if (!publicKey.isEmpty()) obj[QLatin1String(protocols::dnstt::publicKey)] = publicKey;
+    return obj;
+}
+
+XrayDnsttConfig XrayDnsttConfig::fromJson(const QJsonObject &json)
+{
+    XrayDnsttConfig c;
+    c.domain = json.value(QLatin1String(protocols::dnstt::domain)).toString();
+    c.mtu = json.value(QLatin1String(protocols::dnstt::mtu)).toString();
+    c.publicKey = json.value(QLatin1String(protocols::dnstt::publicKey)).toString();
     return c;
 }
 
@@ -370,7 +394,9 @@ bool XrayServerConfig::hasEqualServerSettings(const XrayServerConfig &other) con
            && sni == other.sni
            && alpn == other.alpn
            && xhttp.toJson() == other.xhttp.toJson()
-           && mkcp.toJson() == other.mkcp.toJson();
+           && mkcp.toJson() == other.mkcp.toJson()
+           && dnstt.domain == other.dnstt.domain
+           && dnstt.mtu == other.dnstt.mtu;
 }
 
 QJsonObject XrayClientConfig::toJson() const

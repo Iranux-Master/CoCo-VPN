@@ -140,6 +140,7 @@ namespace amnezia
         constexpr QLatin1String vless("vless");
         constexpr QLatin1String xray("xray");
         constexpr QLatin1String ssxray("ssxray");
+        constexpr QLatin1String dnstt("dnstt");
         constexpr QLatin1String socks5proxy("socks5proxy");
         constexpr QLatin1String mtproxy("mtproxy");
         constexpr QLatin1String telemt("telemt");
@@ -166,6 +167,7 @@ namespace amnezia
         constexpr QLatin1String amneziaAwg("amnezia-awg");
         constexpr QLatin1String amneziaXray("amnezia-xray");
         constexpr QLatin1String amneziaSsxray("amnezia-ssxray");
+        constexpr QLatin1String amneziaDnstt("amnezia-dnstt");
 
         constexpr QLatin1String clientName("clientName");
         constexpr QLatin1String userData("userData");

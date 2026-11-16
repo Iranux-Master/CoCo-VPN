@@ -92,6 +92,19 @@ ContainerConfig InstallerBase::createBaseConfig(DockerContainer container, int p
             config.protocolConfig = xrayConfig;
             break;
         }
+        case Proto::Dnstt: {
+            // CoCo DNS tunnel: VLESS without TLS on a loopback port inside the container (dnstt encrypts the
+            // tunnel). The tunnel domain is set by InstallController::setDnsttInstallHints.
+            XrayProtocolConfig dnsttConfig;
+            XrayServerConfig &srv = dnsttConfig.serverConfig;
+            srv.port = QString(protocols::dnstt::defaultPort);
+            srv.transportProto = QStringLiteral("udp");
+            srv.transport = protocols::xray::defaultTransport;
+            srv.security = QStringLiteral("none");
+            srv.dnstt.mtu = QString(protocols::dnstt::defaultMtu);
+            config.protocolConfig = dnsttConfig;
+            break;
+        }
         case Proto::Sftp: {
             SftpProtocolConfig sftpConfig;
             sftpConfig.port = portStr;

@@ -23,6 +23,7 @@ QScopedPointer<ConfiguratorBase> ConfiguratorBase::create(Proto protocol,
     case Proto::Ikev2: return QScopedPointer<ConfiguratorBase>(new Ikev2Configurator(sshSession));
     case Proto::Xray: return QScopedPointer<ConfiguratorBase>(new XrayConfigurator(sshSession));
     case Proto::SSXray: return QScopedPointer<ConfiguratorBase>(new XrayConfigurator(sshSession));
+    case Proto::Dnstt: return QScopedPointer<ConfiguratorBase>(new XrayConfigurator(sshSession));
     default: return QScopedPointer<ConfiguratorBase>();
     }
 }

@@ -5,6 +5,10 @@
 #endif
 
 #include <QDebug>
+#include <QHostAddress>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QNetworkInterface>
 #include <QCoreApplication>
 #include <amnezia_xray.h>
@@ -31,6 +35,32 @@
     #include "xray_defs.h"
 #endif
 
+namespace
+{
+    // CoCo DNS tunnel: its XRay config only talks to dnstt-client on 127.0.0.1, which already keeps its own DNS
+    // queries outside the tunnel. Binding those sockets to the physical interface (below) would break a loopback
+    // connection, so the binding is skipped when every outbound server is a loopback address.
+    bool outboundsAreLoopbackOnly(const QString &cfg)
+    {
+        const QJsonArray outbounds = QJsonDocument::fromJson(cfg.toUtf8()).object().value(QStringLiteral("outbounds")).toArray();
+        if (outbounds.isEmpty()) {
+            return false;
+        }
+        for (const QJsonValue &v : outbounds) {
+            const QJsonArray vnext = v.toObject().value(QStringLiteral("settings")).toObject().value(QStringLiteral("vnext")).toArray();
+            if (vnext.isEmpty()) {
+                return false;
+            }
+            for (const QJsonValue &server : vnext) {
+                if (!QHostAddress(server.toObject().value(QStringLiteral("address")).toString()).isLoopback()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+}
+
 bool Xray::startXray(const QString &cfg)
 {
     qDebug() << "Xray::startXray()";
@@ -42,7 +72,14 @@ bool Xray::startXray(const QString &cfg)
 #else
     m_defaultIfaceIdx = defaultIface.index();
 #endif
-    if (defaultIface.index() > 0) {
+    if (outboundsAreLoopbackOnly(cfg)) {
+        qDebug() << "[xray] loopback-only outbounds (DNS tunnel): sockets are not bound to the uplink interface";
+#ifdef Q_OS_LINUX
+        m_defaultIfaceName.clear();
+#else
+        m_defaultIfaceIdx = 0;
+#endif
+    } else if (defaultIface.index() > 0) {
         qDebug() << "[xray] using uplink interface:" << defaultIface.name() << "(" << defaultIface.index() << ")";
     }
 

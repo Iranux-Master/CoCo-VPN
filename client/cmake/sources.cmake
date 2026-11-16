@@ -32,6 +32,8 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/installers/wireguardInstaller.h
     ${CLIENT_ROOT_DIR}/core/installers/openvpnInstaller.h
     ${CLIENT_ROOT_DIR}/core/installers/xrayInstaller.h
+    ${CLIENT_ROOT_DIR}/core/installers/dnsttInstaller.h
+    ${CLIENT_ROOT_DIR}/core/utils/dnstt/dnsttUtils.h
     ${CLIENT_ROOT_DIR}/core/installers/torInstaller.h
     ${CLIENT_ROOT_DIR}/core/installers/sftpInstaller.h
     ${CLIENT_ROOT_DIR}/core/installers/socks5Installer.h
@@ -117,6 +119,8 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/installers/wireguardInstaller.cpp
     ${CLIENT_ROOT_DIR}/core/installers/openvpnInstaller.cpp
     ${CLIENT_ROOT_DIR}/core/installers/xrayInstaller.cpp
+    ${CLIENT_ROOT_DIR}/core/installers/dnsttInstaller.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/dnstt/dnsttUtils.cpp
     ${CLIENT_ROOT_DIR}/core/installers/torInstaller.cpp
     ${CLIENT_ROOT_DIR}/core/installers/sftpInstaller.cpp
     ${CLIENT_ROOT_DIR}/core/installers/socks5Installer.cpp
@@ -292,6 +296,7 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
         ${CLIENT_ROOT_DIR}/core/protocols/openVpnProtocol.h
         ${CLIENT_ROOT_DIR}/core/protocols/wireGuardProtocol.h
         ${CLIENT_ROOT_DIR}/core/protocols/xrayProtocol.h
+        ${CLIENT_ROOT_DIR}/core/protocols/dnsttProtocol.h
         ${CLIENT_ROOT_DIR}/core/protocols/awgProtocol.h
         ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.h
     )
@@ -303,6 +308,7 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
         ${CLIENT_ROOT_DIR}/core/protocols/openVpnProtocol.cpp
         ${CLIENT_ROOT_DIR}/core/protocols/wireGuardProtocol.cpp
         ${CLIENT_ROOT_DIR}/core/protocols/xrayProtocol.cpp
+        ${CLIENT_ROOT_DIR}/core/protocols/dnsttProtocol.cpp
         ${CLIENT_ROOT_DIR}/core/protocols/awgProtocol.cpp
     )
 endif()

@@ -294,6 +294,27 @@ namespace amnezia
             constexpr int  botTagHexLength         = 32;
         }
 
+        // CoCo DNS tunnel (docs/plans/D1-dns-tunnel.md): dnstt-server on UDP 53 in front of a loopback-only VLESS
+        // inbound. The XRay files inside the container use the XRay paths above.
+        namespace dnstt
+        {
+            constexpr char defaultPort[] = "53";
+            constexpr char forwardPort[] = "8053";
+            constexpr char defaultMtu[] = "1232";
+            constexpr int minMtu = 512;
+            constexpr int maxMtu = 1400;
+            constexpr char publicKeyPath[] = "/opt/amnezia/dnstt/server.pub";
+            constexpr char domainPath[] = "/opt/amnezia/dnstt/domain";
+            constexpr char mtuPath[] = "/opt/amnezia/dnstt/mtu";
+
+            // Keys of the "dnstt" block in the server settings and in the client config.
+            constexpr char block[] = "dnstt";
+            constexpr char domain[] = "domain";
+            constexpr char mtu[] = "mtu";
+            constexpr char publicKey[] = "pubkey";
+            constexpr char resolvers[] = "resolvers";
+        }
+
         namespace tProxy
         {
             constexpr char secretKey[]        = "tproxy_secret";

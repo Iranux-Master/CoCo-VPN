@@ -106,6 +106,12 @@ public slots:
     bool defaultPortChangeable(int protocolIndex);
     bool defaultTransportProtoChangeable(int protocolIndex);
 
+    // CoCo DNS tunnel (docs/plans/D1-dns-tunnel.md): the wizard's tunnel subdomain field.
+    QString normalizeDnsttDomain(const QString &input) const;
+    bool isValidDnsttDomain(const QString &domain) const;
+    QString dnsttNameServerHost(const QString &domain) const;
+    void setDnsttInstallSettings(const QString &domain, const QString &mtu);
+
 signals:
     void installContainerFinished(const QString &finishMessage, bool isServiceInstall);
     void installServerFinished(const QString &finishMessage);
@@ -166,6 +172,10 @@ private:
     ServerCredentials m_processedServerCredentials;
 
     QString m_privateKeyPassphrase;
+
+    QString m_dnsttDomain;
+    QString m_dnsttMtu;
+    QString dnsttFinishNote(const QString &serverHost) const;
     
     void updateProtocolConfigModel(const QString &serverId, int containerIndex, int protocolIndex);
 

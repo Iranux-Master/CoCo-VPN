@@ -8,6 +8,7 @@
     #include "openVpnProtocol.h"
     #include "wireGuardProtocol.h"
     #include "xrayProtocol.h"
+    #include "dnsttProtocol.h"
 #endif
 
 #ifdef Q_OS_WINDOWS
@@ -120,6 +121,7 @@ VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject &
     case DockerContainer::Awg: return new WireguardProtocol(configuration);
     case DockerContainer::Xray: return new XrayProtocol(configuration);
     case DockerContainer::SSXray: return new XrayProtocol(configuration);
+    case DockerContainer::Dnstt: return new DnsttProtocol(configuration); // CoCo DNS tunnel
 #endif
     default: return nullptr;
     }

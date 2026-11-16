@@ -3,7 +3,12 @@
 Written 2026-11-16 from PR #3's branch (`claude/project-thread-4o25d8`) and a read-only review of
 `Iranux-Master/Iranux-Bash-Runner` at `06964f6` (`Develop`): the catalog tool `dnstt`
 (`tools/catalog-seed/specs/dnstt.json`, `tools/catalog-seed/bodies/dnstt.sh`, tests in
-`BashScriptRunnerBlazor.Tests/ToolCatalogSeedTests.cs`). Nothing here is implemented yet.
+`BashScriptRunnerBlazor.Tests/ToolCatalogSeedTests.cs`).
+
+**Status (2026-11-16):** slices 1 and 2 are implemented in PR #4 (server container, wizard, Windows client); what
+they left open is KNOWN_ISSUES KI-15. Two choices differ from the text below: the container keeps XRay's own
+paths (`/opt/amnezia/xray/server.json`, `xray_uuid.key`) so `XrayConfigurator` and the users table work unchanged,
+and the device uses the first configured resolver instead of probing a list.
 
 ## Goal
 

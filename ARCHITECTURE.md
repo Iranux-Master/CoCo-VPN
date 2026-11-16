@@ -87,6 +87,13 @@ flowchart LR
   (routes, TUN, firewall, kill switch, DNS, starting XRay) is a slot on `IpcInterface`
   (`ipc/ipc_interface.rep`) implemented in `ipc/ipcserver.cpp` inside the service. WireGuard and AWG
   on desktop go through the Mozilla-derived daemon (`client/daemon/`, `platforms/*/daemon/`).
+- **DNS tunnel (CoCo, `DockerContainer::Dnstt`).** Server: container `amnezia-dnstt` = dnstt-server on UDP 53
+  (published on the default-route address only) in front of a loopback VLESS inbound; it reuses
+  `XrayProtocolConfig` (with a `dnstt` block), `XrayConfigurator` and `XrayInstaller` (subclass
+  `DnsttInstaller`). Desktop: `DnsttProtocol` routes the chosen resolver around the tunnel, starts the
+  unprivileged `dnstt-client` (Conan recipe `recipes/dnstt`, installed beside `tun2socks` on Windows) and wraps an
+  `XrayProtocol` pointed at it; the service skips the uplink socket binding for loopback-only XRay configs.
+  Rules shared by all of these: `core/utils/dnstt/dnsttUtils`. Plan: `docs/plans/D1-dns-tunnel.md`.
 - **Mobile.** Android runs the tunnel in `client/android` (`AmneziaVpnService.kt`), iOS and macOS NE in
   a Network Extension (`client/ios`, `client/platforms/ios`); `androidVpnProtocol.cpp` and the iOS
   controller bridge from C++.

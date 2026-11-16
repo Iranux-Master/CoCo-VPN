@@ -64,6 +64,7 @@ ScriptVars genBaseVars(const ServerCredentials &credentials,
 
 ScriptVars genOpenVpnVars(const ContainerConfig &containerConfig);
 ScriptVars genXrayVars(const ContainerConfig &containerConfig);
+ScriptVars genDnsttVars(const ContainerConfig &containerConfig);
 ScriptVars genWireGuardVars(const ContainerConfig &containerConfig);
 ScriptVars genAwgVars(const ContainerConfig &containerConfig);
 ScriptVars genSftpVars(const ContainerConfig &containerConfig);

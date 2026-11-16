@@ -19,14 +19,14 @@ ip6tables -P INPUT DROP
 killall -KILL xray dnstt-server 2>/dev/null
 
 # Each daemon is started again if it exits.
-if [ -f /opt/amnezia/dnstt/server.json ]; then
-  (while true; do xray -config /opt/amnezia/dnstt/server.json; sleep 2; done) &
+if [ -f /opt/amnezia/xray/server.json ]; then
+  (while true; do xray -config /opt/amnezia/xray/server.json; sleep 2; done) &
 fi
 
-if [ -s /opt/amnezia/dnstt/server.key ]; then
+if [ -s /opt/amnezia/dnstt/server.key ] && [ -n "$DNSTT_DOMAIN" ]; then
   (while true; do
-    dnstt-server -udp :53 -mtu $DNSTT_MTU -privkey-file /opt/amnezia/dnstt/server.key \
-      $DNSTT_DOMAIN 127.0.0.1:$DNSTT_FORWARD_PORT
+    dnstt-server -udp :53 -mtu "$DNSTT_MTU" -privkey-file /opt/amnezia/dnstt/server.key \
+      "$DNSTT_DOMAIN" "127.0.0.1:$DNSTT_FORWARD_PORT"
     sleep 2
   done) &
 fi

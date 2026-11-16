@@ -407,6 +407,11 @@ if(NOT ANDROID)
         add_test(NAME Webpack${_webpack_test}Test COMMAND test_webpack_${_webpack_lower})
     endforeach()
 
+    # CoCo: DNS tunnel rules (client/core/utils/dnstt), docs/plans/D1-dns-tunnel.md
+    add_executable(test_dnstt_utils dnstt/testDnsttUtils.cpp)
+    target_link_libraries(test_dnstt_utils PRIVATE Qt6::Test test_common)
+    add_test(NAME DnsttUtilsTest COMMAND test_dnstt_utils)
+
     add_test(NAME MultipleImportsTest              COMMAND test_multiple_imports)
     add_test(NAME ServerEditTest                   COMMAND test_server_edit)
     add_test(NAME DefaultServerChangeTest          COMMAND test_default_server_change)

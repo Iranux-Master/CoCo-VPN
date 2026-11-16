@@ -348,7 +348,7 @@ ErrorCode UsersController::updateClients(const QString &serverId, const DockerCo
             error = getOpenVpnClients(container, credentials, &sshSession, count, m_clientsTable);
         } else if (container == DockerContainer::WireGuard || ContainerUtils::isAwgContainer(container)) {
             error = getWireGuardClients(container, credentials, &sshSession, count, m_clientsTable);
-        } else if (container == DockerContainer::Xray) {
+        } else if (container == DockerContainer::Xray || container == DockerContainer::Dnstt) {
             error = getXrayClients(container, credentials, &sshSession, count, m_clientsTable);
         }
         if (error != ErrorCode::NoError) {
@@ -759,7 +759,8 @@ ErrorCode UsersController::revokeClient(const QString &serverId, const int index
             errorCode = revokeWireGuard(index, container, credentials, &sshSession, m_clientsTable);
             break;
         }
-        case DockerContainer::Xray: {
+        case DockerContainer::Xray:
+        case DockerContainer::Dnstt: {
             errorCode = revokeXray(index, container, credentials, &sshSession, m_clientsTable);
             break;
         }
@@ -817,7 +818,8 @@ ErrorCode UsersController::revokeClient(const QString &serverId, const Container
         case DockerContainer::WireGuard:
         case DockerContainer::Awg:
         case DockerContainer::Awg2:
-        case DockerContainer::Xray: {
+        case DockerContainer::Xray:
+        case DockerContainer::Dnstt: {
             protocol = ContainerUtils::defaultProtocol(container);
             break;
         }
@@ -846,7 +848,8 @@ ErrorCode UsersController::revokeClient(const QString &serverId, const Container
         errorCode = revokeWireGuard(row, container, credentials, &sshSession, m_clientsTable);
         break;
     }
-    case DockerContainer::Xray: {
+    case DockerContainer::Xray:
+    case DockerContainer::Dnstt: {
         errorCode = revokeXray(row, container, credentials, &sshSession, m_clientsTable);
         break;
     }

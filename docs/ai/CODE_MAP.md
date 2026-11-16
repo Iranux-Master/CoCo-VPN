@@ -155,7 +155,7 @@ their roles through `roleNames()`; read the header for those.
 
 ### `InstallUiController` (QML: `InstallController`)
 
-- Callable: addEmptyServer, checkSshConnection, clearCachedProfile, clearProcessedServerCredentials, defaultPort, defaultPortChangeable, defaultTransportProto, defaultTransportProtoChangeable, fetchContainerSecret, getPortForInstall, install, ipAddressRegExp, mountSftpDrive, openClientSettings, openServerSettings, rebootServer, refreshContainerDiagnostics, refreshContainerStatus, removeAllContainers, removeContainer, removeServer, scanServerForInstalledContainers, setContainerEnabled, setEncryptedPassphrase, setProcessedServerCredentials, updateClientConfig, updateProtocols, updateServerConfig, validateConfig
+- Callable: addEmptyServer, checkSshConnection, clearCachedProfile, clearProcessedServerCredentials, defaultPort, defaultPortChangeable, defaultTransportProto, defaultTransportProtoChangeable, dnsttNameServerHost, fetchContainerSecret, getPortForInstall, install, ipAddressRegExp, isValidDnsttDomain, mountSftpDrive, normalizeDnsttDomain, openClientSettings, openServerSettings, rebootServer, refreshContainerDiagnostics, refreshContainerStatus, removeAllContainers, removeContainer, removeServer, scanServerForInstalledContainers, setContainerEnabled, setDnsttInstallSettings, setEncryptedPassphrase, setProcessedServerCredentials, updateClientConfig, updateProtocols, updateServerConfig, validateConfig
 - Signals: apiConfigRemoved, cachedProfileCleared, cancelInstallation, configValidated, containerDiagnosticsRefreshed, containerSecretFetched, containerStatusRefreshed, installContainerFinished, installServerFinished, installationErrorOccurred, passphraseRequestFinished, passphraseRequestStarted, rebootServerFinished, removeAllContainersFinished, removeContainerFinished, removeServerFinished, scanServerFinished, serverAlreadyExists, serverIsBusy, setContainerEnabledFinished, updateContainerFinished, wrongInstallationUser
 
 ### `IpSplitTunnelingUiController` (QML: `IpSplitTunnelingController`)
@@ -520,17 +520,18 @@ Enum entries without a QML file: `PageAbout`, `PageProtocolIKev2Settings`, `Page
 | `client/core/controllers/selfhosted` | 8 | 4 |
 | `client/core/controllers/webpack` | 24 | 0 |
 | `client/core/diagnostics` | 3 | 0 |
-| `client/core/installers` | 22 | 11 |
+| `client/core/installers` | 24 | 12 |
 | `client/core/models` | 6 | 0 |
 | `client/core/models/api` | 8 | 0 |
 | `client/core/models/protocols` | 24 | 0 |
 | `client/core/models/selfhosted` | 6 | 0 |
-| `client/core/protocols` | 17 | 7 |
+| `client/core/protocols` | 19 | 8 |
 | `client/core/repositories` | 4 | 2 |
 | `client/core/utils` | 29 | 7 |
 | `client/core/utils/api` | 4 | 0 |
 | `client/core/utils/constants` | 4 | 0 |
 | `client/core/utils/containers` | 2 | 0 |
+| `client/core/utils/dnstt` | 2 | 0 |
 | `client/core/utils/selfhosted` | 8 | 1 |
 | `client/core/utils/serialization` | 10 | 0 |
 | `client/daemon` | 12 | 6 |
@@ -555,6 +556,7 @@ Enum entries without a QML file: `PageAbout`, `PageProtocolIKev2Settings`, `Page
 | `client/server_scripts/awg` | 3 | 0 |
 | `client/server_scripts/awg_legacy` | 3 | 0 |
 | `client/server_scripts/dns` | 2 | 0 |
+| `client/server_scripts/dnstt` | 3 | 0 |
 | `client/server_scripts/ipsec` | 3 | 0 |
 | `client/server_scripts/mtproxy` | 3 | 0 |
 | `client/server_scripts/openvpn` | 3 | 0 |
@@ -567,6 +569,7 @@ Enum entries without a QML file: `PageAbout`, `PageProtocolIKev2Settings`, `Page
 | `client/server_scripts/xray` | 3 | 0 |
 | `client/tests` | 21 | 0 |
 | `client/tests/api` | 2 | 0 |
+| `client/tests/dnstt` | 1 | 0 |
 | `client/tests/selfHostedAdmin` | 3 | 0 |
 | `client/tests/utils` | 3 | 1 |
 | `client/tests/webpack` | 4 | 2 |

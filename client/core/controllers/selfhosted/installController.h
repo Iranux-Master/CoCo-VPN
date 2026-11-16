@@ -56,6 +56,7 @@ public:
     QString fetchDockerContainerSecret(const QString &serverId, DockerContainer container);
 
     void setTProxyInstallHints(const QString &hostname, const QString &email);
+    void setDnsttInstallHints(const QString &domain, const QString &mtu);
 
     ContainerConfig generateConfig(DockerContainer container, int port, TransportProto transportProto);
     ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, QMap<DockerContainer, ContainerConfig> &installedContainers, SshSession &sshSession);
@@ -130,6 +131,8 @@ private:
     bool m_cancelInstallation = false;
     QString m_tproxyInstallHostname;
     QString m_tproxyInstallEmail;
+    QString m_dnsttInstallDomain;
+    QString m_dnsttInstallMtu;
     
 #ifndef Q_OS_IOS
     QList<QSharedPointer<QProcess>> m_sftpMountProcesses;
