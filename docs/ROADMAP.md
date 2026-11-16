@@ -65,6 +65,7 @@ CoCo's users share accounts with other people, so the account tools are the prod
 | O3 | Recommended protocol per network (AWG for UDP-friendly, XRay REALITY when UDP is blocked) shown in the wizard | content plus a reachability probe |
 | O4 | Server migration: move all accounts to a new server (recreate, then re-share) | after A4, webpack F3 |
 | O5 | Scheduled backup of server-side client tables | |
+| D1 | DNS tunnel protocol (dnstt + VLESS inside) for days when only DNS works: server container, CoCo as the client on Windows then Android | plan: `docs/plans/D1-dns-tunnel.md`; webpack request R12 |
 
 ### 3.5 Client app (P2)
 
