@@ -42,6 +42,8 @@ class AmneziaVPN(ConanFile):
             self.requires("amnezia-libxray/1.0.3")
             self.requires("awg-android/3.1.20260814")
             self.requires("openvpn-pt-android/1.0.0")
+            # CoCo DNS tunnel client, run by client/android/xray/src/main/kotlin/Dnstt.kt
+            self.requires("dnstt/1.20260501.0")
 
         # expicitly use libssh@amnezia to prevent it from being downloaded from conan-center
         self.requires("libssh/0.11.3@amnezia")

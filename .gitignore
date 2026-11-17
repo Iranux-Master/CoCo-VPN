@@ -92,6 +92,8 @@ deploy/data/macos/pf/amn.400.allowPIA.conf
 # Built application files
 *.apk
 *.aar
+# CoCo: dnstt-client copied in by client/cmake/android.cmake
+client/android/xray/src/main/jniLibs/
 *.ap_
 *.aab
 

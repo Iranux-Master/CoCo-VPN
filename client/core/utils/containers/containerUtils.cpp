@@ -323,6 +323,7 @@ bool ContainerUtils::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::MtProxy: return true;
     case DockerContainer::Telemt: return true;
     case DockerContainer::TProxy: return true;
+    case DockerContainer::Dnstt: return true; // CoCo DNS tunnel (client/android/xray/src/main/kotlin/Dnstt.kt)
     default: return false;
     }
 

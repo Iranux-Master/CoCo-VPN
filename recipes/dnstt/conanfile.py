@@ -6,6 +6,8 @@ from conan.tools.layout import basic_layout
 
 import os
 
+from pathlib import Path
+
 
 class Dnstt(ConanFile):
     """dnstt-client (David Fifield, CC0) for the CoCo DNS tunnel (docs/plans/D1-dns-tunnel.md).
@@ -27,20 +29,33 @@ class Dnstt(ConanFile):
     _arch_map = {
         "x86": "386",
         "x86_64": "amd64",
+        "armv7": "arm",
         "armv8": "arm64",
     }
 
     @property
     def _goos(self):
+        os_name = str(self.settings.os)
+        if os_name == "Android":
+            # Go links android/arm64 without cgo (a PIE for /system/bin/linker64). The other Android ABIs need
+            # cgo for GOOS=android, so they get a static linux binary, which Android runs as well.
+            return "android" if str(self.settings.arch) == "armv8" else "linux"
         return {
             "Linux": "linux",
             "Macos": "darwin",
             "Windows": "windows",
-        }.get(str(self.settings.os))
+        }.get(os_name)
 
     @property
     def _binary_name_ext(self):
-        return f"{self._binary_name}.exe" if str(self.settings.os) == "Windows" else self._binary_name
+        os_name = str(self.settings.os)
+        if os_name == "Windows":
+            return f"{self._binary_name}.exe"
+        if os_name == "Android":
+            # Android only extracts lib*.so files from the APK into nativeLibraryDir, the one app folder it lets
+            # an app execute from. client/android/xray/src/main/kotlin/Dnstt.kt starts it from there.
+            return "libdnstt.so"
+        return self._binary_name
 
     @property
     def _module_dir(self):
@@ -75,6 +90,8 @@ class Dnstt(ConanFile):
         env.define("CGO_ENABLED", "0")
         env.define("GOOS", self._goos)
         env.define("GOARCH", self._arch_map[str(self.settings.arch)])
+        if str(self.settings.arch) == "armv7":
+            env.define("GOARM", "7")
         output = os.path.join(self.build_folder, self._binary_name_ext)
         with env.vars(self).apply():
             self.run(f'go build -trimpath -ldflags="-s -w" -o "{output}" ./dnstt-client', cwd=self._module_dir)
@@ -86,3 +103,6 @@ class Dnstt(ConanFile):
         self.cpp_info.exe = True
         self.cpp_info.location = os.path.join(self.package_folder, self._binary_name_ext)
         self.cpp_info.set_property("cmake_target_name", "bamsoftware::dnstt-client")
+        self.cpp_info.set_property("cmake_extra_variables", {
+            "DNSTT_CLIENT_PATH": Path(self.package_folder, self._binary_name_ext).as_posix(),
+        })

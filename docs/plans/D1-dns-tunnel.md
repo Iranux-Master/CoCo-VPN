@@ -5,8 +5,11 @@ Written 2026-11-16 from PR #3's branch (`claude/project-thread-4o25d8`) and a re
 (`tools/catalog-seed/specs/dnstt.json`, `tools/catalog-seed/bodies/dnstt.sh`, tests in
 `BashScriptRunnerBlazor.Tests/ToolCatalogSeedTests.cs`).
 
-**Status (2026-11-16):** slices 1 and 2 are implemented in PR #4 (server container, wizard, Windows client); what
-they left open is KNOWN_ISSUES KI-15. Two choices differ from the text below: the container keeps XRay's own
+**Status (2026-11-17):** slices 1, 2 and 3 are implemented in PR #4 (server container, wizard, Windows and Android
+clients); what they left open is KNOWN_ISSUES KI-15. Android differs from the gomobile design below: `dnstt-client`
+is built as an Android executable (`libdnstt.so`, GOOS=android for arm64) and run as a child process, and CoCo's own
+app is excluded from the VPN so its queries bypass the tunnel. This needs no Go wrapper package, no vendored copy of
+the client and no second AAR. Two choices differ from the text below: the container keeps XRay's own
 paths (`/opt/amnezia/xray/server.json`, `xray_uuid.key`) so `XrayConfigurator` and the users table work unchanged,
 and the device uses the first configured resolver instead of probing a list.
 
