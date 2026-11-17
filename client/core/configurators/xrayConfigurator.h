@@ -55,6 +55,9 @@ private:
                                                           const QString &prefetchedRealityPublicKey = {},
                                                           const QString &prefetchedRealityShortId = {}) const;
 
+    amnezia::ErrorCode readDnsttPublicKey(amnezia::DockerContainer container,
+                                          const amnezia::ServerCredentials &credentials, QString &out) const;
+
     amnezia::ErrorCode readRealityKeyFiles(amnezia::DockerContainer container,
                                            const amnezia::ServerCredentials &credentials,
                                            QString &outPublicKey,

@@ -17,6 +17,7 @@
 #include "core/models/protocols/wireGuardProtocolConfig.h"
 #include "core/models/protocols/awgProtocolConfig.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
+#include "core/utils/dnstt/dnsttUtils.h"
 #include "core/models/protocols/sftpProtocolConfig.h"
 #include "core/models/protocols/socks5ProxyProtocolConfig.h"
 #include "core/models/protocols/mtProxyProtocolConfig.h"
@@ -35,6 +36,7 @@ QString amnezia::scriptFolder(amnezia::DockerContainer container)
     case DockerContainer::Awg: return QLatin1String("awg_legacy");
     case DockerContainer::Ipsec: return QLatin1String("ipsec");
     case DockerContainer::Xray: return QLatin1String("xray");
+    case DockerContainer::Dnstt: return QLatin1String("dnstt");
 
     case DockerContainer::TorWebSite: return QLatin1String("website_tor");
     case DockerContainer::Dns: return QLatin1String("dns");
@@ -212,6 +214,23 @@ amnezia::ScriptVars amnezia::genXrayVars(const ContainerConfig &containerConfig)
         vars.append({ { "$XRAY_SERVER_PORT", config.port.isEmpty() ? protocols::xray::defaultPort : config.port } });
     }
     
+    return vars;
+}
+
+amnezia::ScriptVars amnezia::genDnsttVars(const ContainerConfig &containerConfig)
+{
+    ScriptVars vars;
+
+    if (auto *xrayProtocolConfig = containerConfig.getXrayProtocolConfig()) {
+        const XrayDnsttConfig &dnstt = xrayProtocolConfig->serverConfig.dnstt;
+        // Only a validated domain reaches the scripts; an invalid one leaves the variable empty and start.sh
+        // does not start dnstt-server.
+        const QString domain = dnstt::normalizeTunnelDomain(dnstt.domain);
+        vars.append({ { "$DNSTT_DOMAIN", dnstt::isValidTunnelDomain(domain) ? domain : QString() } });
+        vars.append({ { "$DNSTT_MTU", dnstt::normalizeMtu(dnstt.mtu) } });
+        vars.append({ { "$DNSTT_FORWARD_PORT", QString(protocols::dnstt::forwardPort) } });
+    }
+
     return vars;
 }
 
@@ -439,6 +458,9 @@ amnezia::ScriptVars amnezia::genProtocolVarsForContainer(DockerContainer contain
         break;
     case Proto::Xray:
         vars.append(genXrayVars(containerConfig));
+        break;
+    case Proto::Dnstt:
+        vars.append(genDnsttVars(containerConfig));
         break;
     case Proto::WireGuard:
         vars.append(genWireGuardVars(containerConfig));

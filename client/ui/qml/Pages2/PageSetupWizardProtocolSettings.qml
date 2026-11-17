@@ -59,6 +59,9 @@ PageType {
         delegate: ColumnLayout {
             width: listView.width
 
+            // CoCo DNS tunnel: needs its tunnel subdomain before installing (docs/plans/D1-dns-tunnel.md).
+            readonly property bool isDnstt: ContainerProps.containerTypeToString(dockerContainer) === "dnstt"
+
             BaseHeaderType {
                 id: header
 
@@ -291,6 +294,37 @@ PageType {
                 font.pixelSize: 12
             }
 
+            TextFieldWithHeaderType {
+                id: dnsttDomain
+
+                visible: isDnstt
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                headerText: qsTr("Tunnel subdomain")
+                textField.placeholderText: qsTr("t.example.com")
+                textField.onTextChanged: {
+                    var clean = InstallController.normalizeDnsttDomain(textField.text)
+                    if (clean === "" || InstallController.isValidDnsttDomain(clean)) {
+                        dnsttDomain.errorText = ""
+                    }
+                }
+            }
+
+            CaptionTextType {
+                visible: isDnstt
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                text: qsTr("Use a subdomain only for the tunnel, such as t.example.com. After installation you add two records at your DNS provider: an NS record that hands the subdomain to this server, and an A record for its name server (t-ns.example.com). UDP port 53 on the server must be free. The tunnel is slow and meant for days when other protocols are blocked.")
+                color: AmneziaStyle.color.goldenApricot
+                wrapMode: Text.WordWrap
+                font.pixelSize: 12
+            }
+
             Rectangle {
                 Layout.fillHeight: true
                 Layout.rightMargin: 16
@@ -338,6 +372,14 @@ PageType {
                         TProxyConfigModel.setAcmeEmail(email)
                         TProxyConfigModel.setPort(TProxyConfigModel.defaultPort())
                         TProxyConfigModel.setHttpPort(TProxyConfigModel.defaultHttpPort())
+                    } else if (isDnstt) {
+                        var domain = InstallController.normalizeDnsttDomain(dnsttDomain.textField.text)
+                        dnsttDomain.textField.text = domain
+                        if (!InstallController.isValidDnsttDomain(domain)) {
+                            dnsttDomain.errorText = qsTr("Enter a subdomain such as t.example.com (letters, digits, hyphens)")
+                            return
+                        }
+                        InstallController.setDnsttInstallSettings(domain, "")
                     } else if (!port.textField.acceptableInput &&
                             ContainerProps.containerTypeToString(dockerContainer) !== "torwebsite" &&
                             ContainerProps.containerTypeToString(dockerContainer) !== "ikev2") {

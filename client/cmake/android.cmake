@@ -55,6 +55,12 @@ set_property(TARGET ${PROJECT} APPEND PROPERTY QT_ANDROID_EXTRA_LIBS ${AMNEZIA_A
 find_package(amnezia-libxray REQUIRED)
 file(COPY ${AMNEZIA_LIBXRAY_PATH} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/android/xray/libXray)
 
+# CoCo DNS tunnel: dnstt-client is an executable named libdnstt.so, so the APK extracts it into
+# nativeLibraryDir. It goes into the xray module's jniLibs (git-ignored) rather than QT_ANDROID_EXTRA_LIBS, which
+# androiddeployqt lists as shared libraries of the app process; this one is a program, never loaded.
+find_package(dnstt REQUIRED)
+file(COPY ${DNSTT_CLIENT_PATH} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/android/xray/src/main/jniLibs/${CMAKE_ANDROID_ARCH_ABI})
+
 find_package(openvpn-pt-android REQUIRED)
 set(LIBS ${LIBS} amnezia::openvpn-pt-android)
 set_property(TARGET ${PROJECT} APPEND PROPERTY QT_ANDROID_EXTRA_LIBS ${OPENVPN_PT_ANDROID_LIBCK_OVPN_PLUGIN_PATH})

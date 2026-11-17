@@ -353,6 +353,10 @@ if(WIN32)
     find_package(wintun REQUIRED)
     list(APPEND CONAN_BINS $<TARGET_FILE:zx2c4::wintun>)
 
+    # CoCo DNS tunnel client, started by the client app (DnsttProtocol) from the install folder
+    find_package(dnstt REQUIRED)
+    list(APPEND CONAN_EXECS $<TARGET_FILE:bamsoftware::dnstt-client>)
+
     list(APPEND CONAN_BINS $<TARGET_FILE:OpenSSL::SSL> $<TARGET_FILE:OpenSSL::Crypto>)
 else()
     find_package(awg-go REQUIRED)

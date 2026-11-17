@@ -91,6 +91,17 @@ struct XrayMkcpConfig {
     static XrayMkcpConfig fromJson(const QJsonObject &json);
 };
 
+// ── CoCo DNS tunnel (DockerContainer::Dnstt): dnstt in front of a loopback VLESS inbound ──
+struct XrayDnsttConfig {
+    QString domain;    // tunnel subdomain delegated to the server, e.g. t.example.com
+    QString mtu;       // dnstt-server -mtu (maximum DNS response size)
+    QString publicKey; // dnstt server public key (64 hex digits), read from the server after setup
+
+    bool isEmpty() const { return domain.isEmpty() && mtu.isEmpty() && publicKey.isEmpty(); }
+    QJsonObject toJson() const;
+    static XrayDnsttConfig fromJson(const QJsonObject &json);
+};
+
 // ── Server config (settings editable by user) ─────────────────────────────────
 struct XrayServerConfig {
     QString port;
@@ -108,6 +119,7 @@ struct XrayServerConfig {
     QString transport;
     XrayXhttpConfig xhttp;
     XrayMkcpConfig mkcp;
+    XrayDnsttConfig dnstt; // CoCo: set only for the DNS tunnel container
 
     QJsonObject toJson() const;
 

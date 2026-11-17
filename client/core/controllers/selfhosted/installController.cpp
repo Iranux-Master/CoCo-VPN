@@ -27,6 +27,8 @@
 #include "core/installers/torInstaller.h"
 #include "core/installers/wireguardInstaller.h"
 #include "core/installers/xrayInstaller.h"
+#include "core/installers/dnsttInstaller.h"
+#include "core/utils/dnstt/dnsttUtils.h"
 #include "core/utils/networkUtilities.h"
 #include "core/utils/api/apiUtils.h"
 #include "core/repositories/secureServersRepository.h"
@@ -147,7 +149,7 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
     if (e)
         return e;
 
-    if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
+    if (container == DockerContainer::Xray || container == DockerContainer::SSXray || container == DockerContainer::Dnstt) {
         DnsSettings dnsSettings = { m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns() };
         XrayConfigurator xrayConfigurator(&sshSession);
         e = xrayConfigurator.writeServerConfigForSetup(credentials, container, config, dnsSettings);
@@ -217,7 +219,7 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
 
         if (errorCode == ErrorCode::NoError
             && (container == DockerContainer::MtProxy || container == DockerContainer::Telemt
-                || container == DockerContainer::TProxy)) {
+                || container == DockerContainer::TProxy || container == DockerContainer::Dnstt)) {
             const QString containerName = ContainerUtils::containerToString(container);
             errorCode = sshSession.runScript(credentials, "sudo docker restart " + containerName);
         }
@@ -414,7 +416,8 @@ ErrorCode InstallController::prepareContainerConfig(DockerContainer container, c
     }
 
     if (ContainerUtils::containerService(container) != ServiceType::Other) {
-        if ((container == DockerContainer::Xray || container == DockerContainer::SSXray)
+        if ((container == DockerContainer::Xray || container == DockerContainer::SSXray
+             || container == DockerContainer::Dnstt)
             && containerConfig.protocolConfig.hasClientConfig()) {
             return ErrorCode::NoError;
         }
@@ -609,7 +612,9 @@ ErrorCode InstallController::startupContainerWorker(const ServerCredentials &cre
 
 ErrorCode InstallController::isServerPortBusy(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config, SshSession &sshSession)
 {
-    if (container == DockerContainer::Dns) {
+    // The DNS tunnel's run_container.sh checks UDP 53 itself: lsof here would also match systemd-resolved's stub on
+    // 127.0.0.53, which the tunnel does not need.
+    if (container == DockerContainer::Dns || container == DockerContainer::Dnstt) {
         return ErrorCode::NoError;
     }
 
@@ -744,7 +749,7 @@ bool InstallController::isReinstallContainerRequired(DockerContainer container, 
         }
     }
 
-    if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
+    if (container == DockerContainer::Xray || container == DockerContainer::SSXray || container == DockerContainer::Dnstt) {
         const auto *oldXrayConfig = oldConfig.getXrayProtocolConfig();
         const auto *newXrayConfig = newConfig.getXrayProtocolConfig();
 
@@ -1086,6 +1091,7 @@ QScopedPointer<InstallerBase> InstallController::createInstaller(DockerContainer
     case DockerContainer::OpenVpn: return QScopedPointer<InstallerBase>(new OpenVpnInstaller(this));
     case DockerContainer::Xray:
     case DockerContainer::SSXray: return QScopedPointer<InstallerBase>(new XrayInstaller(this));
+    case DockerContainer::Dnstt: return QScopedPointer<InstallerBase>(new DnsttInstaller(this));
     case DockerContainer::TorWebSite: return QScopedPointer<InstallerBase>(new TorInstaller(this));
     case DockerContainer::Sftp: return QScopedPointer<InstallerBase>(new SftpInstaller(this));
     case DockerContainer::Socks5Proxy: return QScopedPointer<InstallerBase>(new Socks5Installer(this));
@@ -1126,7 +1132,26 @@ ErrorCode InstallController::installContainer(const ServerCredentials &credentia
             return ErrorCode::InternalError;
         }
     }
+    if (container == DockerContainer::Dnstt) {
+        auto *dnsttConfig = config.getXrayProtocolConfig();
+        const QString domain = dnstt::normalizeTunnelDomain(m_dnsttInstallDomain);
+        const QString mtu = m_dnsttInstallMtu;
+        m_dnsttInstallDomain.clear();
+        m_dnsttInstallMtu.clear();
+        // The DNS tunnel cannot start without its subdomain; the wizard validates it before this point.
+        if (!dnsttConfig || !dnstt::isValidTunnelDomain(domain)) {
+            return ErrorCode::InternalError;
+        }
+        dnsttConfig->serverConfig.dnstt.domain = domain;
+        dnsttConfig->serverConfig.dnstt.mtu = dnstt::normalizeMtu(mtu);
+    }
     return setupContainer(credentials, container, config, false);
+}
+
+void InstallController::setDnsttInstallHints(const QString &domain, const QString &mtu)
+{
+    m_dnsttInstallDomain = domain;
+    m_dnsttInstallMtu = mtu;
 }
 
 void InstallController::setTProxyInstallHints(const QString &hostname, const QString &email)

@@ -62,6 +62,10 @@
         <file>wireguard/run_container.sh</file>
         <file>wireguard/start.sh</file>
         <file>wireguard/template.conf</file>
+        <file>dnstt/configure_container.sh</file>
+        <file>dnstt/Dockerfile</file>
+        <file>dnstt/run_container.sh</file>
+        <file>dnstt/start.sh</file>
         <file>xray/configure_container.sh</file>
         <file>xray/Dockerfile</file>
         <file>xray/run_container.sh</file>

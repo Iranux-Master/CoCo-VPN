@@ -278,6 +278,17 @@ Can&apos;t be disabled for current server</source>
 <context>
     <name>InstallUiController</name>
     <message>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="0"/>
+        <source>
+
+Add these two records at your domain&apos;s DNS provider (DNS only, no proxy), then connect:
+%1</source>
+        <translation>
+
+این دو رکورد را در سرویس DNS دامنه‌ی خود اضافه کنید (فقط DNS، بدون پراکسی) و بعد وصل شوید:
+%1</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="132"/>
         <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="174"/>
         <source>%1 installed successfully. </source>
@@ -5402,6 +5413,26 @@ Create one from the current settings.</source>
 <context>
     <name>PageSetupWizardProtocolSettings</name>
     <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="0"/>
+        <source>Tunnel subdomain</source>
+        <translation>زیردامنه‌ی تونل</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="0"/>
+        <source>t.example.com</source>
+        <translation>⁦t.example.com⁩</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="0"/>
+        <source>Use a subdomain only for the tunnel, such as t.example.com. After installation you add two records at your DNS provider: an NS record that hands the subdomain to this server, and an A record for its name server (t-ns.example.com). UDP port 53 on the server must be free. The tunnel is slow and meant for days when other protocols are blocked.</source>
+        <translation>یک زیردامنه که فقط برای تونل است انتخاب کنید، مثلاً ⁦t.example.com⁩. بعد از نصب دو رکورد در سرویس DNS خود اضافه می‌کنید: یک رکورد ⁦NS⁩ که زیردامنه را به این سرور می‌سپارد و یک رکورد ⁦A⁩ برای نام‌سرور آن (⁦t-ns.example.com⁩). پورت ⁦UDP 53⁩ روی سرور باید آزاد باشد. این تونل کند است و برای روزهایی است که پروتکل‌های دیگر بسته‌اند.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="0"/>
+        <source>Enter a subdomain such as t.example.com (letters, digits, hyphens)</source>
+        <translation>یک زیردامنه مثل ⁦t.example.com⁩ وارد کنید (حروف، عدد و خط تیره)</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="69"/>
         <source>Installing %1</source>
         <translation>در حال نصب ⁨%1⁩</translation>
@@ -6019,6 +6050,59 @@ Create one from the current settings.</source>
 </context>
 <context>
     <name>QObject</name>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="0"/>
+        <source>DNS tunnel</source>
+        <translation>تونل DNS</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="0"/>
+        <source>Emergency protocol for days when only DNS works. It carries traffic inside DNS queries, so it is slow, but it can connect when every other protocol is blocked. Needs a domain.</source>
+        <translation>پروتکل اضطراری برای روزهایی که فقط DNS کار می‌کند. ترافیک را درون پرس‌وجوهای DNS می‌برد، پس کند است، اما وقتی همه‌ی پروتکل‌های دیگر بسته‌اند می‌تواند وصل شود. به یک دامنه نیاز دارد.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="0"/>
+        <source>The DNS tunnel (dnstt) carries VPN traffic inside ordinary DNS queries and answers. Your device sends the queries to a DNS resolver (your internet provider&apos;s or a public one), and the resolver passes them to this server, which is the name server of a tunnel subdomain. When international connections are cut but DNS still resolves foreign names, it is often the only way out.
+
+You need a domain: after installation, add the two DNS records the app shows (an NS record for the tunnel subdomain and an A record for its name server).
+
+Features:
+* Works when only DNS is open
+* Encrypted end to end (Noise inside the tunnel, a separate key for each account)
+* Slow: tens to a few hundred kilobits per second, for messaging and light browsing
+* Available in CoCo VPN on Windows for now
+* Operates over UDP port 53</source>
+        <translation>تونل DNS ‏(⁦dnstt⁩) ترافیک VPN را درون پرس‌وجوها و پاسخ‌های معمولی DNS جابه‌جا می‌کند. دستگاه شما پرس‌وجوها را به یک DNS resolver (مال اپراتور اینترنت یا یک resolver عمومی) می‌فرستد و resolver آن‌ها را به این سرور می‌رساند که نام‌سرورِ یک زیردامنه‌ی تونل است. وقتی ارتباط بین‌الملل قطع است اما DNS هنوز نام‌های خارجی را پیدا می‌کند، اغلب تنها راه خروج همین است.
+
+به یک دامنه نیاز دارید: بعد از نصب، دو رکورد DNS را که برنامه نشان می‌دهد اضافه کنید (یک رکورد ⁦NS⁩ برای زیردامنه‌ی تونل و یک رکورد ⁦A⁩ برای نام‌سرور آن).
+
+ویژگی‌ها:
+* وقتی فقط DNS باز است کار می‌کند
+* رمزنگاری سرتاسری (Noise درون تونل و یک کلید جدا برای هر اکانت)
+* کند: ده‌ها تا چند صد کیلوبیت بر ثانیه، برای پیام‌رسان و وب‌گردی سبک
+* فعلاً در CoCo VPN فقط روی ویندوز
+* روی پورت ⁦UDP 53⁩ کار می‌کند</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="0"/>
+        <source>Server error: failed to read the DNS tunnel key from the server</source>
+        <translation>خطای سرور: خواندن کلید تونل DNS از سرور ناموفق بود</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="0"/>
+        <source>DNS tunnel client is missing from this installation</source>
+        <translation>کلاینت تونل DNS در این نصب وجود ندارد</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="0"/>
+        <source>DNS tunnel could not start. Check the DNS records of the tunnel domain, or try another DNS resolver</source>
+        <translation>تونل DNS راه‌اندازی نشد. رکوردهای DNS دامنه‌ی تونل را بررسی کنید یا یک DNS resolver دیگر را امتحان کنید</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="0"/>
+        <source>DNS tunnel: no usable DNS resolver. Add one in the protocol settings</source>
+        <translation>تونل DNS: هیچ DNS resolver قابل‌استفاده‌ای نیست. یکی را در تنظیمات پروتکل اضافه کنید</translation>
+    </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="11"/>
         <source>No error</source>

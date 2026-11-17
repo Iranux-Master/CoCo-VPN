@@ -64,6 +64,7 @@ QMap<Proto, QString> ProtocolUtils::protocolHumanNames()
              { Proto::Ikev2, "IKEv2" },
              { Proto::Xray, "XRay" },
              { Proto::SSXray, "Shadowsocks"},
+             { Proto::Dnstt, QObject::tr("DNS tunnel") },
 
              { Proto::TorWebSite, "Website in Tor network" },
              { Proto::Dns, "DNS Service" },
@@ -91,6 +92,7 @@ ServiceType ProtocolUtils::protocolService(Proto p)
     case Proto::Awg: return ServiceType::Vpn;
     case Proto::Ikev2: return ServiceType::Vpn;
     case Proto::Xray: return ServiceType::Vpn;
+    case Proto::Dnstt: return ServiceType::Vpn;
 
     case Proto::TorWebSite: return ServiceType::Other;
     case Proto::Dns: return ServiceType::Other;
@@ -127,6 +129,7 @@ int ProtocolUtils::defaultPort(Proto p)
     case Proto::WireGuard: return QString(protocols::wireguard::defaultPort).toInt();
     case Proto::Awg: return QString(protocols::awg::defaultPort).toInt();
     case Proto::Xray: return QString(protocols::xray::defaultPort).toInt();
+    case Proto::Dnstt: return QString(protocols::dnstt::defaultPort).toInt();
     case Proto::Ikev2: return -1;
 
     case Proto::TorWebSite: return -1;
@@ -149,6 +152,7 @@ bool ProtocolUtils::defaultPortChangeable(Proto p)
     case Proto::Awg: return true;
     case Proto::Ikev2: return false;
     case Proto::Xray: return true;
+    case Proto::Dnstt: return false; // DNS resolvers only ask port 53
 
     case Proto::TorWebSite: return false;
     case Proto::Dns: return false;
@@ -171,6 +175,7 @@ TransportProto ProtocolUtils::defaultTransportProto(Proto p)
     case Proto::Ikev2: return TransportProto::Udp;
     case Proto::Xray: return TransportProto::Tcp;
     case Proto::SSXray: return TransportProto::Tcp;
+    case Proto::Dnstt: return TransportProto::Udp;
 
     // non-vpn
     case Proto::TorWebSite: return TransportProto::Tcp;

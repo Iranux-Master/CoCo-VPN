@@ -23,6 +23,8 @@ class AmneziaVPN(ConanFile):
                 self.requires("tap-windows6/9.27.0")
                 self.requires("win-split-tunnel/1.2.5.0")
                 self.requires("wintun/0.14.1")
+                # CoCo DNS tunnel client (docs/plans/D1-dns-tunnel.md); Windows first
+                self.requires("dnstt/1.20260501.0")
             else:
                 self.requires("awg-go/3.1.20260814")
 
@@ -40,6 +42,8 @@ class AmneziaVPN(ConanFile):
             self.requires("amnezia-libxray/1.0.3")
             self.requires("awg-android/3.1.20260814")
             self.requires("openvpn-pt-android/1.0.0")
+            # CoCo DNS tunnel client, run by client/android/xray/src/main/kotlin/Dnstt.kt
+            self.requires("dnstt/1.20260501.0")
 
         # expicitly use libssh@amnezia to prevent it from being downloaded from conan-center
         self.requires("libssh/0.11.3@amnezia")

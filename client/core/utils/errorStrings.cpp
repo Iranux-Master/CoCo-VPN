@@ -39,6 +39,9 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::XrayRealityKeysReadFailed):
         errorMessage = QObject::tr("Server error: failed to read XRay Reality keys from the server");
         break;
+    case(ErrorCode::DnsttPublicKeyReadFailed):
+        errorMessage = QObject::tr("Server error: failed to read the DNS tunnel key from the server");
+        break;
     case(ErrorCode::ServerContainerRuntimeNotSupported): errorMessage = QObject::tr("Server error: The default container runtime available for installation on this server is not supported.\n Install Docker Engine on the server manually and try again."); break;
     case(ErrorCode::ContainerRuntimeServiceNotRunning): errorMessage = QObject::tr("Container runtime error: The container runtime service is not running.\n Check the container runtime service on the server, or wait about a minute and try again."); break;
 
@@ -62,6 +65,9 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::OpenVpnExecutableMissing): errorMessage = QObject::tr("OpenVPN executable missing"); break;
     case (ErrorCode::AmneziaServiceConnectionFailed): errorMessage = QObject::tr("VPN helper service error"); break;
     case (ErrorCode::OpenSslFailed): errorMessage = QObject::tr("OpenSSL failed"); break;
+    case (ErrorCode::DnsttClientExecutableMissing): errorMessage = QObject::tr("DNS tunnel client is missing from this installation"); break;
+    case (ErrorCode::DnsttClientFailed): errorMessage = QObject::tr("DNS tunnel could not start. Check the DNS records of the tunnel domain, or try another DNS resolver"); break;
+    case (ErrorCode::DnsttResolverUnreachable): errorMessage = QObject::tr("DNS tunnel: no usable DNS resolver. Add one in the protocol settings"); break;
 
     // VPN errors
     case (ErrorCode::OpenVpnAdaptersInUseError): errorMessage = QObject::tr("Can't connect: another VPN connection is active"); break;

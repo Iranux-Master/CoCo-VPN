@@ -4,6 +4,7 @@ import org.amnezia.vpn.protocol.Protocol
 import org.amnezia.vpn.protocol.awg.Awg
 import org.amnezia.vpn.protocol.openvpn.OpenVpn
 import org.amnezia.vpn.protocol.wireguard.Wireguard
+import org.amnezia.vpn.protocol.xray.Dnstt
 import org.amnezia.vpn.protocol.xray.Xray
 
 enum class VpnProto(
@@ -51,6 +52,15 @@ enum class VpnProto(
         XrayService::class.java
     ) {
         override fun createProtocol(): Protocol = Xray.instance
+    },
+
+    // CoCo DNS tunnel: dnstt-client in front of XRay, in the XRay service process (docs/plans/D1-dns-tunnel.md)
+    DNSTT(
+        "DNS tunnel",
+        ":amneziaXrayService",
+        XrayService::class.java
+    ) {
+        override fun createProtocol(): Protocol = Dnstt.instance
     };
 
     private var _protocol: Protocol? = null

@@ -218,3 +218,7 @@ wizard can prepare a server that CoCo then manages; or a one-time secret result 
     guarantee of how a purchased login's sudo behaves.
 11. **VPN suitability per plan and system (R11, extends 5):** traffic allowance, UDP open, Docker
     support per operating system.
+12. **DNS tunnel delegation (R12):** an `/api/v1` endpoint that creates the NS record for a tunnel
+    subdomain and the glue A record beside it (`t.example.com NS t-ns.example.com`,
+    `t-ns.example.com A <server IP>`) on a domain the account hosts on webpack, as spec 1.3 `dns` already
+    does for catalog scripts, so CoCo's DNS tunnel needs no manual DNS step (`docs/plans/D1-dns-tunnel.md`).

@@ -35,6 +35,7 @@
 #include "core/models/protocols/wireGuardProtocolConfig.h"
 #include "core/models/protocols/openVpnProtocolConfig.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
+#include "core/utils/dnstt/dnsttUtils.h"
 
 InstallUiController::InstallUiController(InstallController *installController,
                                          ServersController *serversController,
@@ -91,6 +92,9 @@ void InstallUiController::install(DockerContainer container, int port, Transport
         m_installController->setTProxyInstallHints(m_tProxyConfigModel->getHostname(),
                                                    m_tProxyConfigModel->getAcmeEmail());
     }
+    if (container == DockerContainer::Dnstt) {
+        m_installController->setDnsttInstallHints(m_dnsttDomain, m_dnsttMtu);
+    }
 
     const bool isNewServer = serverId.isEmpty();
     
@@ -137,6 +141,9 @@ void InstallUiController::install(DockerContainer container, int port, Transport
         if (containersCount > 1) {
             finishMessage += tr("\nAdded containers that were already installed on the server");
         }
+        if (container == DockerContainer::Dnstt) {
+            finishMessage += dnsttFinishNote(serverCredentials.hostName);
+        }
 
         if (!m_connectionController->isConnected()) {
             m_serversController->setDefaultServer(newServerId);
@@ -179,6 +186,9 @@ void InstallUiController::install(DockerContainer container, int port, Transport
         if (hasNewContainers) {
             finishMessage += tr("\nAlready installed containers were found on the server. "
                                 "All installed containers have been added to the application");
+        }
+        if (container == DockerContainer::Dnstt) {
+            finishMessage += dnsttFinishNote(serverCredentials.hostName);
         }
 
         const bool isServiceInstall = ContainerUtils::containerService(container) == ServiceType::Other;
@@ -738,4 +748,39 @@ void InstallUiController::updateProtocolConfigModel(const QString &serverId, int
 #endif
     default: break;
     }
+}
+
+QString InstallUiController::normalizeDnsttDomain(const QString &input) const
+{
+    return amnezia::dnstt::normalizeTunnelDomain(input);
+}
+
+bool InstallUiController::isValidDnsttDomain(const QString &domain) const
+{
+    return amnezia::dnstt::isValidTunnelDomain(amnezia::dnstt::normalizeTunnelDomain(domain));
+}
+
+QString InstallUiController::dnsttNameServerHost(const QString &domain) const
+{
+    return amnezia::dnstt::nameServerHost(amnezia::dnstt::normalizeTunnelDomain(domain));
+}
+
+void InstallUiController::setDnsttInstallSettings(const QString &domain, const QString &mtu)
+{
+    m_dnsttDomain = amnezia::dnstt::normalizeTunnelDomain(domain);
+    m_dnsttMtu = amnezia::dnstt::normalizeMtu(mtu);
+}
+
+QString InstallUiController::dnsttFinishNote(const QString &serverHost) const
+{
+    QString ip = NetworkUtilities::getIPAddress(serverHost);
+    if (ip.isEmpty()) {
+        ip = serverHost;
+    }
+    const QStringList records = amnezia::dnstt::requiredRecords(m_dnsttDomain, ip);
+    if (records.isEmpty()) {
+        return {};
+    }
+    return tr("\n\nAdd these two records at your domain's DNS provider (DNS only, no proxy), then connect:\n%1")
+            .arg(records.join(QLatin1Char('\n')));
 }

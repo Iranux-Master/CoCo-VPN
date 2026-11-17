@@ -19,6 +19,7 @@
 #include "core/utils/constants/protocolConstants.h"
 #include "core/models/containerConfig.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
+#include "core/utils/dnstt/dnsttUtils.h"
 
 namespace {
     Logger logger("XrayConfigurator");
@@ -143,6 +144,36 @@ namespace {
         }
     }
 } // namespace
+
+// CoCo DNS tunnel (DockerContainer::Dnstt): the VLESS inbound listens on a loopback port inside the container and is
+// reached only through dnstt-server; the client config carries the tunnel domain and the dnstt public key, and its
+// outbound points at 127.0.0.1 (DnsttProtocol puts the local dnstt-client port there when connecting).
+namespace {
+    bool isDnstt(DockerContainer container)
+    {
+        return container == DockerContainer::Dnstt;
+    }
+
+    void applyDnsttInbound(QJsonObject &inbound)
+    {
+        inbound[QStringLiteral("listen")] = QString::fromLatin1(amnezia::protocols::xray::defaultLocalListenAddr);
+        inbound[amnezia::protocols::xray::port] = QString(amnezia::protocols::dnstt::forwardPort).toInt();
+    }
+}
+
+ErrorCode XrayConfigurator::readDnsttPublicKey(DockerContainer container, const ServerCredentials &credentials,
+                                               QString &out) const
+{
+    QString key;
+    readContainerKeyFile(container, credentials, QString::fromLatin1(amnezia::protocols::dnstt::publicKeyPath), key);
+    key = key.trimmed().toLower();
+    if (!amnezia::dnstt::isValidPublicKey(key)) {
+        logger.error() << "Dnstt: server public key missing or invalid";
+        return ErrorCode::DnsttPublicKeyReadFailed;
+    }
+    out = key;
+    return ErrorCode::NoError;
+}
 
 XrayConfigurator::XrayConfigurator(SshSession* sshSession, QObject *parent)
     : ConfiguratorBase(sshSession, parent)
@@ -443,6 +474,9 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
     inbound[QStringLiteral("protocol")] = QStringLiteral("vless");
     inbound[px::settings] = settings;
     inbound[px::streamSettings] = streamSettings;
+    if (isDnstt(container)) {
+        applyDnsttInbound(inbound);
+    }
 
     QJsonObject serverConfig;
     serverConfig[QStringLiteral("log")] = QJsonObject { { QStringLiteral("loglevel"), QStringLiteral("error") } };
@@ -520,6 +554,18 @@ XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCrede
     vnextEntry[amnezia::protocols::xray::address] = credentials.hostName;
     vnextEntry[amnezia::protocols::xray::port] =
             srv.port.isEmpty() ? QString(amnezia::protocols::xray::defaultPort).toInt() : srv.port.toInt();
+    QString dnsttPublicKey;
+    if (isDnstt(container)) {
+        dnsttPublicKey = srv.dnstt.publicKey;
+        if (!amnezia::dnstt::isValidPublicKey(dnsttPublicKey)) {
+            errorCode = readDnsttPublicKey(container, credentials, dnsttPublicKey);
+            if (errorCode != ErrorCode::NoError) {
+                return {};
+            }
+        }
+        vnextEntry[amnezia::protocols::xray::address] = QString::fromLatin1(amnezia::protocols::xray::defaultLocalListenAddr);
+        vnextEntry[amnezia::protocols::xray::port] = QString(amnezia::protocols::dnstt::forwardPort).toInt();
+    }
     vnextEntry[amnezia::protocols::xray::users] = QJsonArray { userObj };
 
     QJsonObject outboundSettings;
@@ -539,6 +585,14 @@ XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCrede
     }
 
     outbound[amnezia::protocols::xray::streamSettings] = streamObj;
+    if (isDnstt(container)) {
+        // One dnstt stream for every connection: a new TCP connection then costs no extra round trips through DNS.
+        // QUIC (UDP 443) is refused so browsers fall back to TCP, which suits the tunnel better.
+        outbound[QStringLiteral("mux")] = QJsonObject { { QStringLiteral("enabled"), true },
+                                                        { QStringLiteral("concurrency"), 8 },
+                                                        { QStringLiteral("xudpConcurrency"), 16 },
+                                                        { QStringLiteral("xudpProxyUDP443"), QStringLiteral("reject") } };
+    }
 
     QJsonObject inboundObj;
     inboundObj[QStringLiteral("listen")] = amnezia::protocols::xray::defaultLocalListenAddr;
@@ -550,11 +604,20 @@ XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCrede
     clientJson[QStringLiteral("log")] = QJsonObject { { QStringLiteral("loglevel"), QStringLiteral("error") } };
     clientJson[amnezia::protocols::xray::inbounds] = QJsonArray { inboundObj };
     clientJson[amnezia::protocols::xray::outbounds] = QJsonArray { outbound };
+    if (isDnstt(container)) {
+        // Read and removed by DnsttProtocol before the config reaches xray-core.
+        clientJson[QLatin1String(amnezia::protocols::dnstt::block)] =
+                QJsonObject { { QLatin1String(amnezia::protocols::dnstt::domain), srv.dnstt.domain },
+                              { QLatin1String(amnezia::protocols::dnstt::publicKey), dnsttPublicKey } };
+    }
 
     const QString config = QString::fromUtf8(QJsonDocument(clientJson).toJson(QJsonDocument::Compact));
 
     XrayProtocolConfig protocolConfig;
     protocolConfig.serverConfig = srv;
+    if (isDnstt(container)) {
+        protocolConfig.serverConfig.dnstt.publicKey = dnsttPublicKey;
+    }
 
     XrayClientConfig clientConfig;
     clientConfig.nativeConfig = config;

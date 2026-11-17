@@ -309,6 +309,7 @@ ProtocolConfig ProtocolConfig::fromJson(const QJsonObject& json, Proto type)
         return ProtocolConfig{OpenVpnProtocolConfig::fromJson(json)};
     case Proto::Xray:
     case Proto::SSXray:
+    case Proto::Dnstt:
         return ProtocolConfig{XrayProtocolConfig::fromJson(json)};
     case Proto::Sftp:
         return ProtocolConfig{SftpProtocolConfig::fromJson(json)};
